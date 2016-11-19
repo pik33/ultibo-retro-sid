@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <Version Value="9"/>
+    <BuildModes Active="Default"/>
+    <Units Count="2">
+      <Unit0>
+        <Filename Value="Project1.pas"/>
+        <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="167"/>
+        <CursorPos X="15" Y="255"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="retromalina.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="14"/>
+        <CursorPos X="21" Y="2061"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit1>
+    </Units>
+    <JumpHistory Count="3" HistoryIndex="2">
+      <Position1>
+        <Filename Value="Project1.pas"/>
+        <Caret Line="287" Column="16" TopLine="274"/>
+      </Position1>
+      <Position2>
+        <Filename Value="Project1.pas"/>
+        <Caret Line="283" Column="27" TopLine="274"/>
+      </Position2>
+      <Position3>
+        <Filename Value="Project1.pas"/>
+        <Caret Line="298" Column="2" TopLine="288"/>
+      </Position3>
+    </JumpHistory>
+  </ProjectSession>
+</CONFIG>

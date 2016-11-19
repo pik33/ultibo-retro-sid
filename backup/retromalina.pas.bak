@@ -1,6 +1,6 @@
 // *****************************************************************************
 // The retromachine unit for Raspberry Pi/Ultibo
-// Ultibo v. 0.03 - 2016.11.19
+// Ultibo v. 0.02 - 2016.11.19
 // Piotr Kardasz
 // pik33@o2.pl
 // www.eksperymenty.edu.pl
@@ -2049,16 +2049,16 @@ begin
 for i:=0 to 4095 do sinus[i]:=round(1040+1024*(sin(2*pi*i/512)));
 
 ctrlblock[0]:=$07050140; //transfer info
-ctrlblock[1]:=$c205a000;
+ctrlblock[1]:=$c8000000;
 ctrlblock[2]:=$7E20C018;
-ctrlblock[3]:=7680;
+ctrlblock[3]:=$4000;
 ctrlblock[4]:=$0;
 ctrlblock[5]:=$c4000020;
 ctrlblock[6]:=$0;
 ctrlblock[7]:=$0;
 for i:=0 to 7 do lpoke($4000000+4*i,ctrlblock[i]);
 ctrlblock[5]:=$c4000000;
-ctrlblock[1]:=$c205c000;
+ctrlblock[1]:=$c8004000;
 for i:=0 to 7 do lpoke($4000020+4*i,ctrlblock[i]);
 for i:=0 to 4095 do lpoke ($8000000+4*i,sinus[i]);
 for i:=0 to 4095 do lpoke ($8004000+4*i,sinus[i]);

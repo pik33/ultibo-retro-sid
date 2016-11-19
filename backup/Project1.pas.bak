@@ -295,7 +295,7 @@ a:=lpeek($2060000);
   outtextxyz(600,560, 'DMA control block: ',122,2,2);
   outtextxyz(1028,560, inttohex(lpeek($3f00781c),8),122,2,2);
   outtextxyz(600,600, 'Bytes loaded from file:',138,2,2);
-  outtextxyz(1028,600, inttostr(il),138,2,2);
+  outtextxyz(600,600, inttostr(il),138,2,2);
 
 
 
