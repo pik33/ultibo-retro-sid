@@ -1527,65 +1527,58 @@ main:
 	bl	SYSUTILS_$$_DIRECTORYEXISTS$RAWBYTESTRING$$BOOLEAN
 	cmp	r0,#0
 	beq	.Lj306
-# [210] DeleteFile('C:\kernel7.img');
-	ldr	r0,.Lj310
-	bl	ULTIBO_$$_DELETEFILE$PCHAR$$LONGBOOL
-# [211] RenameFile('C:\kernel7_l.img','C:\kernel7.img');
-	ldr	r1,.Lj311
-	ldr	r0,.Lj312
-	bl	SYSUTILS_$$_RENAMEFILE$RAWBYTESTRING$RAWBYTESTRING$$BOOLEAN
 # [213] sleep(100);
 	mov	r0,#100
 	bl	THREADS_$$_THREADSLEEP$LONGWORD$$LONGWORD
 # [215] fs:=1;
 	mov	r4,#1
 # [216] workdir:='C:\';
-	ldr	r0,.Lj313
+	ldr	r0,.Lj310
 	ldr	r1,.Lj309
 	bl	fpc_ansistr_assign
 # [217] songtime:=0;
 	mov	r1,#0
-	ldr	r0,.Lj315
+	ldr	r0,.Lj312
 	str	r1,[r0]
 	mov	r0,#0
-	ldr	r1,.Lj316
+	ldr	r1,.Lj313
 	str	r0,[r1]
 # [218] pause:=true;
 	mov	r1,#1
-	ldr	r0,.Lj317
+	ldr	r0,.Lj314
 	strb	r1,[r0]
 # [219] siddelay:=20000;
 	mov	r1,#32
 	orr	r1,r1,#19968
-	ldr	r0,.Lj318
+	ldr	r0,.Lj315
 	str	r1,[r0]
 	mov	r1,#0
-	ldr	r0,.Lj319
+	ldr	r0,.Lj316
 	str	r1,[r0]
 # [220] setcurrentdir(workdir);
-	ldr	r0,.Lj313
+	ldr	r0,.Lj310
 	ldr	r0,[r0]
 	bl	SYSUTILS_$$_SETCURRENTDIR$RAWBYTESTRING$$BOOLEAN
 # [221] initmachine;
 	bl	RETROMALINA_$$_INITMACHINE
 # [222] poke($2070002,0);
-	ldr	r0,.Lj321
+	ldr	r0,.Lj318
 	mov	r1,#0
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
 # [223] poke($2070006,0);
-	ldr	r0,.Lj322
+	ldr	r0,.Lj319
 	mov	r1,#0
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
 # [224] poke($2070007,0);
-	ldr	r0,.Lj323
+	ldr	r0,.Lj320
 	mov	r1,#0
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
 # [225] poke($2070008,1);
-	ldr	r0,.Lj324
+	ldr	r0,.Lj321
 	mov	r1,#1
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
 # [226] lpoke($206000c,$002040);
-	ldr	r0,.Lj325
+	ldr	r0,.Lj322
 	mov	r1,#8256
 	bl	RETROMALINA_$$_LPOKE$LONGINT$LONGWORD
 # [227] main1;
@@ -1594,290 +1587,290 @@ main:
 	ldr	r0,.Lj309
 	bl	P$PROJECT1_$$_DIRLIST$ANSISTRING
 # [229] poke($2070003,1);
-	ldr	r0,.Lj327
+	ldr	r0,.Lj324
 	mov	r1,#1
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
 # [230] poke($2070004,1);
-	ldr	r0,.Lj328
+	ldr	r0,.Lj325
 	mov	r1,#1
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
 # [231] poke($2070005,1);
-	ldr	r0,.Lj329
+	ldr	r0,.Lj326
 	mov	r1,#1
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
 # [232] pwmbeep;
 	bl	RETROMALINA_$$_PWMBEEP
 	.balign 4
-.Lj330:
+.Lj327:
 # [234] main2;
 	bl	UMAIN_$$_MAIN2
 # [238] if pause then begin for i:=$200d400 to $200d400+25 do poke(i,0); end;
-	ldr	r0,.Lj317
+	ldr	r0,.Lj314
 	ldrb	r0,[r0]
 	cmp	r0,#0
-	beq	.Lj334
+	beq	.Lj331
 	mov	r1,#33554432
 	orr	r1,r1,#54272
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	str	r1,[r0]
-	ldr	r1,.Lj339
+	ldr	r1,.Lj336
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj338:
-	ldr	r1,.Lj339
+.Lj335:
+	ldr	r1,.Lj336
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	ldr	r0,[r0]
 	mov	r1,#0
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	ldr	r0,[r0]
-	ldr	r1,.Lj344
+	ldr	r1,.Lj341
 	cmp	r0,r1
-	blt	.Lj338
-.Lj334:
+	blt	.Lj335
+.Lj331:
 # [240] if peek($2060028)=ord('5') then begin dpoke ($2060028,0); siddelay:=20000; songfreq:=50; skip:=0; end;
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#53
-	bne	.Lj347
-	ldr	r0,.Lj345
+	bne	.Lj344
+	ldr	r0,.Lj342
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
 	mov	r0,#32
 	orr	r0,r0,#19968
-	ldr	r1,.Lj318
+	ldr	r1,.Lj315
 	str	r0,[r1]
 	mov	r1,#0
-	ldr	r0,.Lj319
+	ldr	r0,.Lj316
 	str	r1,[r0]
 	mov	r0,#50
-	ldr	r1,.Lj351
+	ldr	r1,.Lj348
 	str	r0,[r1]
 	mov	r0,#0
-	ldr	r1,.Lj352
+	ldr	r1,.Lj349
 	str	r0,[r1]
 	mov	r1,#0
-	ldr	r0,.Lj353
+	ldr	r0,.Lj350
 	str	r1,[r0]
-.Lj347:
+.Lj344:
 # [241] if peek($2060028)=ord('1') then begin dpoke ($2060028,0); siddelay:=10000; songfreq:=100; skip:=0; end;
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#49
-	bne	.Lj356
-	ldr	r0,.Lj345
+	bne	.Lj353
+	ldr	r0,.Lj342
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
 	mov	r1,#16
 	orr	r1,r1,#9984
-	ldr	r0,.Lj318
+	ldr	r0,.Lj315
 	str	r1,[r0]
 	mov	r1,#0
-	ldr	r0,.Lj319
+	ldr	r0,.Lj316
 	str	r1,[r0]
 	mov	r1,#100
-	ldr	r0,.Lj351
+	ldr	r0,.Lj348
 	str	r1,[r0]
 	mov	r0,#0
-	ldr	r1,.Lj352
+	ldr	r1,.Lj349
 	str	r0,[r1]
 	mov	r0,#0
-	ldr	r1,.Lj353
+	ldr	r1,.Lj350
 	str	r0,[r1]
-.Lj356:
+.Lj353:
 # [242] if peek($2060028)=ord('2') then begin dpoke ($2060028,0); siddelay:=5000; songfreq:=200; skip:=0;end;
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#50
-	bne	.Lj365
-	ldr	r0,.Lj345
+	bne	.Lj362
+	ldr	r0,.Lj342
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
 	mov	r1,#136
 	orr	r1,r1,#4864
-	ldr	r0,.Lj318
+	ldr	r0,.Lj315
 	str	r1,[r0]
 	mov	r1,#0
-	ldr	r0,.Lj319
+	ldr	r0,.Lj316
 	str	r1,[r0]
 	mov	r0,#200
-	ldr	r1,.Lj351
+	ldr	r1,.Lj348
 	str	r0,[r1]
 	mov	r0,#0
-	ldr	r1,.Lj352
+	ldr	r1,.Lj349
 	str	r0,[r1]
 	mov	r0,#0
-	ldr	r1,.Lj353
+	ldr	r1,.Lj350
 	str	r0,[r1]
-.Lj365:
+.Lj362:
 # [243] if peek($2060028)=ord('3') then begin dpoke ($2060028,0); siddelay:=6666; songfreq:=150; skip:=0; end;
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#51
-	bne	.Lj374
-	ldr	r0,.Lj345
+	bne	.Lj371
+	ldr	r0,.Lj342
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
 	mov	r1,#10
 	orr	r1,r1,#6656
-	ldr	r0,.Lj318
+	ldr	r0,.Lj315
 	str	r1,[r0]
 	mov	r0,#0
-	ldr	r1,.Lj319
+	ldr	r1,.Lj316
 	str	r0,[r1]
 	mov	r1,#150
-	ldr	r0,.Lj351
+	ldr	r0,.Lj348
 	str	r1,[r0]
 	mov	r1,#0
-	ldr	r0,.Lj352
+	ldr	r0,.Lj349
 	str	r1,[r0]
 	mov	r1,#0
-	ldr	r0,.Lj353
+	ldr	r0,.Lj350
 	str	r1,[r0]
-.Lj374:
+.Lj371:
 # [244] if peek($2060028)=ord('4') then begin dpoke ($2060028,0); siddelay:=2500; songfreq:=400; skip:=0; end;
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#52
-	bne	.Lj383
-	ldr	r0,.Lj345
+	bne	.Lj380
+	ldr	r0,.Lj342
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
 	mov	r0,#196
 	orr	r0,r0,#2304
-	ldr	r1,.Lj318
+	ldr	r1,.Lj315
 	str	r0,[r1]
 	mov	r1,#0
-	ldr	r0,.Lj319
+	ldr	r0,.Lj316
 	str	r1,[r0]
 	mov	r0,#400
-	ldr	r1,.Lj351
+	ldr	r1,.Lj348
 	str	r0,[r1]
 	mov	r1,#0
-	ldr	r0,.Lj352
+	ldr	r0,.Lj349
 	str	r1,[r0]
 	mov	r0,#0
-	ldr	r1,.Lj353
+	ldr	r1,.Lj350
 	str	r0,[r1]
-.Lj383:
+.Lj380:
 # [245] if peek($2060028)=ord('p') then begin dpoke ($2060028,0); pause:=not pause; if pause then sdl_pauseaudio(1) else sdl_pauseaudio(0); end;
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#112
-	bne	.Lj392
-	ldr	r0,.Lj345
+	bne	.Lj389
+	ldr	r0,.Lj342
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
-	ldr	r0,.Lj317
+	ldr	r0,.Lj314
 	ldrb	r0,[r0]
 	cmp	r0,#0
 	moveq	r0,#1
 	movne	r0,#0
-	ldr	r1,.Lj317
+	ldr	r1,.Lj314
 	strb	r0,[r1]
-	ldr	r0,.Lj317
+	ldr	r0,.Lj314
 	ldrb	r0,[r0]
 	cmp	r0,#0
-	beq	.Lj397
+	beq	.Lj394
 	mov	r0,#1
 	bl	RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT
-	b	.Lj399
-.Lj397:
+	b	.Lj396
+.Lj394:
 	mov	r0,#0
 	bl	RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT
-.Lj399:
-.Lj392:
+.Lj396:
+.Lj389:
 # [246] if peek($2060028)=1 then begin dpoke($2060028,0); if peek($2070003)=0 then poke ($2070003,1) else poke ($2070003,0); end;
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#1
-	bne	.Lj402
-	ldr	r0,.Lj345
+	bne	.Lj399
+	ldr	r0,.Lj342
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
-	ldr	r0,.Lj327
+	ldr	r0,.Lj324
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#0
-	bne	.Lj406
-	ldr	r0,.Lj327
+	bne	.Lj403
+	ldr	r0,.Lj324
 	mov	r1,#1
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
-	b	.Lj408
-.Lj406:
-	ldr	r0,.Lj327
+	b	.Lj405
+.Lj403:
+	ldr	r0,.Lj324
 	mov	r1,#0
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
-.Lj408:
-.Lj402:
+.Lj405:
+.Lj399:
 # [247] if peek($2060028)=2 then begin dpoke($2060028,0); if peek($2070004)=0 then poke ($2070004,1) else poke ($2070004,0); end;
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#2
-	bne	.Lj412
-	ldr	r0,.Lj345
+	bne	.Lj409
+	ldr	r0,.Lj342
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
-	ldr	r0,.Lj328
+	ldr	r0,.Lj325
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#0
-	bne	.Lj416
-	ldr	r0,.Lj328
+	bne	.Lj413
+	ldr	r0,.Lj325
 	mov	r1,#1
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
-	b	.Lj418
-.Lj416:
-	ldr	r0,.Lj328
+	b	.Lj415
+.Lj413:
+	ldr	r0,.Lj325
 	mov	r1,#0
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
-.Lj418:
-.Lj412:
+.Lj415:
+.Lj409:
 # [248] if peek($2060028)=3 then begin dpoke($2060028,0); if peek($2070005)=0 then poke ($2070005,1) else poke ($2070005,0); end;
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#3
-	bne	.Lj422
-	ldr	r0,.Lj345
+	bne	.Lj419
+	ldr	r0,.Lj342
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
-	ldr	r0,.Lj329
+	ldr	r0,.Lj326
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#0
-	bne	.Lj426
-	ldr	r0,.Lj329
+	bne	.Lj423
+	ldr	r0,.Lj326
 	mov	r1,#1
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
-	b	.Lj428
-.Lj426:
-	ldr	r0,.Lj329
+	b	.Lj425
+.Lj423:
+	ldr	r0,.Lj326
 	mov	r1,#0
 	bl	RETROMALINA_$$_POKE$LONGINT$BYTE
-.Lj428:
-.Lj422:
+.Lj425:
+.Lj419:
 # [252] if peek($2060028)=23 then
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#23
-	bne	.Lj432
+	bne	.Lj429
 # [254] dpoke($2060028,0);
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
 # [255] if sel<ild then
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj435
+	ldr	r0,.Lj432
 	ldr	r0,[r0]
 	cmp	r1,r0
-	bge	.Lj437
+	bge	.Lj434
 # [257] box(920,132+32*sel,840,32,34);
 	mov	r0,#34
 	str	r0,[r13]
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
@@ -1886,209 +1879,209 @@ main:
 	mov	r0,#920
 	bl	RETROMALINA_$$_BOX$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
 # [258] if filenames[sel+selstart,1]='' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj441
+	ldr	r0,.Lj438
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
-	bne	.Lj443
-	ldr	r0,.Lj434
+	bne	.Lj440
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj446
+	ldr	r1,.Lj443
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r0,r0,#4
-	ldr	r1,.Lj448
+	ldr	r1,.Lj445
 	str	r0,[r1]
-	b	.Lj449
-.Lj443:
-	ldr	r0,.Lj434
+	b	.Lj446
+.Lj440:
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj446
+	ldr	r0,.Lj443
 	ldr	r1,[r1, r0]
 	cmp	r1,#0
 	ldrne	r1,[r1, #-4]
-	ldr	r0,.Lj448
+	ldr	r0,.Lj445
 	str	r1,[r0]
-.Lj449:
+.Lj446:
 # [259] if filenames[sel+selstart,1]='' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj441
+	ldr	r1,.Lj438
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
-	bne	.Lj459
-	ldr	r0,.Lj434
+	bne	.Lj456
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj446
+	ldr	r0,.Lj443
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r3,r0,#4
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj446
+	ldr	r1,.Lj443
 	ldr	r1,[r0, r1]
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	mov	r2,#1
 	bl	fpc_ansistr_copy
-	b	.Lj468
-.Lj459:
-	ldr	r0,.Lj434
+	b	.Lj465
+.Lj456:
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj446
+	ldr	r1,.Lj443
 	ldr	r1,[r0, r1]
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	bl	fpc_ansistr_assign
-.Lj468:
+.Lj465:
 # [260] if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	ldr	r0,[r0]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	cmp	r0,#40
-	ble	.Lj476
-	ldr	r0,.Lj467
+	ble	.Lj473
+	ldr	r0,.Lj464
 	ldr	r1,[r0]
 	mov	r3,#40
 	mov	r2,#1
 	sub	r0,r11,#168
 	bl	fpc_ansistr_copy
 	ldr	r1,[r11, #-168]
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	bl	fpc_ansistr_assign
 	mov	r0,#40
-	ldr	r1,.Lj448
+	ldr	r1,.Lj445
 	str	r0,[r1]
-.Lj476:
+.Lj473:
 # [261] for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	ldr	r4,[r0]
 	cmp	r4,#0
 	ldrne	r4,[r4, #-4]
 	mov	r1,#1
-	ldr	r0,.Lj485
+	ldr	r0,.Lj482
 	str	r1,[r0]
-	ldr	r0,.Lj485
+	ldr	r0,.Lj482
 	ldr	r0,[r0]
 	cmp	r4,r0
-	blt	.Lj483
-	ldr	r1,.Lj485
+	blt	.Lj480
+	ldr	r1,.Lj482
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj484:
-	ldr	r1,.Lj485
+.Lj481:
+	ldr	r1,.Lj482
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	ldr	r1,[r0]
-	ldr	r0,.Lj485
+	ldr	r0,.Lj482
 	ldr	r2,[r0]
 	sub	r0,r1,#1
 	ldrb	r0,[r0, r2]
 	cmp	r0,#95
-	bne	.Lj492
-	ldr	r0,.Lj467
+	bne	.Lj489
+	ldr	r0,.Lj464
 	bl	fpc_ansistr_unique
-	ldr	r1,.Lj485
+	ldr	r1,.Lj482
 	ldr	r1,[r1]
 	mov	r2,#32
 	sub	r0,r0,#1
 	strb	r2,[r0, r1]
-.Lj492:
-	ldr	r0,.Lj485
+.Lj489:
+	ldr	r0,.Lj482
 	ldr	r0,[r0]
 	cmp	r4,r0
-	bgt	.Lj484
-.Lj483:
+	bgt	.Lj481
+.Lj480:
 # [262] if filenames[sel+selstart,1]='' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj441
+	ldr	r1,.Lj438
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
-	bne	.Lj500
+	bne	.Lj497
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
-	ldr	r0,.Lj448
+	ldr	r0,.Lj445
 	ldr	r0,[r0]
 	mov	r2,r0,lsl #3
 	mov	r0,#1344
 	sub	r0,r0,r2
-	ldr	r2,.Lj467
+	ldr	r2,.Lj464
 	ldr	r2,[r2]
 	mov	r3,#44
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-.Lj500:
+.Lj497:
 # [263] if filenames[sel+selstart,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'[DIR]',44,2,2);   end;
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj441
+	ldr	r0,.Lj438
 	ldr	r0,[r1, r0]
-	ldr	r1,.Lj507
+	ldr	r1,.Lj504
 	bl	fpc_ansistr_compare_equal
 	cmp	r0,#0
-	bne	.Lj509
+	bne	.Lj506
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
-	ldr	r0,.Lj448
+	ldr	r0,.Lj445
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #3
 	mov	r2,#1344
 	sub	r0,r2,r0
-	ldr	r2,.Lj467
+	ldr	r2,.Lj464
 	ldr	r2,[r2]
 	mov	r3,#44
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
@@ -2096,26 +2089,26 @@ main:
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
 	mov	r0,#136
 	orr	r0,r0,#1536
 	mov	r3,#44
-	ldr	r2,.Lj507
+	ldr	r2,.Lj504
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-.Lj509:
+.Lj506:
 # [264] sel+=1;
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r0,[r0]
 	add	r0,r0,#1
-	ldr	r1,.Lj434
+	ldr	r1,.Lj431
 	str	r0,[r1]
 # [265] box(920,132+32*sel,840,32,36);
 	mov	r0,#36
 	str	r0,[r13]
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
@@ -2124,209 +2117,209 @@ main:
 	mov	r0,#920
 	bl	RETROMALINA_$$_BOX$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
 # [266] if filenames[sel+selstart,1]='' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj441
+	ldr	r1,.Lj438
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
-	bne	.Lj522
-	ldr	r0,.Lj434
+	bne	.Lj519
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj446
+	ldr	r1,.Lj443
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r0,r0,#4
-	ldr	r1,.Lj448
+	ldr	r1,.Lj445
 	str	r0,[r1]
-	b	.Lj528
-.Lj522:
-	ldr	r0,.Lj434
+	b	.Lj525
+.Lj519:
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj446
+	ldr	r1,.Lj443
 	ldr	r1,[r0, r1]
 	cmp	r1,#0
 	ldrne	r1,[r1, #-4]
-	ldr	r0,.Lj448
+	ldr	r0,.Lj445
 	str	r1,[r0]
-.Lj528:
+.Lj525:
 # [267] if filenames[sel+selstart,1]='' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj441
+	ldr	r0,.Lj438
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
-	bne	.Lj538
-	ldr	r0,.Lj434
+	bne	.Lj535
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj446
+	ldr	r1,.Lj443
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r3,r0,#4
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj446
+	ldr	r1,.Lj443
 	ldr	r1,[r0, r1]
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	mov	r2,#1
 	bl	fpc_ansistr_copy
-	b	.Lj547
-.Lj538:
-	ldr	r0,.Lj434
+	b	.Lj544
+.Lj535:
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj446
+	ldr	r1,.Lj443
 	ldr	r1,[r0, r1]
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	bl	fpc_ansistr_assign
-.Lj547:
+.Lj544:
 # [268] if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	ldr	r0,[r0]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	cmp	r0,#40
-	ble	.Lj555
-	ldr	r0,.Lj467
+	ble	.Lj552
+	ldr	r0,.Lj464
 	ldr	r1,[r0]
 	mov	r3,#40
 	mov	r2,#1
 	sub	r0,r11,#168
 	bl	fpc_ansistr_copy
 	ldr	r1,[r11, #-168]
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	bl	fpc_ansistr_assign
 	mov	r0,#40
-	ldr	r1,.Lj448
+	ldr	r1,.Lj445
 	str	r0,[r1]
-.Lj555:
+.Lj552:
 # [269] for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	ldr	r4,[r0]
 	cmp	r4,#0
 	ldrne	r4,[r4, #-4]
 	mov	r0,#1
-	ldr	r1,.Lj485
+	ldr	r1,.Lj482
 	str	r0,[r1]
-	ldr	r0,.Lj485
+	ldr	r0,.Lj482
 	ldr	r0,[r0]
 	cmp	r4,r0
-	blt	.Lj562
-	ldr	r1,.Lj485
+	blt	.Lj559
+	ldr	r1,.Lj482
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj563:
-	ldr	r1,.Lj485
+.Lj560:
+	ldr	r1,.Lj482
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	ldr	r1,[r0]
-	ldr	r0,.Lj485
+	ldr	r0,.Lj482
 	ldr	r2,[r0]
 	sub	r0,r1,#1
 	ldrb	r0,[r0, r2]
 	cmp	r0,#95
-	bne	.Lj571
-	ldr	r0,.Lj467
+	bne	.Lj568
+	ldr	r0,.Lj464
 	bl	fpc_ansistr_unique
-	ldr	r1,.Lj485
+	ldr	r1,.Lj482
 	ldr	r1,[r1]
 	mov	r2,#32
 	sub	r0,r0,#1
 	strb	r2,[r0, r1]
-.Lj571:
-	ldr	r0,.Lj485
+.Lj568:
+	ldr	r0,.Lj482
 	ldr	r0,[r0]
 	cmp	r4,r0
-	bgt	.Lj563
-.Lj562:
+	bgt	.Lj560
+.Lj559:
 # [270] if filenames[sel+selstart,1]='' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj441
+	ldr	r1,.Lj438
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
-	bne	.Lj579
+	bne	.Lj576
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
-	ldr	r0,.Lj448
+	ldr	r0,.Lj445
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #3
 	mov	r2,#1344
 	sub	r0,r2,r0
-	ldr	r2,.Lj467
+	ldr	r2,.Lj464
 	ldr	r2,[r2]
 	mov	r3,#44
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-.Lj579:
+.Lj576:
 # [271] if filenames[sel+selstart,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'[DIR]',44,2,2);   end;
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj441
+	ldr	r1,.Lj438
 	ldr	r0,[r0, r1]
-	ldr	r1,.Lj507
+	ldr	r1,.Lj504
 	bl	fpc_ansistr_compare_equal
 	cmp	r0,#0
-	bne	.Lj594
+	bne	.Lj591
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
-	ldr	r0,.Lj448
+	ldr	r0,.Lj445
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #3
 	mov	r2,#1344
 	sub	r0,r2,r0
-	ldr	r2,.Lj467
+	ldr	r2,.Lj464
 	ldr	r2,[r2]
 	mov	r3,#44
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
@@ -2334,33 +2327,33 @@ main:
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
 	mov	r0,#136
 	orr	r0,r0,#1536
 	mov	r3,#44
-	ldr	r2,.Lj507
+	ldr	r2,.Lj504
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-	b	.Lj594
-.Lj437:
+	b	.Lj591
+.Lj434:
 # [273] else if sel+selstart<ilf-1 then
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r1,r0,r1
-	ldr	r0,.Lj597
+	ldr	r0,.Lj594
 	ldr	r0,[r0]
 	sub	r0,r0,#1
 	cmp	r1,r0
-	bge	.Lj599
+	bge	.Lj596
 # [275] selstart+=1;
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r1,r0,#1
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	str	r1,[r0]
 # [276] box2(897,118,1782,1008,34);
 	mov	r0,#34
@@ -2375,7 +2368,7 @@ main:
 # [277] box(920,132+32*sel,840,32,36);
 	mov	r0,#36
 	str	r0,[r13]
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
@@ -2384,229 +2377,229 @@ main:
 	mov	r0,#920
 	bl	RETROMALINA_$$_BOX$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
 # [278] for i:=0 to ild do
-	ldr	r0,.Lj435
+	ldr	r0,.Lj432
 	ldr	r4,[r0]
 	mov	r1,#0
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	str	r1,[r0]
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	ldr	r0,[r0]
 	cmp	r4,r0
-	blt	.Lj605
-	ldr	r1,.Lj339
+	blt	.Lj602
+	ldr	r1,.Lj336
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj606:
-	ldr	r1,.Lj339
+.Lj603:
+	ldr	r1,.Lj336
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
 # [280] if filenames[i+selstart,1]='' then l:=length(filenames[i+selstart,0])-4 else  l:=length(filenames[i+selstart,0]);
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj441
+	ldr	r1,.Lj438
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
-	bne	.Lj615
-	ldr	r0,.Lj339
+	bne	.Lj612
+	ldr	r0,.Lj336
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj446
+	ldr	r1,.Lj443
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r0,r0,#4
-	ldr	r1,.Lj448
+	ldr	r1,.Lj445
 	str	r0,[r1]
-	b	.Lj621
-.Lj615:
-	ldr	r0,.Lj339
+	b	.Lj618
+.Lj612:
+	ldr	r0,.Lj336
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj446
+	ldr	r1,.Lj443
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
-	ldr	r1,.Lj448
+	ldr	r1,.Lj445
 	str	r0,[r1]
-.Lj621:
+.Lj618:
 # [281] if filenames[i+selstart,1]='' then  s:=copy(filenames[i+selstart,0],1,length(filenames[i+selstart,0])-4) else s:=filenames[i+selstart,0];
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj441
+	ldr	r0,.Lj438
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
-	bne	.Lj631
-	ldr	r0,.Lj339
+	bne	.Lj628
+	ldr	r0,.Lj336
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj446
+	ldr	r1,.Lj443
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r3,r0,#4
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj446
+	ldr	r0,.Lj443
 	ldr	r1,[r1, r0]
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	mov	r2,#1
 	bl	fpc_ansistr_copy
-	b	.Lj640
-.Lj631:
-	ldr	r0,.Lj339
+	b	.Lj637
+.Lj628:
+	ldr	r0,.Lj336
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj446
+	ldr	r1,.Lj443
 	ldr	r1,[r0, r1]
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	bl	fpc_ansistr_assign
-.Lj640:
+.Lj637:
 # [282] if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	ldr	r0,[r0]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	cmp	r0,#40
-	ble	.Lj648
-	ldr	r0,.Lj467
+	ble	.Lj645
+	ldr	r0,.Lj464
 	ldr	r1,[r0]
 	mov	r3,#40
 	mov	r2,#1
 	sub	r0,r11,#168
 	bl	fpc_ansistr_copy
 	ldr	r1,[r11, #-168]
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	bl	fpc_ansistr_assign
 	mov	r0,#40
-	ldr	r1,.Lj448
+	ldr	r1,.Lj445
 	str	r0,[r1]
-.Lj648:
+.Lj645:
 # [283] for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	ldr	r5,[r0]
 	cmp	r5,#0
 	ldrne	r5,[r5, #-4]
 	mov	r1,#1
-	ldr	r0,.Lj485
+	ldr	r0,.Lj482
 	str	r1,[r0]
-	ldr	r0,.Lj485
+	ldr	r0,.Lj482
 	ldr	r0,[r0]
 	cmp	r5,r0
-	blt	.Lj655
-	ldr	r1,.Lj485
+	blt	.Lj652
+	ldr	r1,.Lj482
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj656:
-	ldr	r1,.Lj485
+.Lj653:
+	ldr	r1,.Lj482
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj467
+	ldr	r0,.Lj464
 	ldr	r2,[r0]
-	ldr	r0,.Lj485
+	ldr	r0,.Lj482
 	ldr	r1,[r0]
 	sub	r0,r2,#1
 	ldrb	r0,[r0, r1]
 	cmp	r0,#95
-	bne	.Lj664
-	ldr	r0,.Lj467
+	bne	.Lj661
+	ldr	r0,.Lj464
 	bl	fpc_ansistr_unique
-	ldr	r1,.Lj485
+	ldr	r1,.Lj482
 	ldr	r1,[r1]
 	mov	r2,#32
 	sub	r0,r0,#1
 	strb	r2,[r0, r1]
-.Lj664:
-	ldr	r0,.Lj485
+.Lj661:
+	ldr	r0,.Lj482
 	ldr	r0,[r0]
 	cmp	r5,r0
-	bgt	.Lj656
-.Lj655:
+	bgt	.Lj653
+.Lj652:
 # [284] if filenames[i+selstart,1]='' then outtextxyz(1344-8*l,132+32*i,s,44,2,2);
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj441
+	ldr	r0,.Lj438
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
-	bne	.Lj672
+	bne	.Lj669
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
-	ldr	r0,.Lj448
+	ldr	r0,.Lj445
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #3
 	mov	r2,#1344
 	sub	r0,r2,r0
-	ldr	r2,.Lj467
+	ldr	r2,.Lj464
 	ldr	r2,[r2]
 	mov	r3,#44
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-.Lj672:
+.Lj669:
 # [285] if filenames[i+selstart,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*i,s,44,2,2);  outtextxyz(1672,132+32*i,'[DIR]',44,2,2);   end;
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj441
+	ldr	r1,.Lj438
 	ldr	r0,[r0, r1]
-	ldr	r1,.Lj507
+	ldr	r1,.Lj504
 	bl	fpc_ansistr_compare_equal
 	cmp	r0,#0
-	bne	.Lj681
+	bne	.Lj678
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
-	ldr	r0,.Lj448
+	ldr	r0,.Lj445
 	ldr	r0,[r0]
 	mov	r2,r0,lsl #3
 	mov	r0,#1344
 	sub	r0,r0,r2
-	ldr	r2,.Lj467
+	ldr	r2,.Lj464
 	ldr	r2,[r2]
 	mov	r3,#44
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
@@ -2614,42 +2607,42 @@ main:
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj339
+	ldr	r0,.Lj336
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
 	mov	r0,#136
 	orr	r0,r0,#1536
 	mov	r3,#44
-	ldr	r2,.Lj507
+	ldr	r2,.Lj504
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-.Lj681:
-	ldr	r0,.Lj339
+.Lj678:
+	ldr	r0,.Lj336
 	ldr	r0,[r0]
 	cmp	r4,r0
-	bgt	.Lj606
-.Lj605:
-.Lj599:
-.Lj594:
-.Lj432:
+	bgt	.Lj603
+.Lj602:
+.Lj596:
+.Lj591:
+.Lj429:
 # [290] if peek($2060028)=24 then
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#24
-	bne	.Lj690
+	bne	.Lj687
 # [292] dpoke($2060028,0);
-	ldr	r0,.Lj345
+	ldr	r0,.Lj342
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
 # [293] if sel>0 then
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r0,[r0]
 	cmp	r0,#0
-	ble	.Lj694
+	ble	.Lj691
 # [295] box(920,132+32*sel,840,32,34);
 	mov	r0,#34
 	str	r0,[r13]
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
@@ -2658,280 +2651,274 @@ main:
 	mov	r0,#920
 	bl	RETROMALINA_$$_BOX$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
 # [296] if filenames[sel+selstart,1]='' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
-	ldr	r0,.Lj434
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
-	ldr	r0,.Lj440
+	ldr	r0,.Lj437
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj441
+	ldr	r1,.Lj438
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
-	bne	.Lj700
-	ldr	r0,.Lj434
+	bne	.Lj697
+	ldr	r0,.Lj431
 	ldr	r1,[r0]
+	ldr	r0,.Lj437
+	ldr	r0,[r0]
+	add	r0,r0,r1
+	mov	r0,r0,lsl #3
+	ldr	r1,.Lj443
 # [444] end.
-	b	.Lj1164
+	b	.Lj1161
 .Lj309:
 	.long	.Ld21
 .Lj310:
-	.long	_$PROJECT1$_Ld22
-.Lj311:
-	.long	.Ld23
-.Lj312:
-	.long	.Ld24
-.Lj313:
 	.long	U_$P$PROJECT1_$$_WORKDIR
-.Lj315:
+.Lj312:
 	.long	U_$RETROMALINA_$$_SONGTIME
-.Lj316:
+.Lj313:
 	.long	U_$RETROMALINA_$$_SONGTIME+4
-.Lj317:
+.Lj314:
 	.long	TC_$P$PROJECT1_$$_PAUSE
-.Lj318:
+.Lj315:
 	.long	TC_$RETROMALINA_$$_SIDDELAY
-.Lj319:
+.Lj316:
 	.long	TC_$RETROMALINA_$$_SIDDELAY+4
-.Lj321:
+.Lj318:
 	.long	34013186
-.Lj322:
+.Lj319:
 	.long	34013190
-.Lj323:
+.Lj320:
 	.long	34013191
-.Lj324:
+.Lj321:
 	.long	34013192
-.Lj325:
+.Lj322:
 	.long	33947660
-.Lj327:
+.Lj324:
 	.long	34013187
-.Lj328:
+.Lj325:
 	.long	34013188
-.Lj329:
+.Lj326:
 	.long	34013189
-.Lj339:
+.Lj336:
 	.long	U_$P$PROJECT1_$$_I
-.Lj344:
+.Lj341:
 	.long	33608729
-.Lj345:
+.Lj342:
 	.long	33947688
-.Lj351:
+.Lj348:
 	.long	U_$RETROMALINA_$$_SONGFREQ
-.Lj352:
+.Lj349:
 	.long	U_$RETROMALINA_$$_SONGFREQ+4
-.Lj353:
+.Lj350:
 	.long	U_$RETROMALINA_$$_SKIP
-.Lj434:
+.Lj431:
 	.long	TC_$P$PROJECT1_$$_SEL
-.Lj435:
+.Lj432:
 	.long	U_$P$PROJECT1_$$_ILD
-.Lj440:
+.Lj437:
 	.long	TC_$P$PROJECT1_$$_SELSTART
-.Lj441:
+.Lj438:
 	.long	U_$P$PROJECT1_$$_FILENAMES+4
-.Lj446:
+.Lj443:
 	.long	U_$P$PROJECT1_$$_FILENAMES
-.Lj448:
+.Lj445:
 	.long	U_$P$PROJECT1_$$_L
-.Lj467:
+.Lj464:
 	.long	U_$P$PROJECT1_$$_S
-.Lj485:
+.Lj482:
 	.long	U_$P$PROJECT1_$$_J
-.Lj507:
+.Lj504:
 	.long	.Ld18
-.Lj597:
+.Lj594:
 	.long	U_$P$PROJECT1_$$_ILF
-.Lj1164:
-	ldr	r0,.Lj702
-	ldr	r0,[r0]
-	add	r0,r0,r1
-	mov	r0,r0,lsl #3
-	ldr	r1,.Lj703
+.Lj1161:
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r0,r0,#4
-	ldr	r1,.Lj705
+	ldr	r1,.Lj702
 	str	r0,[r1]
-	b	.Lj706
-.Lj700:
-	ldr	r0,.Lj707
+	b	.Lj703
+.Lj697:
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj703
+	ldr	r1,.Lj706
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
-	ldr	r1,.Lj705
+	ldr	r1,.Lj702
 	str	r0,[r1]
-.Lj706:
+.Lj703:
 # [297] if filenames[sel+selstart,1]='' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj714
+	ldr	r0,.Lj711
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
-	bne	.Lj716
-	ldr	r0,.Lj707
+	bne	.Lj713
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj703
+	ldr	r0,.Lj706
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r3,r0,#4
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj703
+	ldr	r0,.Lj706
 	ldr	r1,[r1, r0]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	mov	r2,#1
 	bl	fpc_ansistr_copy
-	b	.Lj725
-.Lj716:
-	ldr	r0,.Lj707
+	b	.Lj722
+.Lj713:
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj703
+	ldr	r1,.Lj706
 	ldr	r1,[r0, r1]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	bl	fpc_ansistr_assign
-.Lj725:
+.Lj722:
 # [298] if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	ldr	r0,[r0]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	cmp	r0,#40
-	ble	.Lj733
-	ldr	r0,.Lj724
+	ble	.Lj730
+	ldr	r0,.Lj721
 	ldr	r1,[r0]
 	mov	r3,#40
 	mov	r2,#1
 	sub	r0,r11,#168
 	bl	fpc_ansistr_copy
 	ldr	r1,[r11, #-168]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	bl	fpc_ansistr_assign
 	mov	r0,#40
-	ldr	r1,.Lj705
+	ldr	r1,.Lj702
 	str	r0,[r1]
-.Lj733:
+.Lj730:
 # [299] for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	ldr	r4,[r0]
 	cmp	r4,#0
 	ldrne	r4,[r4, #-4]
 	mov	r1,#1
-	ldr	r0,.Lj742
+	ldr	r0,.Lj739
 	str	r1,[r0]
-	ldr	r0,.Lj742
+	ldr	r0,.Lj739
 	ldr	r0,[r0]
 	cmp	r4,r0
-	blt	.Lj740
-	ldr	r1,.Lj742
+	blt	.Lj737
+	ldr	r1,.Lj739
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj741:
-	ldr	r1,.Lj742
+.Lj738:
+	ldr	r1,.Lj739
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	ldr	r2,[r0]
-	ldr	r0,.Lj742
+	ldr	r0,.Lj739
 	ldr	r1,[r0]
 	sub	r0,r2,#1
 	ldrb	r0,[r0, r1]
 	cmp	r0,#95
-	bne	.Lj749
-	ldr	r0,.Lj724
+	bne	.Lj746
+	ldr	r0,.Lj721
 	bl	fpc_ansistr_unique
-	ldr	r1,.Lj742
+	ldr	r1,.Lj739
 	ldr	r1,[r1]
 	mov	r2,#32
 	sub	r0,r0,#1
 	strb	r2,[r0, r1]
-.Lj749:
-	ldr	r0,.Lj742
+.Lj746:
+	ldr	r0,.Lj739
 	ldr	r0,[r0]
 	cmp	r4,r0
-	bgt	.Lj741
-.Lj740:
+	bgt	.Lj738
+.Lj737:
 # [300] if filenames[sel+selstart,1]='' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj714
+	ldr	r0,.Lj711
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
-	bne	.Lj757
+	bne	.Lj754
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
-	ldr	r0,.Lj705
+	ldr	r0,.Lj702
 	ldr	r0,[r0]
 	mov	r2,r0,lsl #3
 	mov	r0,#1344
 	sub	r0,r0,r2
-	ldr	r2,.Lj724
+	ldr	r2,.Lj721
 	ldr	r2,[r2]
 	mov	r3,#44
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-.Lj757:
+.Lj754:
 # [301] if filenames[sel+selstart,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'[DIR]',44,2,2);   end;
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj714
+	ldr	r0,.Lj711
 	ldr	r0,[r1, r0]
-	ldr	r1,.Lj764
+	ldr	r1,.Lj761
 	bl	fpc_ansistr_compare_equal
 	cmp	r0,#0
-	bne	.Lj766
+	bne	.Lj763
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
-	ldr	r0,.Lj705
+	ldr	r0,.Lj702
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #3
 	mov	r2,#1344
 	sub	r0,r2,r0
-	ldr	r2,.Lj724
+	ldr	r2,.Lj721
 	ldr	r2,[r2]
 	mov	r3,#44
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
@@ -2939,26 +2926,26 @@ main:
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
 	mov	r0,#136
 	orr	r0,r0,#1536
 	mov	r3,#44
-	ldr	r2,.Lj764
+	ldr	r2,.Lj761
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-.Lj766:
+.Lj763:
 # [302] sel-=1;
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r0,[r0]
 	sub	r1,r0,#1
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	str	r1,[r0]
 # [303] box(920,132+32*sel,840,32,36);
 	mov	r0,#36
 	str	r0,[r13]
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
@@ -2967,209 +2954,209 @@ main:
 	mov	r0,#920
 	bl	RETROMALINA_$$_BOX$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
 # [304] if filenames[sel+selstart,1]='' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj714
+	ldr	r1,.Lj711
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
-	bne	.Lj779
-	ldr	r0,.Lj707
+	bne	.Lj776
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj703
+	ldr	r1,.Lj706
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r0,r0,#4
-	ldr	r1,.Lj705
+	ldr	r1,.Lj702
 	str	r0,[r1]
-	b	.Lj785
-.Lj779:
-	ldr	r0,.Lj707
+	b	.Lj782
+.Lj776:
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj703
+	ldr	r1,.Lj706
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
-	ldr	r1,.Lj705
+	ldr	r1,.Lj702
 	str	r0,[r1]
-.Lj785:
+.Lj782:
 # [305] if filenames[sel+selstart,1]='' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj714
+	ldr	r0,.Lj711
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
-	bne	.Lj795
-	ldr	r0,.Lj707
+	bne	.Lj792
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj703
+	ldr	r0,.Lj706
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r3,r0,#4
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj703
+	ldr	r1,.Lj706
 	ldr	r1,[r0, r1]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	mov	r2,#1
 	bl	fpc_ansistr_copy
-	b	.Lj804
-.Lj795:
-	ldr	r0,.Lj707
+	b	.Lj801
+.Lj792:
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj703
+	ldr	r0,.Lj706
 	ldr	r1,[r1, r0]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	bl	fpc_ansistr_assign
-.Lj804:
+.Lj801:
 # [306] if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	ldr	r0,[r0]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	cmp	r0,#40
-	ble	.Lj812
-	ldr	r0,.Lj724
+	ble	.Lj809
+	ldr	r0,.Lj721
 	ldr	r1,[r0]
 	mov	r3,#40
 	mov	r2,#1
 	sub	r0,r11,#168
 	bl	fpc_ansistr_copy
 	ldr	r1,[r11, #-168]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	bl	fpc_ansistr_assign
 	mov	r1,#40
-	ldr	r0,.Lj705
+	ldr	r0,.Lj702
 	str	r1,[r0]
-.Lj812:
+.Lj809:
 # [307] for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	ldr	r4,[r0]
 	cmp	r4,#0
 	ldrne	r4,[r4, #-4]
 	mov	r1,#1
-	ldr	r0,.Lj742
+	ldr	r0,.Lj739
 	str	r1,[r0]
-	ldr	r0,.Lj742
+	ldr	r0,.Lj739
 	ldr	r0,[r0]
 	cmp	r4,r0
-	blt	.Lj819
-	ldr	r1,.Lj742
+	blt	.Lj816
+	ldr	r1,.Lj739
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj820:
-	ldr	r1,.Lj742
+.Lj817:
+	ldr	r1,.Lj739
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	ldr	r2,[r0]
-	ldr	r0,.Lj742
+	ldr	r0,.Lj739
 	ldr	r1,[r0]
 	sub	r0,r2,#1
 	ldrb	r0,[r0, r1]
 	cmp	r0,#95
-	bne	.Lj828
-	ldr	r0,.Lj724
+	bne	.Lj825
+	ldr	r0,.Lj721
 	bl	fpc_ansistr_unique
-	ldr	r1,.Lj742
+	ldr	r1,.Lj739
 	ldr	r1,[r1]
 	mov	r2,#32
 	sub	r0,r0,#1
 	strb	r2,[r0, r1]
-.Lj828:
-	ldr	r0,.Lj742
+.Lj825:
+	ldr	r0,.Lj739
 	ldr	r0,[r0]
 	cmp	r4,r0
-	bgt	.Lj820
-.Lj819:
+	bgt	.Lj817
+.Lj816:
 # [308] if filenames[sel+selstart,1]='' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj714
+	ldr	r0,.Lj711
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
-	bne	.Lj836
+	bne	.Lj833
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
-	ldr	r0,.Lj705
+	ldr	r0,.Lj702
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #3
 	mov	r2,#1344
 	sub	r0,r2,r0
-	ldr	r2,.Lj724
+	ldr	r2,.Lj721
 	ldr	r2,[r2]
 	mov	r3,#44
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-.Lj836:
+.Lj833:
 # [309] if filenames[sel+selstart,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'[DIR]',44,2,2);   end;
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj714
+	ldr	r0,.Lj711
 	ldr	r0,[r1, r0]
-	ldr	r1,.Lj764
+	ldr	r1,.Lj761
 	bl	fpc_ansistr_compare_equal
 	cmp	r0,#0
-	bne	.Lj851
+	bne	.Lj848
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
-	ldr	r0,.Lj705
+	ldr	r0,.Lj702
 	ldr	r0,[r0]
 	mov	r2,r0,lsl #3
 	mov	r0,#1344
 	sub	r0,r0,r2
-	ldr	r2,.Lj724
+	ldr	r2,.Lj721
 	ldr	r2,[r2]
 	mov	r3,#44
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
@@ -3177,30 +3164,30 @@ main:
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
 	mov	r0,#136
 	orr	r0,r0,#1536
 	mov	r3,#44
-	ldr	r2,.Lj764
+	ldr	r2,.Lj761
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-	b	.Lj851
-.Lj694:
+	b	.Lj848
+.Lj691:
 # [311] else if sel+selstart>0 then
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	cmp	r0,#0
-	ble	.Lj855
+	ble	.Lj852
 # [313] selstart-=1;
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	sub	r0,r0,#1
-	ldr	r1,.Lj702
+	ldr	r1,.Lj705
 	str	r0,[r1]
 # [314] box2(897,118,1782,1008,34);
 	mov	r0,#34
@@ -3215,7 +3202,7 @@ main:
 # [315] box(920,132+32*sel,840,32,36);
 	mov	r0,#36
 	str	r0,[r13]
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
@@ -3224,229 +3211,229 @@ main:
 	mov	r0,#920
 	bl	RETROMALINA_$$_BOX$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
 # [316] for i:=0 to ild do
-	ldr	r0,.Lj859
+	ldr	r0,.Lj856
 	ldr	r4,[r0]
 	mov	r1,#0
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	str	r1,[r0]
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r0,[r0]
 	cmp	r4,r0
-	blt	.Lj861
-	ldr	r1,.Lj863
+	blt	.Lj858
+	ldr	r1,.Lj860
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj862:
-	ldr	r1,.Lj863
+.Lj859:
+	ldr	r1,.Lj860
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
 # [318] if filenames[i+selstart,1]='' then l:=length(filenames[i+selstart,0])-4 else  l:=length(filenames[i+selstart,0]);
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj714
+	ldr	r1,.Lj711
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
-	bne	.Lj871
-	ldr	r0,.Lj863
+	bne	.Lj868
+	ldr	r0,.Lj860
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj703
+	ldr	r1,.Lj706
 	ldr	r0,[r0, r1]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r0,r0,#4
-	ldr	r1,.Lj705
+	ldr	r1,.Lj702
 	str	r0,[r1]
-	b	.Lj877
-.Lj871:
-	ldr	r0,.Lj863
+	b	.Lj874
+.Lj868:
+	ldr	r0,.Lj860
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj703
+	ldr	r1,.Lj706
 	ldr	r1,[r0, r1]
 	cmp	r1,#0
 	ldrne	r1,[r1, #-4]
-	ldr	r0,.Lj705
-	str	r1,[r0]
-.Lj877:
-# [319] if filenames[i+selstart,1]='' then s:=copy(filenames[i+selstart,0],1,length(filenames[i+selstart,0])-4) else s:=filenames[i+selstart,0];
-	ldr	r0,.Lj863
-	ldr	r1,[r0]
 	ldr	r0,.Lj702
+	str	r1,[r0]
+.Lj874:
+# [319] if filenames[i+selstart,1]='' then s:=copy(filenames[i+selstart,0],1,length(filenames[i+selstart,0])-4) else s:=filenames[i+selstart,0];
+	ldr	r0,.Lj860
+	ldr	r1,[r0]
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj714
+	ldr	r0,.Lj711
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
-	bne	.Lj887
-	ldr	r0,.Lj863
+	bne	.Lj884
+	ldr	r0,.Lj860
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj703
+	ldr	r0,.Lj706
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r3,r0,#4
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj703
+	ldr	r1,.Lj706
 	ldr	r1,[r0, r1]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	mov	r2,#1
 	bl	fpc_ansistr_copy
-	b	.Lj896
-.Lj887:
-	ldr	r0,.Lj863
+	b	.Lj893
+.Lj884:
+	ldr	r0,.Lj860
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj703
+	ldr	r1,.Lj706
 	ldr	r1,[r0, r1]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	bl	fpc_ansistr_assign
-.Lj896:
+.Lj893:
 # [320] if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	ldr	r0,[r0]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	cmp	r0,#40
-	ble	.Lj904
-	ldr	r0,.Lj724
+	ble	.Lj901
+	ldr	r0,.Lj721
 	ldr	r1,[r0]
 	mov	r3,#40
 	mov	r2,#1
 	sub	r0,r11,#168
 	bl	fpc_ansistr_copy
 	ldr	r1,[r11, #-168]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	bl	fpc_ansistr_assign
 	mov	r0,#40
-	ldr	r1,.Lj705
+	ldr	r1,.Lj702
 	str	r0,[r1]
-.Lj904:
+.Lj901:
 # [321] for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	ldr	r5,[r0]
 	cmp	r5,#0
 	ldrne	r5,[r5, #-4]
 	mov	r1,#1
-	ldr	r0,.Lj742
+	ldr	r0,.Lj739
 	str	r1,[r0]
-	ldr	r0,.Lj742
+	ldr	r0,.Lj739
 	ldr	r0,[r0]
 	cmp	r5,r0
-	blt	.Lj911
-	ldr	r1,.Lj742
+	blt	.Lj908
+	ldr	r1,.Lj739
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj912:
-	ldr	r1,.Lj742
+.Lj909:
+	ldr	r1,.Lj739
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	ldr	r2,[r0]
-	ldr	r0,.Lj742
+	ldr	r0,.Lj739
 	ldr	r1,[r0]
 	sub	r0,r2,#1
 	ldrb	r0,[r0, r1]
 	cmp	r0,#95
-	bne	.Lj920
-	ldr	r0,.Lj724
+	bne	.Lj917
+	ldr	r0,.Lj721
 	bl	fpc_ansistr_unique
-	ldr	r1,.Lj742
+	ldr	r1,.Lj739
 	ldr	r1,[r1]
 	mov	r2,#32
 	sub	r0,r0,#1
 	strb	r2,[r0, r1]
-.Lj920:
-	ldr	r0,.Lj742
+.Lj917:
+	ldr	r0,.Lj739
 	ldr	r0,[r0]
 	cmp	r5,r0
-	bgt	.Lj912
-.Lj911:
+	bgt	.Lj909
+.Lj908:
 # [322] if filenames[i+selstart,1]='' then outtextxyz(1344-8*l,132+32*i,s,44,2,2);
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj714
+	ldr	r0,.Lj711
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
-	bne	.Lj928
+	bne	.Lj925
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
-	ldr	r0,.Lj705
+	ldr	r0,.Lj702
 	ldr	r0,[r0]
 	mov	r2,r0,lsl #3
 	mov	r0,#1344
 	sub	r0,r0,r2
-	ldr	r2,.Lj724
+	ldr	r2,.Lj721
 	ldr	r2,[r2]
 	mov	r3,#44
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-.Lj928:
+.Lj925:
 # [323] if filenames[i+selstart,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*i,s,44,2,2);  outtextxyz(1672,132+32*i,'[DIR]',44,2,2);   end;
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj714
+	ldr	r0,.Lj711
 	ldr	r0,[r1, r0]
-	ldr	r1,.Lj764
+	ldr	r1,.Lj761
 	bl	fpc_ansistr_compare_equal
 	cmp	r0,#0
-	bne	.Lj937
+	bne	.Lj934
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
-	ldr	r0,.Lj705
+	ldr	r0,.Lj702
 	ldr	r0,[r0]
 	mov	r2,r0,lsl #3
 	mov	r0,#1344
 	sub	r0,r0,r2
-	ldr	r2,.Lj724
+	ldr	r2,.Lj721
 	ldr	r2,[r2]
 	mov	r3,#44
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
@@ -3454,184 +3441,184 @@ main:
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #5
 	add	r1,r0,#132
 	mov	r0,#136
 	orr	r0,r0,#1536
 	mov	r3,#44
-	ldr	r2,.Lj764
+	ldr	r2,.Lj761
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-.Lj937:
-	ldr	r0,.Lj863
+.Lj934:
+	ldr	r0,.Lj860
 	ldr	r0,[r0]
 	cmp	r4,r0
-	bgt	.Lj862
-.Lj861:
-.Lj855:
-.Lj851:
-.Lj690:
+	bgt	.Lj859
+.Lj858:
+.Lj852:
+.Lj848:
+.Lj687:
 # [328] if peek($2060028)=43 then
-	ldr	r0,.Lj944
+	ldr	r0,.Lj941
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#43
-	bne	.Lj946
+	bne	.Lj943
 # [330] dpoke($2060028,0);
-	ldr	r0,.Lj944
+	ldr	r0,.Lj941
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
 # [331] if songs>0 then
-	ldr	r0,.Lj948
+	ldr	r0,.Lj945
 	ldrh	r0,[r0]
 	cmp	r0,#0
-	bls	.Lj950
+	bls	.Lj947
 # [333] if song<songs then
-	ldr	r0,.Lj951
-	ldrh	r1,[r0]
 	ldr	r0,.Lj948
+	ldrh	r1,[r0]
+	ldr	r0,.Lj945
 	ldrh	r0,[r0]
 	cmp	r1,r0
-	bcs	.Lj954
+	bcs	.Lj951
 # [335] sdl_pauseaudio(1);
 	mov	r0,#1
 	bl	RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT
 # [336] for i:=1 to 20000000 do;
 	mov	r0,#1
-	ldr	r1,.Lj863
+	ldr	r1,.Lj860
 	str	r0,[r1]
-	ldr	r1,.Lj863
+	ldr	r1,.Lj860
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj957:
-	ldr	r1,.Lj863
+.Lj954:
+	ldr	r1,.Lj860
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r1,[r0]
-	ldr	r0,.Lj962
+	ldr	r0,.Lj959
 	cmp	r1,r0
-	blt	.Lj957
+	blt	.Lj954
 # [337] song+=1;
-	ldr	r0,.Lj951
+	ldr	r0,.Lj948
 	ldrh	r0,[r0]
 	add	r0,r0,#1
 	uxth	r1,r0
-	ldr	r0,.Lj951
+	ldr	r0,.Lj948
 	strh	r1,[r0]
 # [338] jsr6502(song,init);
-	ldr	r0,.Lj965
+	ldr	r0,.Lj962
 	ldrh	r1,[r0]
-	ldr	r0,.Lj951
+	ldr	r0,.Lj948
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_JSR6502$WORD$LONGINT
 # [339] sdl_pauseaudio(0);
 	mov	r0,#0
 	bl	RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT
-.Lj954:
-.Lj950:
-.Lj946:
+.Lj951:
+.Lj947:
+.Lj943:
 # [344] if peek($2060028)=45 then
-	ldr	r0,.Lj944
+	ldr	r0,.Lj941
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#45
-	bne	.Lj969
+	bne	.Lj966
 # [346] dpoke($2060028,0);
-	ldr	r0,.Lj944
+	ldr	r0,.Lj941
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
 # [347] if songs>0 then
+	ldr	r0,.Lj945
+	ldrh	r0,[r0]
+	cmp	r0,#0
+	bls	.Lj970
+# [349] if song>0 then
 	ldr	r0,.Lj948
 	ldrh	r0,[r0]
 	cmp	r0,#0
 	bls	.Lj973
-# [349] if song>0 then
-	ldr	r0,.Lj951
-	ldrh	r0,[r0]
-	cmp	r0,#0
-	bls	.Lj976
 # [351] sdl_pauseaudio(1);
 	mov	r0,#1
 	bl	RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT
 # [352] for i:=1 to 20000000 do;
 	mov	r1,#1
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	str	r1,[r0]
-	ldr	r1,.Lj863
+	ldr	r1,.Lj860
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj979:
-	ldr	r1,.Lj863
+.Lj976:
+	ldr	r1,.Lj860
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r1,[r0]
-	ldr	r0,.Lj962
+	ldr	r0,.Lj959
 	cmp	r1,r0
-	blt	.Lj979
+	blt	.Lj976
 # [353] song-=1;
-	ldr	r0,.Lj951
+	ldr	r0,.Lj948
 	ldrh	r0,[r0]
 	sub	r0,r0,#1
 	uxth	r0,r0
-	ldr	r1,.Lj951
+	ldr	r1,.Lj948
 	strh	r0,[r1]
 # [354] jsr6502(song,init);
-	ldr	r0,.Lj965
+	ldr	r0,.Lj962
 	ldrh	r1,[r0]
-	ldr	r0,.Lj951
+	ldr	r0,.Lj948
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_JSR6502$WORD$LONGINT
 # [355] sdl_pauseaudio(0);
 	mov	r0,#0
 	bl	RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT
-.Lj976:
 .Lj973:
-.Lj969:
+.Lj970:
+.Lj966:
 # [360] if peek($2060028)=13 then
-	ldr	r0,.Lj944
+	ldr	r0,.Lj941
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#13
-	bne	.Lj991
+	bne	.Lj988
 # [362] dpoke($2060028,0);
-	ldr	r0,.Lj944
+	ldr	r0,.Lj941
 	mov	r1,#0
 	bl	RETROMALINA_$$_DPOKE$LONGINT$WORD
 # [363] if filenames[sel+selstart,1]='[DIR]' then
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj714
+	ldr	r1,.Lj711
 	ldr	r0,[r0, r1]
-	ldr	r1,.Lj764
+	ldr	r1,.Lj761
 	bl	fpc_ansistr_compare_equal
 	cmp	r0,#0
-	bne	.Lj998
+	bne	.Lj995
 # [365] dirlist(currentdir2+filenames[sel+selstart,0]+'\');
 	sub	r0,r11,#168
 	bl	fpc_ansistr_decr_ref
-	ldr	r0,.Lj999
+	ldr	r0,.Lj996
 	ldr	r0,[r0]
 	str	r0,[r11, #-180]
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj703
+	ldr	r0,.Lj706
 	ldr	r0,[r1, r0]
 	str	r0,[r11, #-176]
-	ldr	r0,.Lj1003
+	ldr	r0,.Lj1000
 	str	r0,[r11, #-172]
 	sub	r1,r11,#180
 	mov	r3,#0
@@ -3640,313 +3627,251 @@ main:
 	bl	fpc_ansistr_concat_multi
 	ldr	r0,[r11, #-168]
 	bl	P$PROJECT1_$$_DIRLIST$ANSISTRING
-	b	.Lj1004
-.Lj998:
+	b	.Lj1001
+.Lj995:
 # [370] begin if not pause then
-	ldr	r0,.Lj1005
+	ldr	r0,.Lj1002
 	ldrb	r0,[r0]
 	cmp	r0,#0
-	bne	.Lj1007
+	bne	.Lj1004
 # [372] pause:=true;
 	mov	r1,#1
-	ldr	r0,.Lj1005
+	ldr	r0,.Lj1002
 	strb	r1,[r0]
 # [373] sdl_pauseaudio(1);
 	mov	r0,#1
 	bl	RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT
-.Lj1007:
+.Lj1004:
 # [376] for i:=0 to $2F do siddata[i]:=0;
 	mov	r0,#0
-	ldr	r1,.Lj863
+	ldr	r1,.Lj860
 	str	r0,[r1]
-	ldr	r1,.Lj863
+	ldr	r1,.Lj860
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj1011:
-	ldr	r1,.Lj863
+.Lj1008:
+	ldr	r1,.Lj860
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #2
 	mov	r1,#0
-	ldr	r2,.Lj1016
+	ldr	r2,.Lj1013
 	str	r1,[r0, r2]
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r0,[r0]
 	cmp	r0,#47
-	blt	.Lj1011
+	blt	.Lj1008
 # [377] for i:=$50 to $7F do siddata[i]:=0;
 	mov	r1,#80
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	str	r1,[r0]
-	ldr	r1,.Lj863
+	ldr	r1,.Lj860
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj1020:
-	ldr	r1,.Lj863
+.Lj1017:
+	ldr	r1,.Lj860
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r0,[r0]
 	mov	r1,r0,lsl #2
 	mov	r0,#0
-	ldr	r2,.Lj1016
+	ldr	r2,.Lj1013
 	str	r0,[r1, r2]
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r0,[r0]
 	cmp	r0,#127
-	blt	.Lj1020
+	blt	.Lj1017
 # [378] siddata[$0e]:=$7FFFF8;
 	mvn	r1,#-1073741817
 	bic	r1,r1,#1065353216
-	ldr	r0,.Lj1027
+	ldr	r0,.Lj1024
 	str	r1,[r0]
 # [379] siddata[$1e]:=$7FFFF8;
 	mvn	r0,#-1073741817
 	bic	r0,r0,#1065353216
-	ldr	r1,.Lj1028
+	ldr	r1,.Lj1025
 	str	r0,[r1]
 # [380] siddata[$2e]:=$7FFFF8;
 	mvn	r1,#-1073741817
 	bic	r1,r1,#1065353216
-	ldr	r0,.Lj1029
+	ldr	r0,.Lj1026
 	str	r1,[r0]
 # [381] if sfh>=0 then fileclose(sfh);
-	ldr	r0,.Lj1030
+	ldr	r0,.Lj1027
 	ldr	r0,[r0]
 	cmp	r0,#0
-	ldrge	r0,.Lj1030
+	ldrge	r0,.Lj1027
 	ldrge	r0,[r0]
 	blge	SYSUTILS_$$_FILECLOSE$LONGINT
 # [382] sfh:=-1;
 	mvn	r1,#0
-	ldr	r0,.Lj1030
+	ldr	r0,.Lj1027
 	str	r1,[r0]
 # [383] songtime:=0;
 	mov	r1,#0
-	ldr	r0,.Lj1035
+	ldr	r0,.Lj1032
 	str	r1,[r0]
 	mov	r0,#0
-	ldr	r1,.Lj1036
+	ldr	r1,.Lj1033
 	str	r0,[r1]
 # [385] for i:=0 to 6 do lpoke($200d400+4*i,0);
 	mov	r1,#0
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	str	r1,[r0]
-	ldr	r1,.Lj863
+	ldr	r1,.Lj860
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj1039:
-	ldr	r1,.Lj863
+.Lj1036:
+	ldr	r1,.Lj860
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r0,[r0]
 	mov	r0,r0,lsl #2
 	add	r0,r0,#33554432
 	add	r0,r0,#54272
 	mov	r1,#0
 	bl	RETROMALINA_$$_LPOKE$LONGINT$LONGWORD
-	ldr	r0,.Lj863
+	ldr	r0,.Lj860
 	ldr	r0,[r0]
 	cmp	r0,#6
-	blt	.Lj1039
+	blt	.Lj1036
 # [386] fn:= currentdir2+filenames[sel+selstart,0];
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj703
+	ldr	r0,.Lj706
 	ldr	r2,[r1, r0]
-	ldr	r0,.Lj999
+	ldr	r0,.Lj996
 	ldr	r1,[r0]
-	ldr	r0,.Lj1049
+	ldr	r0,.Lj1046
 	mov	r3,#0
 	bl	fpc_ansistr_concat
 # [387] sfh:=fileopen(fn,$40);
-	ldr	r0,.Lj1049
+	ldr	r0,.Lj1046
 	ldr	r0,[r0]
 	mov	r1,#64
 	bl	SYSUTILS_$$_FILEOPEN$RAWBYTESTRING$LONGINT$$LONGINT
-	ldr	r1,.Lj1030
+	ldr	r1,.Lj1027
 	str	r0,[r1]
 # [388] s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4);
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r1,r0,lsl #3
-	ldr	r0,.Lj703
+	ldr	r0,.Lj706
 	ldr	r0,[r1, r0]
 	cmp	r0,#0
 	ldrne	r0,[r0, #-4]
 	sub	r3,r0,#4
-	ldr	r0,.Lj707
+	ldr	r0,.Lj704
 	ldr	r1,[r0]
-	ldr	r0,.Lj702
+	ldr	r0,.Lj705
 	ldr	r0,[r0]
 	add	r0,r0,r1
 	mov	r0,r0,lsl #3
-	ldr	r1,.Lj703
+	ldr	r1,.Lj706
 	ldr	r1,[r0, r1]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	mov	r2,#1
 	bl	fpc_ansistr_copy
 # [389] for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	ldr	r4,[r0]
 	cmp	r4,#0
 	ldrne	r4,[r4, #-4]
 	mov	r0,#1
-	ldr	r1,.Lj742
+	ldr	r1,.Lj739
 	str	r0,[r1]
-	ldr	r0,.Lj742
+	ldr	r0,.Lj739
 	ldr	r0,[r0]
 	cmp	r4,r0
-	blt	.Lj1063
-	ldr	r1,.Lj742
+	blt	.Lj1060
+	ldr	r1,.Lj739
 	ldr	r0,[r1]
 	sub	r0,r0,#1
 	str	r0,[r1]
 	.balign 4
-.Lj1064:
-	ldr	r1,.Lj742
+.Lj1061:
+	ldr	r1,.Lj739
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
-	ldr	r0,.Lj724
+	ldr	r0,.Lj721
 	ldr	r1,[r0]
-	ldr	r0,.Lj742
+	ldr	r0,.Lj739
 	ldr	r2,[r0]
 	sub	r0,r1,#1
 	ldrb	r0,[r0, r2]
 	cmp	r0,#95
-	bne	.Lj1072
-	ldr	r0,.Lj724
+	bne	.Lj1069
+	ldr	r0,.Lj721
 	bl	fpc_ansistr_unique
-	ldr	r1,.Lj742
+	ldr	r1,.Lj739
 	ldr	r2,[r1]
 	mov	r1,#32
 	sub	r0,r0,#1
 	strb	r1,[r0, r2]
-.Lj1072:
-	ldr	r0,.Lj742
+.Lj1069:
+	ldr	r0,.Lj739
 	ldr	r0,[r0]
 	cmp	r4,r0
-	bgt	.Lj1064
-.Lj1063:
+	bgt	.Lj1061
+.Lj1060:
 # [390] siddelay:=20000;
 	mov	r1,#32
 	orr	r1,r1,#19968
-	ldr	r0,.Lj1076
+	ldr	r0,.Lj1073
 	str	r1,[r0]
 	mov	r0,#0
-	ldr	r1,.Lj1077
+	ldr	r1,.Lj1074
 	str	r0,[r1]
 # [391] filetype:=0;
 	mov	r0,#0
-	ldr	r1,.Lj1078
+	ldr	r1,.Lj1075
 	str	r0,[r1]
 # [392] fileread(sfh,buf,4);
-	ldr	r1,.Lj1079
-	ldr	r0,.Lj1030
+	ldr	r1,.Lj1076
+	ldr	r0,.Lj1027
 	ldr	r0,[r0]
 	mov	r2,#4
 	bl	SYSUTILS_$$_FILEREAD$LONGINT$formal$LONGINT$$LONGINT
-	ldr	r0,.Lj1079
+	ldr	r0,.Lj1076
 # [393] if (buf[0]=ord('S')) and (buf[1]=ord('D')) and (buf[2]=ord('M')) and (buf[3]=ord('P')) then
 	ldrb	r1,[r0]
 	cmp	r1,#83
-	bne	.Lj1083
+	bne	.Lj1080
 	ldrb	r1,[r0, #1]
 	cmp	r1,#68
-	bne	.Lj1083
+	bne	.Lj1080
 	ldrb	r1,[r0, #2]
 	cmp	r1,#77
-	bne	.Lj1083
+	bne	.Lj1080
 	ldrb	r0,[r0, #3]
 	cmp	r0,#80
-	bne	.Lj1083
+	bne	.Lj1080
 # [395] box(18,132,800,600,178);
 	mov	r0,#178
 	str	r0,[r13]
 	mov	r3,#600
 	mov	r2,#800
-	b	.Lj1165
-.Lj702:
-	.long	TC_$P$PROJECT1_$$_SELSTART
-.Lj703:
-	.long	U_$P$PROJECT1_$$_FILENAMES
-.Lj705:
-	.long	U_$P$PROJECT1_$$_L
-.Lj707:
-	.long	TC_$P$PROJECT1_$$_SEL
-.Lj714:
-	.long	U_$P$PROJECT1_$$_FILENAMES+4
-.Lj724:
-	.long	U_$P$PROJECT1_$$_S
-.Lj742:
-	.long	U_$P$PROJECT1_$$_J
-.Lj764:
-	.long	.Ld18
-.Lj859:
-	.long	U_$P$PROJECT1_$$_ILD
-.Lj863:
-	.long	U_$P$PROJECT1_$$_I
-.Lj944:
-	.long	33947688
-.Lj948:
-	.long	TC_$P$PROJECT1_$$_SONGS
-.Lj951:
-	.long	TC_$P$PROJECT1_$$_SONG
-.Lj962:
-	.long	20000000
-.Lj965:
-	.long	U_$P$PROJECT1_$$_INIT
-.Lj999:
-	.long	U_$P$PROJECT1_$$_CURRENTDIR2
-.Lj1003:
-	.long	.Ld16
-.Lj1005:
-	.long	TC_$P$PROJECT1_$$_PAUSE
-.Lj1016:
-	.long	U_$RETROMALINA_$$_SIDDATA
-.Lj1027:
-	.long	U_$RETROMALINA_$$_SIDDATA+56
-.Lj1028:
-	.long	U_$RETROMALINA_$$_SIDDATA+120
-.Lj1029:
-	.long	U_$RETROMALINA_$$_SIDDATA+184
-.Lj1030:
-	.long	U_$RETROMALINA_$$_SFH
-.Lj1035:
-	.long	U_$RETROMALINA_$$_SONGTIME
-.Lj1036:
-	.long	U_$RETROMALINA_$$_SONGTIME+4
-.Lj1049:
-	.long	U_$P$PROJECT1_$$_FN
-.Lj1076:
-	.long	TC_$RETROMALINA_$$_SIDDELAY
-.Lj1077:
-	.long	TC_$RETROMALINA_$$_SIDDELAY+4
-.Lj1078:
-	.long	U_$RETROMALINA_$$_FILETYPE
-.Lj1079:
-	.long	U_$P$PROJECT1_$$_BUF
-.Lj1165:
 	mov	r1,#132
 	mov	r0,#18
 	bl	RETROMALINA_$$_BOX$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
@@ -3956,43 +3881,107 @@ main:
 # Peephole MovStrMov done
 	str	r0,[r13]
 	mov	r3,#188
-	ldr	r2,.Lj1087
+	ldr	r2,.Lj1084
 	mov	r1,#132
+	b	.Lj1162
+.Lj702:
+	.long	U_$P$PROJECT1_$$_L
+.Lj704:
+	.long	TC_$P$PROJECT1_$$_SEL
+.Lj705:
+	.long	TC_$P$PROJECT1_$$_SELSTART
+.Lj706:
+	.long	U_$P$PROJECT1_$$_FILENAMES
+.Lj711:
+	.long	U_$P$PROJECT1_$$_FILENAMES+4
+.Lj721:
+	.long	U_$P$PROJECT1_$$_S
+.Lj739:
+	.long	U_$P$PROJECT1_$$_J
+.Lj761:
+	.long	.Ld18
+.Lj856:
+	.long	U_$P$PROJECT1_$$_ILD
+.Lj860:
+	.long	U_$P$PROJECT1_$$_I
+.Lj941:
+	.long	33947688
+.Lj945:
+	.long	TC_$P$PROJECT1_$$_SONGS
+.Lj948:
+	.long	TC_$P$PROJECT1_$$_SONG
+.Lj959:
+	.long	20000000
+.Lj962:
+	.long	U_$P$PROJECT1_$$_INIT
+.Lj996:
+	.long	U_$P$PROJECT1_$$_CURRENTDIR2
+.Lj1000:
+	.long	.Ld16
+.Lj1002:
+	.long	TC_$P$PROJECT1_$$_PAUSE
+.Lj1013:
+	.long	U_$RETROMALINA_$$_SIDDATA
+.Lj1024:
+	.long	U_$RETROMALINA_$$_SIDDATA+56
+.Lj1025:
+	.long	U_$RETROMALINA_$$_SIDDATA+120
+.Lj1026:
+	.long	U_$RETROMALINA_$$_SIDDATA+184
+.Lj1027:
+	.long	U_$RETROMALINA_$$_SFH
+.Lj1032:
+	.long	U_$RETROMALINA_$$_SONGTIME
+.Lj1033:
+	.long	U_$RETROMALINA_$$_SONGTIME+4
+.Lj1046:
+	.long	U_$P$PROJECT1_$$_FN
+.Lj1073:
+	.long	TC_$RETROMALINA_$$_SIDDELAY
+.Lj1074:
+	.long	TC_$RETROMALINA_$$_SIDDELAY+4
+.Lj1075:
+	.long	U_$RETROMALINA_$$_FILETYPE
+.Lj1076:
+	.long	U_$P$PROJECT1_$$_BUF
+.Lj1084:
+	.long	.Ld22
+.Lj1162:
 	mov	r0,#18
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
 # [397] songs:=0;
 	mov	r1,#0
-	ldr	r0,.Lj1088
+	ldr	r0,.Lj1085
 	strh	r1,[r0]
 # [398] fileread(sfh,buf,4);
-	ldr	r1,.Lj1089
-	ldr	r0,.Lj1090
+	ldr	r1,.Lj1086
+	ldr	r0,.Lj1087
 	ldr	r0,[r0]
 	mov	r2,#4
 	bl	SYSUTILS_$$_FILEREAD$LONGINT$formal$LONGINT$$LONGINT
 # [399] siddelay:=1000000 div buf[0];
-	ldr	r0,.Lj1089
+	ldr	r0,.Lj1086
 	ldrb	r0,[r0]
 	mov	r1,#999424
 	orr	r1,r1,#576
 	bl	fpc_div_longint
 	mov	r2,r0,asr #31
-	ldr	r1,.Lj1092
+	ldr	r1,.Lj1089
 	str	r0,[r1]
-	ldr	r0,.Lj1093
+	ldr	r0,.Lj1090
 	str	r2,[r0]
 # [400] outtextxyz(18,196,'speed: '+inttostr(buf[0])+' Hz',188,2,2);
 	sub	r0,r11,#168
 	bl	fpc_ansistr_decr_ref
-	ldr	r0,.Lj1094
+	ldr	r0,.Lj1091
 	str	r0,[r11, #-180]
-	ldr	r0,.Lj1089
+	ldr	r0,.Lj1086
 	ldrb	r1,[r0]
 	sub	r0,r11,#184
 	bl	SYSUTILS_$$_INTTOSTR$LONGINT$$ANSISTRING
 	ldr	r0,[r11, #-184]
 	str	r0,[r11, #-176]
-	ldr	r0,.Lj1096
+	ldr	r0,.Lj1093
 	str	r0,[r11, #-172]
 	sub	r1,r11,#180
 	mov	r3,#0
@@ -4009,19 +3998,19 @@ main:
 	mov	r0,#18
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
 # [401] atitle:='                                ';
-	ldr	r0,.Lj1097
-	ldr	r2,.Lj1098
+	ldr	r0,.Lj1094
+	ldr	r2,.Lj1095
 	mov	r1,#32
 	bl	fpc_shortstr_to_shortstr
 # [402] fileread(sfh,atitle[1],16);
-	ldr	r1,.Lj1099
-	ldr	r0,.Lj1090
+	ldr	r1,.Lj1096
+	ldr	r0,.Lj1087
 	ldr	r0,[r0]
 	mov	r2,#16
 	bl	SYSUTILS_$$_FILEREAD$LONGINT$formal$LONGINT$$LONGINT
 # [403] fileread(sfh,buf,1);
-	ldr	r1,.Lj1089
-	ldr	r0,.Lj1090
+	ldr	r1,.Lj1086
+	ldr	r0,.Lj1087
 	ldr	r0,[r0]
 	mov	r2,#1
 	bl	SYSUTILS_$$_FILEREAD$LONGINT$formal$LONGINT$$LONGINT
@@ -4032,13 +4021,13 @@ main:
 	str	r0,[r13]
 	sub	r0,r11,#168
 	bl	fpc_ansistr_decr_ref
-	ldr	r1,.Lj1097
+	ldr	r1,.Lj1094
 	mov	r2,#0
 	sub	r0,r11,#188
 	bl	fpc_shortstr_to_ansistr
 	ldr	r2,[r11, #-188]
 	mov	r3,#0
-	ldr	r1,.Lj1104
+	ldr	r1,.Lj1101
 	sub	r0,r11,#168
 	bl	fpc_ansistr_concat
 	ldr	r2,[r11, #-168]
@@ -4057,17 +4046,17 @@ main:
 # [406] outtextxyz(18,912,'SIDCog DMP file, '+inttostr(songfreq)+' Hz',250,2,2);
 	sub	r0,r11,#188
 	bl	fpc_ansistr_decr_ref
-	ldr	r0,.Lj1105
+	ldr	r0,.Lj1102
 	str	r0,[r11, #-180]
-	ldr	r0,.Lj1106
+	ldr	r0,.Lj1103
 	ldr	r2,[r0]
-	ldr	r0,.Lj1107
+	ldr	r0,.Lj1104
 	ldr	r1,[r0]
 	sub	r0,r11,#184
 	bl	SYSUTILS_$$_INTTOSTR$INT64$$ANSISTRING
 	ldr	r0,[r11, #-184]
 	str	r0,[r11, #-176]
-	ldr	r0,.Lj1096
+	ldr	r0,.Lj1093
 	str	r0,[r11, #-172]
 	sub	r1,r11,#180
 	mov	r3,#0
@@ -4083,36 +4072,36 @@ main:
 	mov	r1,#912
 	mov	r0,#18
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-	b	.Lj1109
-.Lj1083:
-	ldr	r0,.Lj1089
+	b	.Lj1106
+.Lj1080:
+	ldr	r0,.Lj1086
 # [408] else if (buf[0]=ord('P')) and (buf[1]=ord('S')) and (buf[2]=ord('I')) and (buf[3]=ord('D')) then
 	ldrb	r1,[r0]
 	cmp	r1,#80
-	bne	.Lj1112
+	bne	.Lj1109
 	ldrb	r1,[r0, #1]
 	cmp	r1,#83
-	bne	.Lj1112
+	bne	.Lj1109
 	ldrb	r1,[r0, #2]
 	cmp	r1,#73
-	bne	.Lj1112
+	bne	.Lj1109
 	ldrb	r0,[r0, #3]
 	cmp	r0,#68
-	bne	.Lj1112
+	bne	.Lj1109
 # [410] reset6502;
 	bl	UNIT6502_$$_RESET6502
 # [411] sidopen(sfh);
-	ldr	r0,.Lj1090
+	ldr	r0,.Lj1087
 	bl	P$PROJECT1_$$_SIDOPEN$LONGINT
 # [412] if cia>0 then siddelay:={985248}1000000 div (50*round(19652/cia));
-	ldr	r0,.Lj1117
+	ldr	r0,.Lj1114
 	ldr	r0,[r0]
 	cmp	r0,#0
-	ble	.Lj1119
-	ldr	r0,.Lj1117
+	ble	.Lj1116
+	ldr	r0,.Lj1114
 	vldr	s0,[r0]
 	vcvt.f64.s32	d1,s0
-	vldr	d0,.Lj1120
+	vldr	d0,.Lj1117
 	vdiv.f64	d0,d0,d1
 	vmov	r0,r1,d0
 	bl	fpc_round_real
@@ -4127,14 +4116,14 @@ main:
 	mov	r2,#999424
 	orr	r2,r2,#576
 	bl	fpc_div_int64
-	ldr	r2,.Lj1092
+	ldr	r2,.Lj1089
 	str	r0,[r2]
-	ldr	r0,.Lj1093
+	ldr	r0,.Lj1090
 	str	r1,[r0]
-.Lj1119:
+.Lj1116:
 # [413] filetype:=1;
 	mov	r0,#1
-	ldr	r1,.Lj1124
+	ldr	r1,.Lj1121
 	str	r0,[r1]
 # [414] box(18,912,800,32,244);
 	mov	r0,#244
@@ -4147,14 +4136,14 @@ main:
 # [415] outtextxyz(18,912,'PSID file, '+inttostr(1000000 div siddelay)+' Hz',250,2,2);
 	sub	r0,r11,#188
 	bl	fpc_ansistr_decr_ref
-	ldr	r0,.Lj1125
+	ldr	r0,.Lj1122
 	str	r0,[r11, #-180]
 	mov	r3,#0
 	mov	r2,#999424
 	orr	r2,r2,#576
-	ldr	r0,.Lj1093
+	ldr	r0,.Lj1090
 	ldr	r1,[r0]
-	ldr	r0,.Lj1092
+	ldr	r0,.Lj1089
 	ldr	r0,[r0]
 	bl	fpc_div_int64
 	mov	r2,r1
@@ -4163,7 +4152,7 @@ main:
 	bl	SYSUTILS_$$_INTTOSTR$INT64$$ANSISTRING
 	ldr	r0,[r11, #-184]
 	str	r0,[r11, #-176]
-	ldr	r0,.Lj1096
+	ldr	r0,.Lj1093
 	str	r0,[r11, #-172]
 	sub	r1,r11,#180
 	mov	r3,#0
@@ -4179,25 +4168,25 @@ main:
 	mov	r1,#912
 	mov	r0,#18
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-	b	.Lj1129
-.Lj1112:
-	ldr	r0,.Lj1089
+	b	.Lj1126
+.Lj1109:
+	ldr	r0,.Lj1086
 # [417] else if (buf[0]=ord('R')) and (buf[1]=ord('S')) and (buf[2]=ord('I')) and (buf[3]=ord('D')) then
 	ldrb	r1,[r0]
 	cmp	r1,#82
-	bne	.Lj1132
+	bne	.Lj1129
 	ldrb	r1,[r0, #1]
 	cmp	r1,#83
-	bne	.Lj1132
+	bne	.Lj1129
 	ldrb	r1,[r0, #2]
 	cmp	r1,#73
-	bne	.Lj1132
+	bne	.Lj1129
 	ldrb	r0,[r0, #3]
 	cmp	r0,#68
-	bne	.Lj1132
+	bne	.Lj1129
 # [419] filetype:=2;
 	mov	r1,#2
-	ldr	r0,.Lj1124
+	ldr	r0,.Lj1121
 	str	r1,[r0]
 # [420] box(18,132,800,600,178);
 	mov	r0,#178
@@ -4213,15 +4202,15 @@ main:
 # Peephole MovStrMov done
 	str	r0,[r13]
 	mov	r3,#44
-	ldr	r2,.Lj1137
+	ldr	r2,.Lj1134
 	mov	r1,#132
 	mov	r0,#18
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-	b	.Lj1138
-.Lj1132:
+	b	.Lj1135
+.Lj1129:
 # [425] fileread(sfh,buf,21);
-	ldr	r1,.Lj1089
-	ldr	r0,.Lj1090
+	ldr	r1,.Lj1086
+	ldr	r0,.Lj1087
 	ldr	r0,[r0]
 	mov	r2,#21
 	bl	SYSUTILS_$$_FILEREAD$LONGINT$formal$LONGINT$$LONGINT
@@ -4239,62 +4228,60 @@ main:
 # Peephole MovStrMov done
 	str	r0,[r13]
 	mov	r3,#188
-	ldr	r2,.Lj1141
+	ldr	r2,.Lj1138
 	mov	r1,#132
 	mov	r0,#18
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
 # [428] box(18,912,800,32,244);
 	mov	r0,#244
-	b	.Lj1166
-.Lj1087:
-	.long	.Ld25
-.Lj1088:
-	.long	TC_$P$PROJECT1_$$_SONGS
-.Lj1089:
-	.long	U_$P$PROJECT1_$$_BUF
-.Lj1090:
-	.long	U_$RETROMALINA_$$_SFH
-.Lj1092:
-	.long	TC_$RETROMALINA_$$_SIDDELAY
-.Lj1093:
-	.long	TC_$RETROMALINA_$$_SIDDELAY+4
-.Lj1094:
-	.long	.Ld10
-.Lj1096:
-	.long	.Ld26
-.Lj1097:
-	.long	U_$P$PROJECT1_$$_ATITLE
-.Lj1098:
-	.long	_$PROJECT1$_Ld1
-.Lj1099:
-	.long	U_$P$PROJECT1_$$_ATITLE+1
-.Lj1104:
-	.long	.Ld27
-.Lj1105:
-	.long	.Ld28
-.Lj1106:
-	.long	U_$RETROMALINA_$$_SONGFREQ+4
-.Lj1107:
-	.long	U_$RETROMALINA_$$_SONGFREQ
-.Lj1117:
-	.long	U_$P$PROJECT1_$$_CIA
-.Lj1120:
-# value: 0d+1.9652000000000000E+004
-	.byte	0,0,0,0,0,49,211,64
-.Lj1124:
-	.long	U_$RETROMALINA_$$_FILETYPE
-.Lj1125:
-	.long	.Ld29
-.Lj1137:
-	.long	.Ld30
-.Lj1141:
-	.long	.Ld31
-.Lj1166:
 	str	r0,[r13]
 	mov	r3,#32
 	mov	r2,#800
 	mov	r1,#912
 	mov	r0,#18
+	b	.Lj1163
+.Lj1085:
+	.long	TC_$P$PROJECT1_$$_SONGS
+.Lj1086:
+	.long	U_$P$PROJECT1_$$_BUF
+.Lj1087:
+	.long	U_$RETROMALINA_$$_SFH
+.Lj1089:
+	.long	TC_$RETROMALINA_$$_SIDDELAY
+.Lj1090:
+	.long	TC_$RETROMALINA_$$_SIDDELAY+4
+.Lj1091:
+	.long	.Ld10
+.Lj1093:
+	.long	.Ld23
+.Lj1094:
+	.long	U_$P$PROJECT1_$$_ATITLE
+.Lj1095:
+	.long	_$PROJECT1$_Ld1
+.Lj1096:
+	.long	U_$P$PROJECT1_$$_ATITLE+1
+.Lj1101:
+	.long	.Ld24
+.Lj1102:
+	.long	.Ld25
+.Lj1103:
+	.long	U_$RETROMALINA_$$_SONGFREQ+4
+.Lj1104:
+	.long	U_$RETROMALINA_$$_SONGFREQ
+.Lj1114:
+	.long	U_$P$PROJECT1_$$_CIA
+.Lj1117:
+# value: 0d+1.9652000000000000E+004
+	.byte	0,0,0,0,0,49,211,64
+.Lj1121:
+	.long	U_$RETROMALINA_$$_FILETYPE
+.Lj1122:
+	.long	.Ld26
+.Lj1134:
+	.long	.Ld27
+.Lj1138:
+	.long	.Ld28
+.Lj1163:
 	bl	RETROMALINA_$$_BOX$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
 # [429] outtextxyz(18,912,'SIDCog DMP file, 50 Hz',250,2,2);
 	mov	r0,#2
@@ -4302,79 +4289,79 @@ main:
 # Peephole MovStrMov done
 	str	r0,[r13]
 	mov	r3,#250
-	ldr	r2,.Lj1142
+	ldr	r2,.Lj1139
 	mov	r1,#912
 	mov	r0,#18
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-.Lj1138:
-.Lj1129:
-.Lj1109:
+.Lj1135:
+.Lj1126:
+.Lj1106:
 # [431] songname:=s;
-	ldr	r0,.Lj1143
+	ldr	r0,.Lj1140
 	ldr	r1,[r0]
-	ldr	r0,.Lj1144
+	ldr	r0,.Lj1141
 	bl	fpc_ansistr_assign
 # [432] songtime:=0;
 	mov	r1,#0
-	ldr	r0,.Lj1145
+	ldr	r0,.Lj1142
 	str	r1,[r0]
 	mov	r1,#0
-	ldr	r0,.Lj1146
+	ldr	r0,.Lj1143
 	str	r1,[r0]
 # [433] timer1:=-1;
 	mvn	r0,#0
-	ldr	r1,.Lj1147
+	ldr	r1,.Lj1144
 	str	r0,[r1]
 	mvn	r1,#0
-	ldr	r0,.Lj1148
+	ldr	r0,.Lj1145
 	str	r1,[r0]
 # [434] if filetype<>2 then begin pause:=false; sdl_pauseaudio(0); end;
-	ldr	r0,.Lj1149
+	ldr	r0,.Lj1146
 	ldr	r0,[r0]
 	cmp	r0,#2
-	beq	.Lj1151
+	beq	.Lj1148
 	mov	r1,#0
-	ldr	r0,.Lj1152
+	ldr	r0,.Lj1149
 	strb	r1,[r0]
 	mov	r0,#0
 	bl	RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT
-.Lj1151:
-.Lj1004:
-.Lj991:
+.Lj1148:
+.Lj1001:
+.Lj988:
 # [437] until (peek($2060028)=27) ;
-	ldr	r0,.Lj1153
+	ldr	r0,.Lj1150
 	bl	RETROMALINA_$$_PEEK$LONGINT$$BYTE
 	cmp	r0,#27
-	bne	.Lj330
+	bne	.Lj327
 # [438] sdl_pauseaudio(1);
 	mov	r0,#1
 	bl	RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT
 # [440] if sfh>0 then fileclose(sfh);
-	ldr	r0,.Lj1154
+	ldr	r0,.Lj1151
 	ldr	r0,[r0]
 	cmp	r0,#0
-	ldrgt	r0,.Lj1154
+	ldrgt	r0,.Lj1151
 	ldrgt	r0,[r0]
 	blgt	SYSUTILS_$$_FILECLOSE$LONGINT
 # [441] setcurrentdir(workdir);
-	ldr	r0,.Lj1158
+	ldr	r0,.Lj1155
 	ldr	r0,[r0]
 	bl	SYSUTILS_$$_SETCURRENTDIR$RAWBYTESTRING$$BOOLEAN
 # [442] stopmachine;
 	bl	RETROMALINA_$$_STOPMACHINE
 # [443] systemrestart(0);
-	ldr	r0,.Lj1159
+	ldr	r0,.Lj1156
 	ldr	r0,[r0]
 	cmp	r0,#0
-	beq	.Lj1161
+	beq	.Lj1158
 	mov	r0,#0
-	ldr	r1,.Lj1159
+	ldr	r1,.Lj1156
 	ldr	r1,[r1]
 	blx	r1
-	b	.Lj1163
-.Lj1161:
+	b	.Lj1160
+.Lj1158:
 	mov	r0,#120
-.Lj1163:
+.Lj1160:
 .Lj304:
 	bl	fpc_popaddrstack
 	sub	r0,r11,#188
@@ -4388,31 +4375,31 @@ main:
 	blne	fpc_reraise
 	bl	fpc_do_exit
 	ldmea	r11,{r4,r5,r11,r13,r15}
-.Lj1142:
-	.long	.Ld32
-.Lj1143:
+.Lj1139:
+	.long	.Ld29
+.Lj1140:
 	.long	U_$P$PROJECT1_$$_S
-.Lj1144:
+.Lj1141:
 	.long	U_$UMAIN_$$_SONGNAME
-.Lj1145:
+.Lj1142:
 	.long	U_$RETROMALINA_$$_SONGTIME
-.Lj1146:
+.Lj1143:
 	.long	U_$RETROMALINA_$$_SONGTIME+4
-.Lj1147:
+.Lj1144:
 	.long	TC_$RETROMALINA_$$_TIMER1
-.Lj1148:
+.Lj1145:
 	.long	TC_$RETROMALINA_$$_TIMER1+4
-.Lj1149:
+.Lj1146:
 	.long	U_$RETROMALINA_$$_FILETYPE
-.Lj1152:
+.Lj1149:
 	.long	TC_$P$PROJECT1_$$_PAUSE
-.Lj1153:
+.Lj1150:
 	.long	33947688
-.Lj1154:
+.Lj1151:
 	.long	U_$RETROMALINA_$$_SFH
-.Lj1158:
+.Lj1155:
 	.long	U_$P$PROJECT1_$$_WORKDIR
-.Lj1159:
+.Lj1156:
 	.long	U_$PLATFORM_$$_SYSTEMRESTARTHANDLER
 .Le3:
 	.size	main, .Le3 - main
@@ -4440,40 +4427,40 @@ FINALIZE$_$P$PROJECT1:
 P$PROJECT1_$$_finalize_implicit:
 	stmfd	r13!,{r14}
 # Var fs located in register r0
-	ldr	r0,.Lj1167
+	ldr	r0,.Lj1164
 	bl	fpc_ansistr_decr_ref
+	ldr	r0,.Lj1165
+	bl	fpc_ansistr_decr_ref
+	ldr	r0,.Lj1166
+	bl	fpc_ansistr_decr_ref
+	ldr	r1,.Lj1167
 	ldr	r0,.Lj1168
-	bl	fpc_ansistr_decr_ref
-	ldr	r0,.Lj1169
-	bl	fpc_ansistr_decr_ref
-	ldr	r1,.Lj1170
+	bl	fpc_finalize
+	ldr	r1,.Lj1169
+	ldr	r0,.Lj1170
+	bl	fpc_finalize
 	ldr	r0,.Lj1171
-	bl	fpc_finalize
-	ldr	r1,.Lj1172
-	ldr	r0,.Lj1173
-	bl	fpc_finalize
-	ldr	r0,.Lj1174
 	bl	fpc_ansistr_decr_ref
-	ldr	r0,.Lj1175
+	ldr	r0,.Lj1172
 	bl	fpc_ansistr_decr_ref
 	ldmfd	r13!,{r15}
-.Lj1167:
+.Lj1164:
 	.long	U_$P$PROJECT1_$$_S
-.Lj1168:
+.Lj1165:
 	.long	U_$P$PROJECT1_$$_CURRENTDIR
-.Lj1169:
+.Lj1166:
 	.long	U_$P$PROJECT1_$$_CURRENTDIR2
-.Lj1170:
+.Lj1167:
 	.long	INIT_$SYSUTILS_$$_TRAWBYTESEARCHREC
-.Lj1171:
+.Lj1168:
 	.long	U_$P$PROJECT1_$$_SR
-.Lj1172:
+.Lj1169:
 	.long	RTTI_$P$PROJECT1_$$_def00000003
-.Lj1173:
+.Lj1170:
 	.long	U_$P$PROJECT1_$$_FILENAMES
-.Lj1174:
+.Lj1171:
 	.long	U_$P$PROJECT1_$$_FN
-.Lj1175:
+.Lj1172:
 	.long	U_$P$PROJECT1_$$_WORKDIR
 .Le5:
 	.size	P$PROJECT1_$$_finalize_implicit, .Le5 - P$PROJECT1_$$_finalize_implicit
@@ -5023,21 +5010,23 @@ _$PROJECT1$_Ld1:
 .Le40:
 	.size	.Ld21$strlab, .Le40 - .Ld21$strlab
 
-.section .rodata.n__$PROJECT1$_Ld22
+.section .rodata.n_.Ld22
 	.balign 4
-.globl	_$PROJECT1$_Ld22
-_$PROJECT1$_Ld22:
-	.ascii	"C:\\kernel7.img\000"
+.Ld22$strlab:
+	.short	0,1
+	.long	-1,10
+.Ld22:
+	.ascii	"type: SDMP\000"
 .Le41:
-	.size	_$PROJECT1$_Ld22, .Le41 - _$PROJECT1$_Ld22
+	.size	.Ld22$strlab, .Le41 - .Ld22$strlab
 
 .section .rodata.n_.Ld23
 	.balign 4
 .Ld23$strlab:
 	.short	0,1
-	.long	-1,14
+	.long	-1,3
 .Ld23:
-	.ascii	"C:\\kernel7.img\000"
+	.ascii	" Hz\000"
 .Le42:
 	.size	.Ld23$strlab, .Le42 - .Ld23$strlab
 
@@ -5045,9 +5034,9 @@ _$PROJECT1$_Ld22:
 	.balign 4
 .Ld24$strlab:
 	.short	0,1
-	.long	-1,16
+	.long	-1,8
 .Ld24:
-	.ascii	"C:\\kernel7_l.img\000"
+	.ascii	"atitle: \000"
 .Le43:
 	.size	.Ld24$strlab, .Le43 - .Ld24$strlab
 
@@ -5055,9 +5044,9 @@ _$PROJECT1$_Ld22:
 	.balign 4
 .Ld25$strlab:
 	.short	0,1
-	.long	-1,10
+	.long	-1,17
 .Ld25:
-	.ascii	"type: SDMP\000"
+	.ascii	"SIDCog DMP file, \000"
 .Le44:
 	.size	.Ld25$strlab, .Le44 - .Ld25$strlab
 
@@ -5065,9 +5054,9 @@ _$PROJECT1$_Ld22:
 	.balign 4
 .Ld26$strlab:
 	.short	0,1
-	.long	-1,3
+	.long	-1,11
 .Ld26:
-	.ascii	" Hz\000"
+	.ascii	"PSID file, \000"
 .Le45:
 	.size	.Ld26$strlab, .Le45 - .Ld26$strlab
 
@@ -5075,9 +5064,9 @@ _$PROJECT1$_Ld22:
 	.balign 4
 .Ld27$strlab:
 	.short	0,1
-	.long	-1,8
+	.long	-1,29
 .Ld27:
-	.ascii	"atitle: \000"
+	.ascii	"type: RSID, not yet supported\000"
 .Le46:
 	.size	.Ld27$strlab, .Le46 - .Ld27$strlab
 
@@ -5085,9 +5074,9 @@ _$PROJECT1$_Ld22:
 	.balign 4
 .Ld28$strlab:
 	.short	0,1
-	.long	-1,17
+	.long	-1,33
 .Ld28:
-	.ascii	"SIDCog DMP file, \000"
+	.ascii	"type: unknown, 50 Hz SDMP assumed\000"
 .Le47:
 	.size	.Ld28$strlab, .Le47 - .Ld28$strlab
 
@@ -5095,41 +5084,11 @@ _$PROJECT1$_Ld22:
 	.balign 4
 .Ld29$strlab:
 	.short	0,1
-	.long	-1,11
+	.long	-1,22
 .Ld29:
-	.ascii	"PSID file, \000"
+	.ascii	"SIDCog DMP file, 50 Hz\000"
 .Le48:
 	.size	.Ld29$strlab, .Le48 - .Ld29$strlab
-
-.section .rodata.n_.Ld30
-	.balign 4
-.Ld30$strlab:
-	.short	0,1
-	.long	-1,29
-.Ld30:
-	.ascii	"type: RSID, not yet supported\000"
-.Le49:
-	.size	.Ld30$strlab, .Le49 - .Ld30$strlab
-
-.section .rodata.n_.Ld31
-	.balign 4
-.Ld31$strlab:
-	.short	0,1
-	.long	-1,33
-.Ld31:
-	.ascii	"type: unknown, 50 Hz SDMP assumed\000"
-.Le50:
-	.size	.Ld31$strlab, .Le50 - .Ld31$strlab
-
-.section .rodata.n_.Ld32
-	.balign 4
-.Ld32$strlab:
-	.short	0,1
-	.long	-1,22
-.Ld32:
-	.ascii	"SIDCog DMP file, 50 Hz\000"
-.Le51:
-	.size	.Ld32$strlab, .Le51 - .Ld32$strlab
 # End asmlist al_typedconsts
 # Begin asmlist al_rtti
 
@@ -5142,8 +5101,8 @@ RTTI_$P$PROJECT1_$$_def00000004:
 	.long	RTTI_$SYSTEM_$$_ANSISTRING
 	.byte	1,0,0,0
 	.long	RTTI_$SYSTEM_$$_SHORTINT
-.Le52:
-	.size	RTTI_$P$PROJECT1_$$_def00000004, .Le52 - RTTI_$P$PROJECT1_$$_def00000004
+.Le49:
+	.size	RTTI_$P$PROJECT1_$$_def00000004, .Le49 - RTTI_$P$PROJECT1_$$_def00000004
 
 .section .rodata.n_RTTI_$P$PROJECT1_$$_def00000003
 	.balign 4
@@ -5155,8 +5114,8 @@ RTTI_$P$PROJECT1_$$_def00000003:
 	.byte	2,0,0,0
 	.long	RTTI_$SYSTEM_$$_SMALLINT
 	.long	RTTI_$SYSTEM_$$_SHORTINT
-.Le53:
-	.size	RTTI_$P$PROJECT1_$$_def00000003, .Le53 - RTTI_$P$PROJECT1_$$_def00000003
+.Le50:
+	.size	RTTI_$P$PROJECT1_$$_def00000003, .Le50 - RTTI_$P$PROJECT1_$$_def00000003
 
 .section .rodata.n_RTTI_$P$PROJECT1_$$_def00000005
 	.balign 4
@@ -5167,8 +5126,8 @@ RTTI_$P$PROJECT1_$$_def00000005:
 	.long	RTTI_$SYSTEM_$$_RAWBYTESTRING
 	.byte	1,0,0,0
 	.long	RTTI_$SYSTEM_$$_LONGINT
-.Le54:
-	.size	RTTI_$P$PROJECT1_$$_def00000005, .Le54 - RTTI_$P$PROJECT1_$$_def00000005
+.Le51:
+	.size	RTTI_$P$PROJECT1_$$_def00000005, .Le51 - RTTI_$P$PROJECT1_$$_def00000005
 
 .section .rodata.n_RTTI_$P$PROJECT1_$$_def00000006
 	.balign 4
@@ -5179,8 +5138,8 @@ RTTI_$P$PROJECT1_$$_def00000006:
 	.long	RTTI_$SYSTEM_$$_RAWBYTESTRING
 	.byte	1,0,0,0
 	.long	RTTI_$SYSTEM_$$_LONGINT
-.Le55:
-	.size	RTTI_$P$PROJECT1_$$_def00000006, .Le55 - RTTI_$P$PROJECT1_$$_def00000006
+.Le52:
+	.size	RTTI_$P$PROJECT1_$$_def00000006, .Le52 - RTTI_$P$PROJECT1_$$_def00000006
 
 .section .rodata.n_RTTI_$P$PROJECT1_$$_def00000007
 	.balign 4
@@ -5191,8 +5150,8 @@ RTTI_$P$PROJECT1_$$_def00000007:
 	.long	RTTI_$SYSTEM_$$_RAWBYTESTRING
 	.byte	1,0,0,0
 	.long	RTTI_$SYSTEM_$$_LONGINT
-.Le56:
-	.size	RTTI_$P$PROJECT1_$$_def00000007, .Le56 - RTTI_$P$PROJECT1_$$_def00000007
+.Le53:
+	.size	RTTI_$P$PROJECT1_$$_def00000007, .Le53 - RTTI_$P$PROJECT1_$$_def00000007
 
 .section .rodata.n_RTTI_$P$PROJECT1_$$_def00000008
 	.balign 4
@@ -5203,7 +5162,7 @@ RTTI_$P$PROJECT1_$$_def00000008:
 	.long	RTTI_$SYSTEM_$$_RAWBYTESTRING
 	.byte	1,0,0,0
 	.long	RTTI_$SYSTEM_$$_LONGINT
-.Le57:
-	.size	RTTI_$P$PROJECT1_$$_def00000008, .Le57 - RTTI_$P$PROJECT1_$$_def00000008
+.Le54:
+	.size	RTTI_$P$PROJECT1_$$_def00000008, .Le54 - RTTI_$P$PROJECT1_$$_def00000008
 # End asmlist al_rtti
 

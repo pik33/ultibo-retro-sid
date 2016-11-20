@@ -229,7 +229,7 @@ dirlist('C:\');
 poke($2070003,1);
 poke($2070004,1);
 poke($2070005,1);
-
+pwmbeep;
 repeat
   main2;
 
