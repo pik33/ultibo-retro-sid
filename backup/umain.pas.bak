@@ -204,7 +204,7 @@ if peek($2070005)=1 then outtextxyz(1620,1070,inttostr(peek($200d412)shr 4),40,2
 outtextxyz(1680,1070,inttostr(peek($2060028)),44,2,2);
 
 a:= TemperatureGetCurrent(0) div 1000;
-outtextxyz(1482,1070,inttostr(a),44,2,2);
+outtextxyz(1600,1070,inttostr(a),44,2,2);
 
 for i:=64 to 88 do lpoke($2010000+4*i,lpeek($2010000+2048+4*((c div 2) mod 256)+4*i));
 if (c mod 32)=0 then lpoke($2010000+4*89,lpeek($2010000+2048+(4*(c div 32) mod 256)))   ;

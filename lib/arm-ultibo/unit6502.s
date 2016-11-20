@@ -9,11 +9,10 @@ UNIT6502_$$_READ6502$LONGINT$$BYTE:
 # Var $result located in register r0
 # [unit6502.pas]
 # [249] begin
-# Var $result located in register r0
-# Rescheduled
 # [250] result:=ram[address and $FFFF];
-	ldr	r1,.Lj5
 	uxth	r0,r0
+# Var $result located in register r0
+	ldr	r1,.Lj5
 	ldrb	r0,[r0, r1]
 # [251] end;
 	bx	r14
@@ -30,11 +29,10 @@ UNIT6502_$$_WRITE6502$LONGINT$BYTE:
 # Var value located in register r1
 # [255] begin
 # [256] ram[address and $FFFF]:=value;
-	uxth	r2,r0
+	uxth	r0,r0
 # Var value located in register r1
-# Rescheduled
-	ldr	r0,.Lj8
-	strb	r1,[r2, r0]
+	ldr	r2,.Lj8
+	strb	r1,[r0, r2]
 # [257] end;
 	bx	r14
 .Lj8:
@@ -49,13 +47,11 @@ UNIT6502_$$_PUSH32$LONGWORD:
 	stmfd	r13!,{r4,r14}
 # Var pushval located in register r4
 	mov	r4,r0
-# Peephole LsrAnd2Lsr done
-# Peephole LsrAnd2Lsr done
-# Rescheduled
-# Rescheduled
 # [264] write6502(BASE_STACK+sp,(pushval shr 24) and $FF);
-	ldr	r0,.Lj11
 	mov	r1,r4,lsr #24
+# Peephole LsrAnd2Lsr done
+# Peephole LsrAnd2Lsr done
+	ldr	r0,.Lj11
 	ldrb	r0,[r0]
 	add	r0,r0,#256
 	bl	UNIT6502_$$_WRITE6502$LONGINT$BYTE
@@ -91,11 +87,9 @@ UNIT6502_$$_PUSH32$LONGWORD:
 # [268] sp-=4;
 	ldr	r0,.Lj11
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj11
 	sub	r0,r0,#4
+	and	r0,r0,#255
+	ldr	r1,.Lj11
 	strb	r0,[r1]
 # [269] end;
 	ldmfd	r13!,{r4,r15}
@@ -115,7 +109,6 @@ UNIT6502_$$_PUSH16$WORD:
 	mov	r0,r4,lsr #8
 # Peephole AndAnd2And done
 	and	r1,r0,#255
-# Rescheduled
 	ldr	r0,.Lj19
 	ldrb	r0,[r0]
 	add	r0,r0,#256
@@ -132,11 +125,9 @@ UNIT6502_$$_PUSH16$WORD:
 # [276] sp-=2;
 	ldr	r0,.Lj19
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj19
 	sub	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj19
 	strb	r0,[r1]
 # [277] end;
 	ldmfd	r13!,{r4,r15}
@@ -174,64 +165,56 @@ UNIT6502_$$_PUSH8$WORD:
 .section .text.n_unit6502_$$_pull32$$longword
 	.balign 4
 UNIT6502_$$_PULL32$$LONGWORD:
+# [290] begin
+	stmfd	r13!,{r4,r14}
 # Var $result located in register r0
 # Var temp32 located in register r0
-# [290] begin
-# Rescheduled
 # [291] temp32:=read6502(BASE_STACK + ((sp + 4) and $FF));
 	ldr	r0,.Lj29
-	stmfd	r13!,{r4,r14}
 	ldrb	r0,[r0]
 	add	r0,r0,#4
 	and	r0,r0,#255
 	add	r0,r0,#256
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 # Var temp32 located in register r0
-# Rescheduled
 # [292] temp32:=(temp32 shl 8) + read6502(BASE_STACK + ((sp + 3) and $FF));
-	ldr	r1,.Lj29
 	mov	r4,r0,lsl #8
-	ldrb	r0,[r1]
+	ldr	r0,.Lj29
+	ldrb	r0,[r0]
 	add	r0,r0,#3
 	and	r0,r0,#255
 	add	r0,r0,#256
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 	add	r0,r0,r4
 # Var temp32 located in register r0
-# Rescheduled
 # [293] temp32:=(temp32 shl 8) + read6502(BASE_STACK + ((sp + 2) and $FF));
-	ldr	r1,.Lj29
 	mov	r4,r0,lsl #8
-	ldrb	r0,[r1]
+	ldr	r0,.Lj29
+	ldrb	r0,[r0]
 	add	r0,r0,#2
 	and	r0,r0,#255
 	add	r0,r0,#256
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 	add	r0,r0,r4
 # Var temp32 located in register r0
-# Rescheduled
 # [294] temp32:=(temp32 shl 8) + read6502(BASE_STACK + ((sp + 1) and $FF));
-	ldr	r1,.Lj29
 	mov	r4,r0,lsl #8
-	ldrb	r0,[r1]
+	ldr	r0,.Lj29
+	ldrb	r0,[r0]
 	add	r0,r0,#1
 	and	r0,r0,#255
 	add	r0,r0,#256
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
+	add	r0,r0,r4
 # Var temp32 located in register r0
 # Var $result located in register r0
 # Var temp32 located in register r0
-# Rescheduled
-# Rescheduled
 # [296] sp+=4;
 	ldr	r1,.Lj29
-	add	r0,r0,r4
 	ldrb	r1,[r1]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r2,.Lj29
 	add	r1,r1,#4
+	and	r1,r1,#255
+	ldr	r2,.Lj29
 	strb	r1,[r2]
 # [297] end;
 	ldmfd	r13!,{r4,r15}
@@ -243,43 +226,37 @@ UNIT6502_$$_PULL32$$LONGWORD:
 .section .text.n_unit6502_$$_pull16$$word
 	.balign 4
 UNIT6502_$$_PULL16$$WORD:
+# [303] begin
+	stmfd	r13!,{r4,r14}
 # Var $result located in register r0
 # Var temp16 located in register r0
-# [303] begin
-# Rescheduled
 # [304] temp16:=read6502(BASE_STACK + ((sp + 2) and $FF));
 	ldr	r0,.Lj37
-	stmfd	r13!,{r4,r14}
 	ldrb	r0,[r0]
 	add	r0,r0,#2
 	and	r0,r0,#255
 	add	r0,r0,#256
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 # Var temp16 located in register r0
-# Rescheduled
 # [305] temp16:=(temp16 shl 8) + read6502(BASE_STACK + ((sp + 1) and $FF));
-	ldr	r1,.Lj37
 	mov	r4,r0,lsl #8
-	ldrb	r0,[r1]
+	ldr	r0,.Lj37
+	ldrb	r0,[r0]
 	add	r0,r0,#1
 	and	r0,r0,#255
 	add	r0,r0,#256
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 	add	r0,r0,r4
+	uxth	r0,r0
 # Var temp16 located in register r0
 # Var $result located in register r0
 # Var temp16 located in register r0
-# Rescheduled
-# Rescheduled
 # [307] sp+=2;
 	ldr	r1,.Lj37
-	uxth	r0,r0
 	ldrb	r1,[r1]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r2,.Lj37
 	add	r1,r1,#2
+	and	r1,r1,#255
+	ldr	r2,.Lj37
 	strb	r1,[r2]
 # [308] end;
 	ldmfd	r13!,{r4,r15}
@@ -291,19 +268,17 @@ UNIT6502_$$_PULL16$$WORD:
 .section .text.n_unit6502_$$_pull8$$byte
 	.balign 4
 UNIT6502_$$_PULL8$$BYTE:
-# Var $result located in register r0
 # [312] begin
-# Rescheduled
-# [313] inc(sp);
-	ldr	r2,.Lj43
 	stmfd	r13!,{r14}
-	ldrb	r0,[r2]
-	add	r1,r0,#1
+# Var $result located in register r0
+# [313] inc(sp);
+	ldr	r1,.Lj43
+	ldrb	r0,[r1]
+	add	r0,r0,#1
 # Peephole AndStrb2Strb done
-# Rescheduled
+	strb	r0,[r1]
 # [314] result:=(read6502(BASE_STACK + sp));
 	ldr	r0,.Lj43
-	strb	r1,[r2]
 	ldrb	r0,[r0]
 	add	r0,r0,#256
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
@@ -324,25 +299,19 @@ UNIT6502_$$_GETVALUE$$WORD:
 # Var ea2 located in register r0
 # [322] ea2:=ea+ds^;
 	ldr	r0,.Lj47
-# Rescheduled
-	ldr	r1,.Lj48
-	ldrh	r2,[r0]
-	ldr	r0,[r1]
+	ldrh	r1,[r0]
+	ldr	r0,.Lj48
 	ldr	r0,[r0]
+	ldr	r0,[r0]
+	add	r0,r0,r1
 # Var ea2 located in register r0
-# Rescheduled
-# Rescheduled
 # [323] if (addrtable[opcode] = @acc) then
 	ldr	r1,.Lj49
-	add	r0,r0,r2
-	ldrb	r2,[r1]
-# Rescheduled
-# Rescheduled
-# Peephole FoldShiftLdrStr done
-# Rescheduled
-	ldr	r3,.Lj51
+	ldrb	r1,[r1]
+	mov	r3,r1,lsl #2
 	ldr	r1,.Lj50
-	ldr	r2,[r3, r2, lsl #2]
+	ldr	r2,.Lj51
+	ldr	r2,[r3, r2]
 	cmp	r2,r1
 # [324] result:=a
 	ldreq	r1,.Lj54
@@ -362,10 +331,10 @@ UNIT6502_$$_GETVALUE$$WORD:
 	.long	U_$UNIT6502_$$_DS
 .Lj49:
 	.long	U_$UNIT6502_$$_OPCODE
-.Lj51:
-	.long	TC_$UNIT6502_$$_ADDRTABLE
 .Lj50:
 	.long	UNIT6502_$$_ACC
+.Lj51:
+	.long	TC_$UNIT6502_$$_ADDRTABLE
 .Lj54:
 	.long	U_$UNIT6502_$$_A
 .Le8:
@@ -380,12 +349,11 @@ UNIT6502_$$_GETVALUE16$$WORD:
 # Var ea2 located in register r4
 # [334] ea2:=ea+ds^;
 	ldr	r0,.Lj58
-# Rescheduled
-	ldr	r1,.Lj59
-	ldrh	r2,[r0]
-	ldr	r0,[r1]
+	ldrh	r1,[r0]
+	ldr	r0,.Lj59
 	ldr	r0,[r0]
-	add	r4,r0,r2
+	ldr	r0,[r0]
+	add	r4,r0,r1
 # Var ea2 located in register r4
 # Var ea2 located in register r4
 # [335] result:=word(read6502(ea2)) or (word(read6502(ea2+1)) shl 8);
@@ -416,12 +384,11 @@ UNIT6502_$$_GETVALUE32$$LONGWORD:
 # Var ea2 located in register r4
 # [344] ea2:=ea+ds^;
 	ldr	r0,.Lj62
-# Rescheduled
-	ldr	r1,.Lj63
-	ldrh	r2,[r0]
-	ldr	r0,[r1]
+	ldrh	r1,[r0]
+	ldr	r0,.Lj63
 	ldr	r0,[r0]
-	add	r4,r0,r2
+	ldr	r0,[r0]
+	add	r4,r0,r1
 # Var ea2 located in register r4
 # Var ea2 located in register r4
 # [346] result:=cardinal(read6502(ea2))
@@ -463,31 +430,24 @@ UNIT6502_$$_PUTVALUE$WORD:
 	mov	r1,r0
 # [357] ea2:=ea+ds^;
 	ldr	r0,.Lj66
-# Rescheduled
-	ldr	r2,.Lj67
-	ldrh	r3,[r0]
-	ldr	r0,[r2]
+	ldrh	r2,[r0]
+	ldr	r0,.Lj67
 	ldr	r0,[r0]
+	ldr	r0,[r0]
+	add	r0,r0,r2
 # Var ea2 located in register r0
-# Rescheduled
-# Rescheduled
 # [358] if (addrtable[opcode] = @acc) then a := byte(saveval and $00FF) else write6502(ea2, (saveval and $00FF));
 	ldr	r2,.Lj68
-	add	r0,r0,r3
-	ldrb	r3,[r2]
-# Rescheduled
-# Rescheduled
-# Peephole FoldShiftLdrStr done
-# Rescheduled
-	ldr	r12,.Lj70
+	ldrb	r2,[r2]
+	mov	r12,r2,lsl #2
 	ldr	r2,.Lj69
-	ldr	r3,[r12, r3, lsl #2]
+	ldr	r3,.Lj70
+	ldr	r3,[r12, r3]
 	cmp	r3,r2
 # Peephole AndAnd2And done
-# Peephole AndStrb2Strb done
-# Rescheduled
+	andeq	r2,r1,#255
 	ldreq	r3,.Lj73
-	streqb	r1,[r3]
+	streqb	r2,[r3]
 # Peephole AndAnd2And done
 	andne	r1,r1,#255
 	blne	UNIT6502_$$_WRITE6502$LONGINT$BYTE
@@ -499,10 +459,10 @@ UNIT6502_$$_PUTVALUE$WORD:
 	.long	U_$UNIT6502_$$_DS
 .Lj68:
 	.long	U_$UNIT6502_$$_OPCODE
-.Lj70:
-	.long	TC_$UNIT6502_$$_ADDRTABLE
 .Lj69:
 	.long	UNIT6502_$$_ACC
+.Lj70:
+	.long	TC_$UNIT6502_$$_ADDRTABLE
 .Lj73:
 	.long	U_$UNIT6502_$$_A
 .Le11:
@@ -518,12 +478,11 @@ UNIT6502_$$_PUTVALUE32$LONGWORD:
 	mov	r4,r0
 # [367] ea2:=ea+ds^;
 	ldr	r0,.Lj77
-# Rescheduled
-	ldr	r1,.Lj78
-	ldrh	r2,[r0]
-	ldr	r0,[r1]
+	ldrh	r1,[r0]
+	ldr	r0,.Lj78
 	ldr	r0,[r0]
-	add	r5,r0,r2
+	ldr	r0,[r0]
+	add	r5,r0,r1
 # Var ea2 located in register r5
 # Peephole AndAnd2And done
 # [369] write6502(ea2, (saveval and $000000FF));
@@ -574,85 +533,66 @@ UNIT6502_$$_RESET6502:
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 	mov	r0,r0,lsl #8
 	uxth	r0,r0
-# Rescheduled
-	ldr	r1,.Lj81
-	orr	r0,r0,r4
-	strh	r0,[r1]
-# Rescheduled
+	orr	r1,r0,r4
+	ldr	r0,.Lj81
+	strh	r1,[r0]
 # [379] a := 0;
-	ldr	r1,.Lj82
-	mov	r0,#0
-	strb	r0,[r1]
-# Rescheduled
-# [380] x := 0;
-	ldr	r1,.Lj83
-	mov	r0,#0
-	strb	r0,[r1]
-# Rescheduled
-# [381] y := 0;
-	ldr	r0,.Lj84
 	mov	r1,#0
+	ldr	r0,.Lj82
 	strb	r1,[r0]
-# Rescheduled
+# [380] x := 0;
+	mov	r0,#0
+	ldr	r1,.Lj83
+	strb	r0,[r1]
+# [381] y := 0;
+	mov	r0,#0
+	ldr	r1,.Lj84
+	strb	r0,[r1]
 # [382] sp := $FD;
-	ldr	r1,.Lj85
-	mov	r2,#253
-# Rescheduled
+	mov	r1,#253
+	ldr	r0,.Lj85
+	strb	r1,[r0]
 # [383] ds:=@dsa;
 	ldr	r0,.Lj86
-	strb	r2,[r1]
-# Rescheduled
-	ldr	r2,.Lj87
-# Rescheduled
+	ldr	r1,.Lj87
+	str	r0,[r1]
 # [384] cs:=@csa;
-	ldr	r1,.Lj88
-	str	r0,[r2]
-# Rescheduled
-	ldr	r2,.Lj89
-# Rescheduled
+	ldr	r0,.Lj88
+	ldr	r1,.Lj89
+	str	r0,[r1]
 # [385] cs^:=0; ds^:=0; csi:=0; dsi:=0;
 	ldr	r0,.Lj89
-	str	r1,[r2]
-	ldr	r1,[r0]
+	ldr	r0,[r0]
+	mov	r1,#0
+	str	r1,[r0]
+	ldr	r0,.Lj87
+	ldr	r0,[r0]
+	mov	r1,#0
+	str	r1,[r0]
 	mov	r0,#0
-# Rescheduled
-	ldr	r2,.Lj87
-	str	r0,[r1]
-	ldr	r1,[r2]
-	mov	r0,#0
-	str	r0,[r1]
-# Rescheduled
 	ldr	r1,.Lj92
-	mov	r0,#0
 	str	r0,[r1]
-# Rescheduled
+	mov	r0,#0
 	ldr	r1,.Lj93
-	mov	r0,#0
-# Rescheduled
+	str	r0,[r1]
 # [386] status:=status or FLAG_CONSTANT;
-	ldr	r2,.Lj94
-	str	r0,[r1]
-	ldrb	r0,[r2]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj94
+	ldr	r0,.Lj94
+	ldrb	r0,[r0]
 	orr	r0,r0,#32
+	and	r0,r0,#255
+	ldr	r1,.Lj94
 	strb	r0,[r1]
-# Rescheduled
 # [387] clockgoal6502:=0;
+	mov	r0,#0
 	ldr	r1,.Lj96
-	mov	r0,#0
 	str	r0,[r1]
-# Rescheduled
 # [388] instructions:=0;
+	mov	r0,#0
 	ldr	r1,.Lj97
-	mov	r0,#0
 	str	r0,[r1]
-# Rescheduled
 # [389] clockticks6502:=0;
-	ldr	r1,.Lj98
 	mov	r0,#0
+	ldr	r1,.Lj98
 	str	r0,[r1]
 # [391] end;
 	ldmfd	r13!,{r4,r15}
@@ -694,10 +634,9 @@ UNIT6502_$$_RESET6502:
 .globl	UNIT6502_$$_NMI6502
 UNIT6502_$$_NMI6502:
 # [395] begin
-# Rescheduled
+	stmfd	r13!,{r4,r14}
 # [396] push16(pc);
 	ldr	r0,.Lj101
-	stmfd	r13!,{r4,r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_PUSH16$WORD
 # [397] push8(status);
@@ -707,11 +646,9 @@ UNIT6502_$$_NMI6502:
 # [398] status :=status or FLAG_INTERRUPT;
 	ldr	r0,.Lj102
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj102
 	orr	r0,r0,#4
+	and	r0,r0,#255
+	ldr	r1,.Lj102
 	strb	r0,[r1]
 # [399] pc := word(read6502($FFFA)) or (word(read6502($FFFB)) << 8);
 	mov	r0,#250
@@ -724,22 +661,17 @@ UNIT6502_$$_NMI6502:
 # Peephole FoldShiftProcess done
 # [402] end;
 	orr	r0,r4,r0,lsl #8
-# Rescheduled
-	ldr	r2,.Lj101
-	uxth	r1,r0
-# Rescheduled
+	uxth	r0,r0
+	ldr	r1,.Lj101
+	strh	r0,[r1]
 # [400] cs:=@csi;
 	ldr	r0,.Lj106
-	strh	r1,[r2]
-# Rescheduled
-	ldr	r2,.Lj107
-# Rescheduled
+	ldr	r1,.Lj107
+	str	r0,[r1]
 # [401] ds:=@dsi;
-	ldr	r1,.Lj108
-	str	r0,[r2]
-# Rescheduled
-	ldr	r0,.Lj109
-	str	r1,[r0]
+	ldr	r0,.Lj108
+	ldr	r1,.Lj109
+	str	r0,[r1]
 	ldmfd	r13!,{r4,r15}
 .Lj101:
 	.long	U_$UNIT6502_$$_PC
@@ -761,10 +693,9 @@ UNIT6502_$$_NMI6502:
 .globl	UNIT6502_$$_IRQ6502
 UNIT6502_$$_IRQ6502:
 # [406] begin
-# Rescheduled
+	stmfd	r13!,{r4,r14}
 # [407] push16(pc);
 	ldr	r0,.Lj112
-	stmfd	r13!,{r4,r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_PUSH16$WORD
 # [408] push8(status);
@@ -774,11 +705,9 @@ UNIT6502_$$_IRQ6502:
 # [409] status :=status or FLAG_INTERRUPT;
 	ldr	r0,.Lj113
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj113
 	orr	r0,r0,#4
+	and	r0,r0,#255
+	ldr	r1,.Lj113
 	strb	r0,[r1]
 # [410] pc := word(read6502($FFFE)) or (word(read6502($FFFF)) << 8);
 	mov	r0,#254
@@ -791,22 +720,17 @@ UNIT6502_$$_IRQ6502:
 # Peephole FoldShiftProcess done
 # [413] end;
 	orr	r0,r4,r0,lsl #8
-# Rescheduled
-	ldr	r2,.Lj112
-	uxth	r1,r0
-# Rescheduled
+	uxth	r0,r0
+	ldr	r1,.Lj112
+	strh	r0,[r1]
 # [411] cs:=@csi;
 	ldr	r0,.Lj117
-	strh	r1,[r2]
-# Rescheduled
-	ldr	r2,.Lj118
-# Rescheduled
+	ldr	r1,.Lj118
+	str	r0,[r1]
 # [412] ds:=@dsi;
-	ldr	r1,.Lj119
-	str	r0,[r2]
-# Rescheduled
-	ldr	r0,.Lj120
-	str	r1,[r0]
+	ldr	r0,.Lj119
+	ldr	r1,.Lj120
+	str	r0,[r1]
 	ldmfd	r13!,{r4,r15}
 .Lj112:
 	.long	U_$UNIT6502_$$_PC
@@ -827,89 +751,71 @@ UNIT6502_$$_IRQ6502:
 	.balign 4
 .globl	UNIT6502_$$_EXEC6502$LONGINT
 UNIT6502_$$_EXEC6502$LONGINT:
-# Var tickcount located in register r0
 # [417] begin
-# Rescheduled
+	stmfd	r13!,{r14}
+# Var tickcount located in register r0
 # [418] clockgoal6502 += tickcount;
 	ldr	r1,.Lj123
-	stmfd	r13!,{r14}
 	ldr	r1,[r1]
-# Rescheduled
-	ldr	r2,.Lj123
-	add	r0,r0,r1
-	str	r0,[r2]
+	add	r1,r0,r1
+	ldr	r0,.Lj123
+	str	r1,[r0]
 # [419] while (clockticks6502 < clockgoal6502) do
 	b	.Lj126
 	.balign 4
 .Lj125:
 # [421] opcode := read6502(pc+cs^);
 	ldr	r0,.Lj128
-# Rescheduled
-	ldr	r1,.Lj129
-	ldrh	r2,[r0]
-	ldr	r0,[r1]
+	ldrh	r1,[r0]
+	ldr	r0,.Lj129
 	ldr	r0,[r0]
-	add	r0,r0,r2
+	ldr	r0,[r0]
+	add	r0,r0,r1
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
-	ldr	r2,.Lj130
-# Rescheduled
+	ldr	r1,.Lj130
+	strb	r0,[r1]
 # [422] pc+=1;
-	ldr	r1,.Lj128
-	strb	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-	ldr	r1,.Lj128
+	ldr	r0,.Lj128
+	ldrh	r0,[r0]
 	add	r0,r0,#1
+	uxth	r0,r0
+	ldr	r1,.Lj128
 	strh	r0,[r1]
-# Rescheduled
 # [424] penaltyop := 0;
-	ldr	r0,.Lj133
-	mov	r1,#0
-	strb	r1,[r0]
-# Rescheduled
+	mov	r0,#0
+	ldr	r1,.Lj133
+	strb	r0,[r1]
 # [425] penaltyaddr := 0;
-	ldr	r2,.Lj134
-	mov	r1,#0
-# Rescheduled
+	mov	r0,#0
+	ldr	r1,.Lj134
+	strb	r0,[r1]
 # [426] addrtable[opcode];
 	ldr	r0,.Lj130
-	strb	r1,[r2]
-# Rescheduled
-# Peephole FoldShiftLdrStr done
-# Rescheduled
-	ldr	r1,.Lj136
 	ldrb	r0,[r0]
-	ldr	r0,[r1, r0, lsl #2]
+	mov	r1,r0,lsl #2
+	ldr	r0,.Lj136
+	ldr	r0,[r1, r0]
 	blx	r0
 # [427] optable[opcode];
 	ldr	r0,.Lj130
-# Rescheduled
-# Peephole FoldShiftLdrStr done
-# Rescheduled
-	ldr	r1,.Lj138
 	ldrb	r0,[r0]
-	ldr	r0,[r1, r0, lsl #2]
+	mov	r1,r0,lsl #2
+	ldr	r0,.Lj138
+	ldr	r0,[r1, r0]
 	blx	r0
 # [428] clockticks6502 += ticktable[opcode];
 	ldr	r0,.Lj130
-# Rescheduled
-	ldr	r1,.Lj140
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r2,.Lj141
+	ldr	r1,.Lj140
 	ldrb	r1,[r0, r1]
-	ldr	r0,[r2]
-# Rescheduled
-	ldr	r2,.Lj141
-	add	r0,r0,r1
-# Rescheduled
+	ldr	r0,.Lj141
+	ldr	r0,[r0]
+	add	r1,r0,r1
+	ldr	r0,.Lj141
+	str	r1,[r0]
 # [429] if (penaltyop<>0) and (penaltyaddr<>0) then  clockticks6502+=1;
-	ldr	r1,.Lj133
-	str	r0,[r2]
-	ldrb	r0,[r1]
+	ldr	r0,.Lj133
+	ldrb	r0,[r0]
 	cmp	r0,#0
 	beq	.Lj145
 	ldr	r0,.Lj134
@@ -918,25 +824,22 @@ UNIT6502_$$_EXEC6502$LONGINT:
 	beq	.Lj145
 	ldr	r0,.Lj141
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj141
 	add	r0,r0,#1
+	ldr	r1,.Lj141
 	str	r0,[r1]
 .Lj145:
 # [430] instructions+=1;
 	ldr	r0,.Lj150
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj150
 	add	r0,r0,#1
+	ldr	r1,.Lj150
 	str	r0,[r1]
 .Lj126:
 	ldr	r0,.Lj141
-# Rescheduled
-	ldr	r1,.Lj123
-	ldr	r2,[r0]
-	ldr	r0,[r1]
-	cmp	r2,r0
+	ldr	r1,[r0]
+	ldr	r0,.Lj123
+	ldr	r0,[r0]
+	cmp	r1,r0
 	blt	.Lj125
 # [432] end;
 	ldmfd	r13!,{r15}
@@ -969,83 +872,68 @@ UNIT6502_$$_EXEC6502$LONGINT:
 	.balign 4
 .globl	UNIT6502_$$_FAST6502$LONGINT
 UNIT6502_$$_FAST6502$LONGINT:
-# Var tickcount located in register r0
 # [436] begin
-# Rescheduled
+	stmfd	r13!,{r14}
+# Var tickcount located in register r0
 # [437] clockgoal6502 += tickcount;
 	ldr	r1,.Lj156
-	stmfd	r13!,{r14}
 	ldr	r1,[r1]
-# Rescheduled
-	ldr	r2,.Lj156
-	add	r0,r0,r1
-	str	r0,[r2]
+	add	r1,r0,r1
+	ldr	r0,.Lj156
+	str	r1,[r0]
 # [438] while (clockticks6502 < clockgoal6502) do
 	b	.Lj159
 	.balign 4
 .Lj158:
 # [440] opcode := read6502(pc+cs^);
 	ldr	r0,.Lj161
-# Rescheduled
-	ldr	r1,.Lj162
-	ldrh	r2,[r0]
-	ldr	r0,[r1]
+	ldrh	r1,[r0]
+	ldr	r0,.Lj162
 	ldr	r0,[r0]
-	add	r0,r0,r2
+	ldr	r0,[r0]
+	add	r0,r0,r1
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
-	ldr	r2,.Lj163
-# Rescheduled
+	ldr	r1,.Lj163
+	strb	r0,[r1]
 # [441] pc+=1;
-	ldr	r1,.Lj161
-	strb	r0,[r2]
-	ldrh	r0,[r1]
+	ldr	r0,.Lj161
+	ldrh	r0,[r0]
 	add	r0,r0,#1
-# Rescheduled
-	ldr	r2,.Lj161
-	uxth	r1,r0
-# Rescheduled
+	uxth	r0,r0
+	ldr	r1,.Lj161
+	strh	r0,[r1]
 # [442] addrtable[opcode];
 	ldr	r0,.Lj163
-	strh	r1,[r2]
-# Rescheduled
-# Peephole FoldShiftLdrStr done
-# Rescheduled
-	ldr	r1,.Lj167
 	ldrb	r0,[r0]
-	ldr	r0,[r1, r0, lsl #2]
+	mov	r1,r0,lsl #2
+	ldr	r0,.Lj167
+	ldr	r0,[r1, r0]
 	blx	r0
 # [443] optable[opcode];
 	ldr	r0,.Lj163
-# Rescheduled
-# Peephole FoldShiftLdrStr done
-# Rescheduled
-	ldr	r1,.Lj169
 	ldrb	r0,[r0]
-	ldr	r0,[r1, r0, lsl #2]
+	mov	r1,r0,lsl #2
+	ldr	r0,.Lj169
+	ldr	r0,[r1, r0]
 	blx	r0
 # [444] clockticks6502 += 1;
 	ldr	r0,.Lj170
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r2,.Lj170
 	add	r0,r0,#1
-# Rescheduled
+	ldr	r1,.Lj170
+	str	r0,[r1]
 # [445] instructions+=1;
-	ldr	r1,.Lj172
-	str	r0,[r2]
-	ldr	r0,[r1]
-# Rescheduled
-	ldr	r1,.Lj172
+	ldr	r0,.Lj172
+	ldr	r0,[r0]
 	add	r0,r0,#1
+	ldr	r1,.Lj172
 	str	r0,[r1]
 .Lj159:
 	ldr	r0,.Lj170
-# Rescheduled
-	ldr	r1,.Lj156
-	ldr	r2,[r0]
-	ldr	r0,[r1]
-	cmp	r2,r0
+	ldr	r1,[r0]
+	ldr	r0,.Lj156
+	ldr	r0,[r0]
+	cmp	r1,r0
 	blt	.Lj158
 # [447] end;
 	ldmfd	r13!,{r15}
@@ -1076,81 +964,63 @@ UNIT6502_$$_STEP6502:
 	stmfd	r13!,{r14}
 # [452] opcode := read6502(pc+cs^);
 	ldr	r0,.Lj178
-# Rescheduled
-	ldr	r1,.Lj179
-	ldrh	r2,[r0]
-	ldr	r0,[r1]
+	ldrh	r1,[r0]
+	ldr	r0,.Lj179
 	ldr	r0,[r0]
-	add	r0,r0,r2
+	ldr	r0,[r0]
+	add	r0,r0,r1
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
-	ldr	r2,.Lj180
-# Rescheduled
+	ldr	r1,.Lj180
+	strb	r0,[r1]
 # [453] pc+=1;
-	ldr	r1,.Lj178
-	strb	r0,[r2]
-	ldrh	r0,[r1]
+	ldr	r0,.Lj178
+	ldrh	r0,[r0]
 	add	r0,r0,#1
-# Rescheduled
-	ldr	r2,.Lj178
-	uxth	r1,r0
-# Rescheduled
+	uxth	r0,r0
+	ldr	r1,.Lj178
+	strh	r0,[r1]
 # [454] status :=status or FLAG_CONSTANT;
 	ldr	r0,.Lj183
-	strh	r1,[r2]
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj183
 	orr	r0,r0,#32
+	and	r0,r0,#255
+	ldr	r1,.Lj183
 	strb	r0,[r1]
-# Rescheduled
 # [455] penaltyop := 0;
-	ldr	r1,.Lj185
 	mov	r0,#0
+	ldr	r1,.Lj185
 	strb	r0,[r1]
-# Rescheduled
 # [456] penaltyaddr := 0;
-	ldr	r2,.Lj186
 	mov	r1,#0
-# Rescheduled
+	ldr	r0,.Lj186
+	strb	r1,[r0]
 # [457] addrtable[opcode];
 	ldr	r0,.Lj180
-	strb	r1,[r2]
-# Rescheduled
-# Peephole FoldShiftLdrStr done
-# Rescheduled
-	ldr	r1,.Lj188
 	ldrb	r0,[r0]
-	ldr	r0,[r1, r0, lsl #2]
+	mov	r1,r0,lsl #2
+	ldr	r0,.Lj188
+	ldr	r0,[r1, r0]
 	blx	r0
 # [458] optable[opcode];
 	ldr	r0,.Lj180
-# Rescheduled
-# Peephole FoldShiftLdrStr done
-# Rescheduled
-	ldr	r1,.Lj190
 	ldrb	r0,[r0]
-	ldr	r0,[r1, r0, lsl #2]
+	mov	r1,r0,lsl #2
+	ldr	r0,.Lj190
+	ldr	r0,[r1, r0]
 	blx	r0
 # [459] clockticks6502 += ticktable[opcode];
 	ldr	r0,.Lj180
-# Rescheduled
-	ldr	r1,.Lj192
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r2,.Lj193
+	ldr	r1,.Lj192
 	ldrb	r1,[r0, r1]
-	ldr	r0,[r2]
-# Rescheduled
-	ldr	r2,.Lj193
+	ldr	r0,.Lj193
+	ldr	r0,[r0]
 	add	r0,r0,r1
-# Rescheduled
+	ldr	r1,.Lj193
+	str	r0,[r1]
 # [460] if (penaltyop<>0) and (penaltyaddr<>0) then clockticks6502+=1;
-	ldr	r1,.Lj185
-	str	r0,[r2]
-	ldrb	r0,[r1]
+	ldr	r0,.Lj185
+	ldrb	r0,[r0]
 	cmp	r0,#0
 	beq	.Lj197
 	ldr	r0,.Lj186
@@ -1159,25 +1029,21 @@ UNIT6502_$$_STEP6502:
 	beq	.Lj197
 	ldr	r0,.Lj193
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj193
 	add	r0,r0,#1
+	ldr	r1,.Lj193
 	str	r0,[r1]
 .Lj197:
 # [461] clockgoal6502 := clockticks6502;
 	ldr	r0,.Lj193
-# Rescheduled
-	ldr	r2,.Lj203
 	ldr	r1,[r0]
-# Rescheduled
+	ldr	r0,.Lj203
+	str	r1,[r0]
 # [462] instructions+=1;
 	ldr	r0,.Lj204
-	str	r1,[r2]
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj204
-	add	r0,r0,#1
-	str	r0,[r1]
+	add	r1,r0,#1
+	ldr	r0,.Lj204
+	str	r1,[r0]
 # [463] end;
 	ldmfd	r13!,{r15}
 .Lj178:
@@ -1211,21 +1077,18 @@ UNIT6502_$$_STEP6502:
 	.balign 4
 .globl	UNIT6502_$$_JSR6502$WORD$LONGINT
 UNIT6502_$$_JSR6502$WORD$LONGINT:
+# [470] begin
+	stmfd	r13!,{r4,r14}
 # Var aa located in register r0
 # Var addr located in register r1
 # Var depth located in register r4
-# [470] begin
-# Rescheduled
-# Peephole UXTHStrh2Strh done
-# Rescheduled
 # [471] pc:=addr;
-	ldr	r2,.Lj208
-	stmfd	r13!,{r4,r14}
-	strh	r1,[r2]
-# Rescheduled
+	uxth	r2,r1
+	ldr	r1,.Lj208
+	strh	r2,[r1]
 # [472] sp := $FD;
-	ldr	r2,.Lj209
 	mov	r1,#253
+	ldr	r2,.Lj209
 	strb	r1,[r2]
 # Var depth located in register r4
 # [473] depth:=0;
@@ -1233,46 +1096,38 @@ UNIT6502_$$_JSR6502$WORD$LONGINT:
 # [474] if aa<256 then begin a:=aa; x:=0; y:=0; status:=0; end;
 	cmp	r0,#256
 	bcs	.Lj211
-# Rescheduled
+	and	r0,r0,#255
 	ldr	r1,.Lj212
-# Peephole AndStrb2Strb done
 	strb	r0,[r1]
-# Rescheduled
-	ldr	r1,.Lj213
 	mov	r0,#0
+	ldr	r1,.Lj213
 	strb	r0,[r1]
-# Rescheduled
+	mov	r1,#0
 	ldr	r0,.Lj214
-	mov	r1,#0
 	strb	r1,[r0]
-# Rescheduled
-	ldr	r0,.Lj215
 	mov	r1,#0
+	ldr	r0,.Lj215
 	strb	r1,[r0]
 .Lj211:
-# Rescheduled
 # [475] instructions:=0;
-	ldr	r0,.Lj216
 	mov	r1,#0
+	ldr	r0,.Lj216
 	str	r1,[r0]
 	.balign 4
 .Lj217:
 # [477] opcode := read6502(pc+cs^);
 	ldr	r0,.Lj208
-# Rescheduled
-	ldr	r1,.Lj221
-	ldrh	r2,[r0]
-	ldr	r0,[r1]
+	ldrh	r1,[r0]
+	ldr	r0,.Lj221
 	ldr	r0,[r0]
-	add	r0,r0,r2
+	ldr	r0,[r0]
+	add	r0,r0,r1
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
-	ldr	r2,.Lj222
-# Rescheduled
-# [478] if opcode=$20 then inc(depth);
 	ldr	r1,.Lj222
-	strb	r0,[r2]
-	ldrb	r0,[r1]
+	strb	r0,[r1]
+# [478] if opcode=$20 then inc(depth);
+	ldr	r0,.Lj222
+	ldrb	r0,[r0]
 	cmp	r0,#32
 	addeq	r4,r4,#1
 # [479] if opcode=$60 then dec(depth);
@@ -1284,44 +1139,37 @@ UNIT6502_$$_JSR6502$WORD$LONGINT:
 	ldr	r0,.Lj208
 	ldrh	r0,[r0]
 	add	r0,r0,#1
-# Rescheduled
-	ldr	r2,.Lj208
-	uxth	r1,r0
-# Rescheduled
+	uxth	r0,r0
+	ldr	r1,.Lj208
+	strh	r0,[r1]
 # [482] addrtable[opcode];
 	ldr	r0,.Lj222
-	strh	r1,[r2]
-# Rescheduled
-# Peephole FoldShiftLdrStr done
-# Rescheduled
-	ldr	r1,.Lj232
 	ldrb	r0,[r0]
-	ldr	r0,[r1, r0, lsl #2]
+	mov	r0,r0,lsl #2
+	ldr	r1,.Lj232
+	ldr	r0,[r0, r1]
 	blx	r0
 # [483] optable[opcode];
 	ldr	r0,.Lj222
-# Rescheduled
-# Peephole FoldShiftLdrStr done
-# Rescheduled
-	ldr	r1,.Lj234
 	ldrb	r0,[r0]
-	ldr	r0,[r1, r0, lsl #2]
+	mov	r1,r0,lsl #2
+	ldr	r0,.Lj234
+	ldr	r0,[r1, r0]
 	blx	r0
 # [484] instructions+=1;
 	ldr	r0,.Lj216
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj216
-	add	r0,r0,#1
-	str	r0,[r1]
+	add	r1,r0,#1
+	ldr	r0,.Lj216
+	str	r1,[r0]
 # [486] until (depth<0) or (instructions>3000);
 	cmp	r4,#0
 	blt	.Lj219
 	ldr	r0,.Lj216
-	ldr	r1,[r0]
-	mov	r0,#184
-	orr	r0,r0,#2816
-	cmp	r1,r0
+	ldr	r0,[r0]
+	mov	r1,#184
+	orr	r1,r1,#2816
+	cmp	r0,r1
 	ble	.Lj217
 .Lj219:
 # [487] end;
@@ -1375,17 +1223,15 @@ UNIT6502_$$_IMM:
 # [503] begin
 # [504] ea := pc;
 	ldr	r0,.Lj247
-# Rescheduled
-	ldr	r1,.Lj248
 	ldrh	r0,[r0]
-# Rescheduled
-# [505] inc(pc);
-	ldr	r2,.Lj247
+	ldr	r1,.Lj248
 	strh	r0,[r1]
-	ldrh	r0,[r2]
+# [505] inc(pc);
+	ldr	r1,.Lj247
+	ldrh	r0,[r1]
 	add	r0,r0,#1
 # Peephole UXTHStrh2Strh done
-	strh	r0,[r2]
+	strh	r0,[r1]
 # [506] end;
 	bx	r14
 .Lj247:
@@ -1399,22 +1245,19 @@ UNIT6502_$$_IMM:
 	.balign 4
 UNIT6502_$$_ZP:
 # [510] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [511] ea := word(read6502(pc));
 	ldr	r0,.Lj252
-	stmfd	r13!,{r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
 	ldr	r1,.Lj253
-# Rescheduled
-# [512] inc(pc);
-	ldr	r2,.Lj252
 	strh	r0,[r1]
-	ldrh	r0,[r2]
+# [512] inc(pc);
+	ldr	r1,.Lj252
+	ldrh	r0,[r1]
 	add	r0,r0,#1
 # Peephole UXTHStrh2Strh done
-	strh	r0,[r2]
+	strh	r0,[r1]
 # [513] end;
 	ldmfd	r13!,{r15}
 .Lj252:
@@ -1428,28 +1271,24 @@ UNIT6502_$$_ZP:
 	.balign 4
 UNIT6502_$$_ZPX:
 # [517] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [518] ea := ((read6502(pc)+x) and $FF); //zero-page wraparound
 	ldr	r0,.Lj257
-	stmfd	r13!,{r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
 	ldr	r1,.Lj258
 	ldrb	r1,[r1]
 	add	r0,r1,r0
 # Peephole AndUxt2And done
-# Rescheduled
-	ldr	r1,.Lj259
 	and	r0,r0,#255
-# Rescheduled
-# [519] inc(pc)
-	ldr	r2,.Lj257
+	ldr	r1,.Lj259
 	strh	r0,[r1]
-	ldrh	r0,[r2]
+# [519] inc(pc)
+	ldr	r1,.Lj257
+	ldrh	r0,[r1]
 	add	r0,r0,#1
 # Peephole UXTHStrh2Strh done
-	strh	r0,[r2]
+	strh	r0,[r1]
 # [520] end;
 	ldmfd	r13!,{r15}
 .Lj257:
@@ -1465,28 +1304,24 @@ UNIT6502_$$_ZPX:
 	.balign 4
 UNIT6502_$$_ZPY:
 # [524] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [525] ea := ((read6502(pc)+y) and $FF); //zero-page wraparound
 	ldr	r0,.Lj263
-	stmfd	r13!,{r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
 	ldr	r1,.Lj264
 	ldrb	r1,[r1]
 	add	r0,r1,r0
 # Peephole AndUxt2And done
-# Rescheduled
-	ldr	r1,.Lj265
 	and	r0,r0,#255
-# Rescheduled
-# [526] inc(pc)
-	ldr	r2,.Lj263
+	ldr	r1,.Lj265
 	strh	r0,[r1]
-	ldrh	r0,[r2]
+# [526] inc(pc)
+	ldr	r1,.Lj263
+	ldrh	r0,[r1]
 	add	r0,r0,#1
 # Peephole UXTHStrh2Strh done
-	strh	r0,[r2]
+	strh	r0,[r1]
 # [527] end;
 	ldmfd	r13!,{r15}
 .Lj263:
@@ -1502,34 +1337,29 @@ UNIT6502_$$_ZPY:
 	.balign 4
 UNIT6502_$$_REL:
 # [531] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [532] reladdr := word(read6502(pc));
 	ldr	r0,.Lj269
-	stmfd	r13!,{r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
 	ldr	r1,.Lj270
-# Rescheduled
-# [533] inc(pc);
-	ldr	r2,.Lj269
 	strh	r0,[r1]
-	ldrh	r0,[r2]
+# [533] inc(pc);
+	ldr	r1,.Lj269
+	ldrh	r0,[r1]
 	add	r0,r0,#1
 # Peephole UXTHStrh2Strh done
-# Rescheduled
+	strh	r0,[r1]
 # [534] if (reladdr and $80)<>0 then reladdr:=reladdr or $FF00;
-	ldr	r1,.Lj270
-	strh	r0,[r2]
-	ldrh	r0,[r1]
+	ldr	r0,.Lj270
+	ldrh	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj274
 	ldr	r0,.Lj270
 	ldrh	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj270
 	orr	r0,r0,#65280
+	ldr	r1,.Lj270
 	strh	r0,[r1]
 .Lj274:
 # [535] end;
@@ -1545,34 +1375,28 @@ UNIT6502_$$_REL:
 	.balign 4
 UNIT6502_$$_ABSO:
 # [539] begin
-# Rescheduled
+	stmfd	r13!,{r4,r14}
 # [540] ea := word(read6502(pc)) or (word(read6502(pc+1)) shl 8);
 	ldr	r0,.Lj279
-	stmfd	r13!,{r4,r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
-	ldr	r1,.Lj279
 	mov	r4,r0
-	ldrh	r0,[r1]
+	ldr	r0,.Lj279
+	ldrh	r0,[r0]
 	add	r0,r0,#1
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 # Peephole FoldShiftProcess done
 # [542] end;
 	orr	r0,r4,r0,lsl #8
-# Rescheduled
-	ldr	r2,.Lj281
-	uxth	r1,r0
-# Rescheduled
+	uxth	r0,r0
+	ldr	r1,.Lj281
+	strh	r0,[r1]
 # [541] pc += 2;
 	ldr	r0,.Lj279
-	strh	r1,[r2]
 	ldrh	r0,[r0]
-# Rescheduled
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-	ldr	r1,.Lj279
 	add	r0,r0,#2
+	uxth	r0,r0
+	ldr	r1,.Lj279
 	strh	r0,[r1]
 	ldmfd	r13!,{r4,r15}
 .Lj279:
@@ -1585,64 +1409,53 @@ UNIT6502_$$_ABSO:
 .section .text.n_unit6502_$$_absx
 	.balign 4
 UNIT6502_$$_ABSX:
-# Var startpage located in register r0
 # [548] begin
-# Rescheduled
+	stmfd	r13!,{r4,r14}
+# Var startpage located in register r0
 # [549] ea := word(read6502(pc)) or (word(read6502(pc+1)) shl 8);
 	ldr	r0,.Lj286
-	stmfd	r13!,{r4,r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
-	ldr	r1,.Lj286
 	mov	r4,r0
-	ldrh	r0,[r1]
+	ldr	r0,.Lj286
+	ldrh	r0,[r0]
 	add	r0,r0,#1
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 # Peephole FoldShiftProcess done
 # [554] end;
 	orr	r0,r4,r0,lsl #8
-# Rescheduled
-	ldr	r2,.Lj288
 	uxth	r1,r0
-# Rescheduled
+	ldr	r0,.Lj288
+	strh	r1,[r0]
 # [550] startpage := ea and $FF00;
 	ldr	r0,.Lj288
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 	and	r0,r0,#65280
 # Var startpage located in register r0
-# Rescheduled
 # [551] ea += x;
 	ldr	r1,.Lj288
-# Rescheduled
-	ldr	r3,.Lj291
 	ldrh	r2,[r1]
-	ldrb	r1,[r3]
+	ldr	r1,.Lj291
+	ldrb	r1,[r1]
 	add	r1,r1,r2
-# Rescheduled
-	ldr	r3,.Lj288
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [552] if (startpage <> (ea and $FF00)) then penaltyaddr := 1;   //one cycle penalty for page-crossing on some opcodes
+	uxth	r1,r1
 	ldr	r2,.Lj288
-	strh	r1,[r3]
-	ldrh	r1,[r2]
+	strh	r1,[r2]
+# [552] if (startpage <> (ea and $FF00)) then penaltyaddr := 1;   //one cycle penalty for page-crossing on some opcodes
+	ldr	r1,.Lj288
+	ldrh	r1,[r1]
 	and	r1,r1,#65280
 	cmp	r1,r0
-# Rescheduled
-	ldrne	r1,.Lj296
-	movne	r0,#1
-	strneb	r0,[r1]
+	movne	r1,#1
+	ldrne	r0,.Lj296
+	strneb	r1,[r0]
 # [553] pc += 2;
 	ldr	r0,.Lj286
 	ldrh	r0,[r0]
-# Rescheduled
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-	ldr	r1,.Lj286
 	add	r0,r0,#2
-	strh	r0,[r1]
+	uxth	r1,r0
+	ldr	r0,.Lj286
+	strh	r1,[r0]
 	ldmfd	r13!,{r4,r15}
 .Lj286:
 	.long	U_$UNIT6502_$$_PC
@@ -1658,64 +1471,53 @@ UNIT6502_$$_ABSX:
 .section .text.n_unit6502_$$_absy
 	.balign 4
 UNIT6502_$$_ABSY:
-# Var startpage located in register r0
 # [560] begin
-# Rescheduled
+	stmfd	r13!,{r4,r14}
+# Var startpage located in register r0
 # [561] ea := word(read6502(pc)) or (word(read6502(pc+1)) shl 8);
 	ldr	r0,.Lj301
-	stmfd	r13!,{r4,r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
-	ldr	r1,.Lj301
 	mov	r4,r0
-	ldrh	r0,[r1]
+	ldr	r0,.Lj301
+	ldrh	r0,[r0]
 	add	r0,r0,#1
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 # Peephole FoldShiftProcess done
 # [566] end;
 	orr	r0,r4,r0,lsl #8
-# Rescheduled
-	ldr	r2,.Lj303
 	uxth	r1,r0
-# Rescheduled
+	ldr	r0,.Lj303
+	strh	r1,[r0]
 # [562] startpage := ea and $FF00;
 	ldr	r0,.Lj303
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 	and	r0,r0,#65280
 # Var startpage located in register r0
-# Rescheduled
 # [563] ea += y;
 	ldr	r1,.Lj303
-# Rescheduled
-	ldr	r3,.Lj306
 	ldrh	r2,[r1]
-	ldrb	r1,[r3]
+	ldr	r1,.Lj306
+	ldrb	r1,[r1]
 	add	r1,r1,r2
-# Rescheduled
-	ldr	r3,.Lj303
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [564] if (startpage <> (ea and $FF00)) then penaltyaddr := 1; //one cycle penalty for page-crossing on some opcodes
+	uxth	r1,r1
 	ldr	r2,.Lj303
-	strh	r1,[r3]
-	ldrh	r1,[r2]
+	strh	r1,[r2]
+# [564] if (startpage <> (ea and $FF00)) then penaltyaddr := 1; //one cycle penalty for page-crossing on some opcodes
+	ldr	r1,.Lj303
+	ldrh	r1,[r1]
 	and	r1,r1,#65280
 	cmp	r1,r0
-# Rescheduled
-	ldrne	r1,.Lj311
-	movne	r0,#1
-	strneb	r0,[r1]
+	movne	r1,#1
+	ldrne	r0,.Lj311
+	strneb	r1,[r0]
 # [565] pc += 2;
 	ldr	r0,.Lj301
 	ldrh	r0,[r0]
-# Rescheduled
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-	ldr	r1,.Lj301
 	add	r0,r0,#2
-	strh	r0,[r1]
+	uxth	r1,r0
+	ldr	r0,.Lj301
+	strh	r1,[r0]
 	ldmfd	r13!,{r4,r15}
 .Lj301:
 	.long	U_$UNIT6502_$$_PC
@@ -1731,19 +1533,17 @@ UNIT6502_$$_ABSY:
 .section .text.n_unit6502_$$_ind
 	.balign 4
 UNIT6502_$$_IND:
+# [572] begin
+	stmfd	r13!,{r4,r5,r14}
 # Var eahelp located in register r0
 # Var eahelp2 located in register r0
-# [572] begin
-# Rescheduled
 # [573] eahelp := word(read6502(pc)) or (word(read6502(pc+1)) shl 8);
 	ldr	r0,.Lj316
-	stmfd	r13!,{r4,r5,r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
-	ldr	r1,.Lj316
 	mov	r4,r0
-	ldrh	r0,[r1]
+	ldr	r0,.Lj316
+	ldrh	r0,[r0]
 	add	r0,r0,#1
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 # Peephole FoldShiftProcess done
@@ -1767,19 +1567,15 @@ UNIT6502_$$_IND:
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 # Peephole FoldShiftProcess done
 	orr	r0,r5,r0,lsl #8
-# Rescheduled
-	ldr	r2,.Lj318
-# Peephole UXTHStrh2Strh done
-# Rescheduled
+	uxth	r0,r0
+	ldr	r1,.Lj318
+	strh	r0,[r1]
 # [576] pc += 2;
-	ldr	r1,.Lj316
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-	ldr	r1,.Lj316
+	ldr	r0,.Lj316
+	ldrh	r0,[r0]
 	add	r0,r0,#2
+	uxth	r0,r0
+	ldr	r1,.Lj316
 	strh	r0,[r1]
 	ldmfd	r13!,{r4,r5,r15}
 .Lj316:
@@ -1792,20 +1588,17 @@ UNIT6502_$$_IND:
 .section .text.n_unit6502_$$_izp
 	.balign 4
 UNIT6502_$$_IZP:
-# Var eahelp located in register r4
 # [583] begin
-# Rescheduled
+	stmfd	r13!,{r4,r5,r14}
+# Var eahelp located in register r4
 # [584] eahelp := word(read6502(pc)) and $FF; //zero-page wraparound for table pointer
 	ldr	r0,.Lj323
-	stmfd	r13!,{r4,r5,r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
+	and	r4,r0,#255
 # Var eahelp located in register r4
-# Rescheduled
-# Rescheduled
 # [585] inc(pc);
 	ldr	r1,.Lj323
-	and	r4,r0,#255
 	ldrh	r0,[r1]
 	add	r0,r0,#1
 # Peephole UXTHStrh2Strh done
@@ -1818,12 +1611,10 @@ UNIT6502_$$_IZP:
 	and	r0,r0,#255
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 # Peephole FoldShiftProcess done
-# Rescheduled
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-	ldr	r1,.Lj325
 # [587] end;
 	orr	r0,r5,r0,lsl #8
+	uxth	r0,r0
+	ldr	r1,.Lj325
 	strh	r0,[r1]
 	ldmfd	r13!,{r4,r5,r15}
 .Lj323:
@@ -1836,25 +1627,21 @@ UNIT6502_$$_IZP:
 .section .text.n_unit6502_$$_indx
 	.balign 4
 UNIT6502_$$_INDX:
-# Var eahelp located in register r4
 # [594] begin
-# Rescheduled
+	stmfd	r13!,{r4,r5,r14}
+# Var eahelp located in register r4
 # [595] eahelp := (word(read6502(pc) + x) and $FF); //zero-page wraparound for table pointer
 	ldr	r0,.Lj328
-	stmfd	r13!,{r4,r5,r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
 	ldr	r1,.Lj329
 	ldrb	r1,[r1]
 	add	r0,r1,r0
 	uxth	r0,r0
+	and	r4,r0,#255
 # Var eahelp located in register r4
-# Rescheduled
-# Rescheduled
 # [596] inc(pc);
 	ldr	r1,.Lj328
-	and	r4,r0,#255
 	ldrh	r0,[r1]
 	add	r0,r0,#1
 # Peephole UXTHStrh2Strh done
@@ -1867,12 +1654,10 @@ UNIT6502_$$_INDX:
 	and	r0,r0,#255
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 # Peephole FoldShiftProcess done
-# Rescheduled
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-	ldr	r1,.Lj331
 # [598] end;
 	orr	r0,r5,r0,lsl #8
+	uxth	r0,r0
+	ldr	r1,.Lj331
 	strh	r0,[r1]
 	ldmfd	r13!,{r4,r5,r15}
 .Lj328:
@@ -1887,38 +1672,32 @@ UNIT6502_$$_INDX:
 .section .text.n_unit6502_$$_iax
 	.balign 4
 UNIT6502_$$_IAX:
-# Var eahelp located in register r4
 # [604] begin
-# Rescheduled
+	stmfd	r13!,{r4,r5,r14}
+# Var eahelp located in register r4
 # [605] eahelp := word(read6502(pc))+(word(read6502(pc+1) shl 8)+ y); //zero-page wraparound for table pointer
 	ldr	r0,.Lj334
-	stmfd	r13!,{r4,r5,r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
-# Rescheduled
-	ldr	r1,.Lj334
 	mov	r4,r0
-	ldrh	r0,[r1]
+	ldr	r0,.Lj334
+	ldrh	r0,[r0]
 	add	r0,r0,#1
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 	mov	r0,r0,lsl #8
-# Rescheduled
-	ldr	r2,.Lj336
 	uxth	r1,r0
-	ldrb	r0,[r2]
+	ldr	r0,.Lj336
+	ldrb	r0,[r0]
 	add	r0,r0,r1
 	add	r0,r0,r4
 	uxth	r4,r0
 # Var eahelp located in register r4
-# Rescheduled
 # [606] pc+=2;
 	ldr	r0,.Lj334
 	ldrh	r0,[r0]
-# Rescheduled
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-	ldr	r1,.Lj334
 	add	r0,r0,#2
+	uxth	r0,r0
+	ldr	r1,.Lj334
 	strh	r0,[r1]
 # [607] ea := word(read6502(eahelp and $00FF)) or (word(read6502((eahelp+1) and $00FF)) shl 8);
 	and	r0,r4,#255
@@ -1928,12 +1707,10 @@ UNIT6502_$$_IAX:
 	and	r0,r0,#255
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 # Peephole FoldShiftProcess done
-# Rescheduled
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-	ldr	r1,.Lj339
 # [608] end;
 	orr	r0,r5,r0,lsl #8
+	uxth	r0,r0
+	ldr	r1,.Lj339
 	strh	r0,[r1]
 	ldmfd	r13!,{r4,r5,r15}
 .Lj334:
@@ -1948,18 +1725,16 @@ UNIT6502_$$_IAX:
 .section .text.n_unit6502_$$_indy
 	.balign 4
 UNIT6502_$$_INDY:
+# [614] begin
+	stmfd	r13!,{r4,r5,r14}
 # Var eahelp located in register r0
 # Var eahelp2 located in register r0
 # Var startpage located in register r0
-# [614] begin
-# Rescheduled
 # [615] eahelp := word(read6502(pc));
 	ldr	r0,.Lj342
-	stmfd	r13!,{r4,r5,r14}
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 # Var eahelp located in register r0
-# Rescheduled
 # [616] inc(pc);
 	ldr	r2,.Lj342
 	ldrh	r1,[r2]
@@ -1983,38 +1758,31 @@ UNIT6502_$$_INDY:
 # Peephole FoldShiftProcess done
 # [622] end;
 	orr	r0,r5,r0,lsl #8
-# Rescheduled
-	ldr	r2,.Lj344
 	uxth	r1,r0
-# Rescheduled
+	ldr	r0,.Lj344
+	strh	r1,[r0]
 # [619] startpage := ea and $FF00;
 	ldr	r0,.Lj344
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 	and	r0,r0,#65280
 # Var startpage located in register r0
-# Rescheduled
 # [620] ea += y;
 	ldr	r1,.Lj344
-# Rescheduled
-	ldr	r3,.Lj347
 	ldrh	r2,[r1]
-	ldrb	r1,[r3]
+	ldr	r1,.Lj347
+	ldrb	r1,[r1]
 	add	r1,r1,r2
-# Rescheduled
-	ldr	r3,.Lj344
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [621] if (startpage <> (ea and $FF00)) then penaltyaddr := 1; //one cycle penalty for page-crossing on some opcodes
+	uxth	r1,r1
 	ldr	r2,.Lj344
-	strh	r1,[r3]
-	ldrh	r1,[r2]
+	strh	r1,[r2]
+# [621] if (startpage <> (ea and $FF00)) then penaltyaddr := 1; //one cycle penalty for page-crossing on some opcodes
+	ldr	r1,.Lj344
+	ldrh	r1,[r1]
 	and	r1,r1,#65280
 	cmp	r1,r0
-# Rescheduled
-	ldrne	r1,.Lj352
-	movne	r0,#1
-	strneb	r0,[r1]
+	movne	r1,#1
+	ldrne	r0,.Lj352
+	strneb	r1,[r0]
 	ldmfd	r13!,{r4,r5,r15}
 .Lj342:
 	.long	U_$UNIT6502_$$_PC
@@ -2032,36 +1800,29 @@ UNIT6502_$$_INDY:
 UNIT6502_$$_ADC:
 # [630] begin
 	stmfd	r13!,{r14}
-# Rescheduled
 # [631] penaltyop := 1;
-	ldr	r0,.Lj355
 	mov	r1,#1
+	ldr	r0,.Lj355
 	strb	r1,[r0]
 # [632] value := getvalue;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj356
-# Rescheduled
-# [633] aresult := word(value)+a+(status and FLAG_CARRY);
 	ldr	r1,.Lj356
-	strh	r0,[r2]
-# Rescheduled
+	strh	r0,[r1]
+# [633] aresult := word(value)+a+(status and FLAG_CARRY);
+	ldr	r0,.Lj356
+	ldrh	r1,[r0]
 	ldr	r0,.Lj358
-	ldrh	r1,[r1]
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r2,.Lj359
 	add	r1,r0,r1
-	ldrb	r0,[r2]
+	ldr	r0,.Lj359
+	ldrb	r0,[r0]
 	and	r0,r0,#1
 	add	r0,r0,r1
-# Rescheduled
-	ldr	r2,.Lj360
 	uxth	r1,r0
-# Rescheduled
+	ldr	r0,.Lj360
+	strh	r1,[r0]
 # [634] if (aresult and $FF00) <>0 then setcarry else clearcarry;
 	ldr	r0,.Lj360
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#65280
@@ -2069,22 +1830,18 @@ UNIT6502_$$_ADC:
 # [218] {$define setcarry:= status :=status or FLAG_CARRY}
 	ldr	r0,.Lj359
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj359
 	orr	r0,r0,#1
+	and	r0,r0,#255
+	ldr	r1,.Lj359
 	strb	r0,[r1]
 	b	.Lj366
 .Lj363:
 # [219] {$define clearcarry:= status := status and not(FLAG_CARRY)}
 	ldr	r0,.Lj359
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj359
 	bic	r0,r0,#1
+	and	r0,r0,#255
+	ldr	r1,.Lj359
 	strb	r0,[r1]
 .Lj366:
 # [635] if (aresult and $00FF)<>0 then clearzero else setzero;
@@ -2096,38 +1853,30 @@ UNIT6502_$$_ADC:
 # [221] {$define clearzero:= status:= status and not(FLAG_ZERO)}
 	ldr	r0,.Lj359
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj359
 	bic	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj359
 	strb	r0,[r1]
 	b	.Lj374
 .Lj371:
 # [220] {$define setzero:= status :=status or FLAG_ZERO}
 	ldr	r0,.Lj359
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj359
 	orr	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj359
+	strb	r1,[r0]
 .Lj374:
 # [636] if ((aresult xor a) and (aresult xor value) and $0080)<>0 then
 	ldr	r0,.Lj358
-# Rescheduled
-	ldr	r1,.Lj360
-	ldrb	r2,[r0]
-	ldrh	r0,[r1]
-# Rescheduled
-	ldr	r1,.Lj360
-	eor	r2,r0,r2
-# Rescheduled
-	ldr	r0,.Lj356
-# Rescheduled
+	ldrb	r1,[r0]
+	ldr	r0,.Lj360
 	ldrh	r0,[r0]
-	ldrh	r1,[r1]
+	eor	r2,r0,r1
+	ldr	r0,.Lj360
+	ldrh	r1,[r0]
+	ldr	r0,.Lj356
+	ldrh	r0,[r0]
 	eor	r0,r0,r1
 	and	r0,r0,r2
 # Peephole OpCmp2OpS done
@@ -2136,22 +1885,18 @@ UNIT6502_$$_ADC:
 # [226] {$define setoverflow:= status :=status or FLAG_OVERFLOW}
 	ldr	r0,.Lj359
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj359
 	orr	r0,r0,#64
+	and	r0,r0,#255
+	ldr	r1,.Lj359
 	strb	r0,[r1]
 	b	.Lj385
 .Lj382:
 # [227] {$define clearoverflow:= status := status and not(FLAG_OVERFLOW)}
 	ldr	r0,.Lj359
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj359
 	bic	r0,r0,#64
+	and	r0,r0,#255
+	ldr	r1,.Lj359
 	strb	r0,[r1]
 .Lj385:
 # [640] if (aresult and $0080)<>0 then setsign else clearsign;
@@ -2163,20 +1908,17 @@ UNIT6502_$$_ADC:
 # [228] {$define setsign:= status :=status or FLAG_SIGN}
 	ldr	r0,.Lj359
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj359
 	orr	r0,r0,#128
+	ldr	r1,.Lj359
 	strb	r0,[r1]
 	b	.Lj393
 .Lj390:
 # [229] {$define clearsign:= status := status and not(FLAG_SIGN)}
 	ldr	r0,.Lj359
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj359
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj359
 	strb	r0,[r1]
 .Lj393:
 # [641] if (status and FLAG_DECIMAL)<>0 then
@@ -2186,32 +1928,27 @@ UNIT6502_$$_ADC:
 	ands	r0,r0,#8
 	beq	.Lj398
 # [643] inc(clockticks6502);
-	ldr	r2,.Lj399
-	ldr	r0,[r2]
+	ldr	r1,.Lj399
+	ldr	r0,[r1]
 	add	r0,r0,#1
-# Rescheduled
-	ldr	r1,.Lj359
-	str	r0,[r2]
-	ldrb	r0,[r1]
+	str	r0,[r1]
+	ldr	r0,.Lj359
+	ldrb	r0,[r0]
 	bic	r0,r0,#1
-# Rescheduled
-	ldr	r2,.Lj359
-	and	r1,r0,#255
-# Rescheduled
+	and	r0,r0,#255
+	ldr	r1,.Lj359
+	strb	r0,[r1]
 # [645] if ((a and $0F) > $09) then a += $06;
 	ldr	r0,.Lj358
-	strb	r1,[r2]
 	ldrb	r0,[r0]
 	and	r0,r0,#15
 	cmp	r0,#9
 	ble	.Lj404
 	ldr	r0,.Lj358
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj358
 	add	r0,r0,#6
+	and	r0,r0,#255
+	ldr	r1,.Lj358
 	strb	r0,[r1]
 .Lj404:
 # [646] if ((a and $F0) > $90) then
@@ -2224,29 +1961,23 @@ UNIT6502_$$_ADC:
 	ldr	r0,.Lj358
 	ldrb	r0,[r0]
 	add	r0,r0,#96
-# Rescheduled
-	ldr	r2,.Lj358
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj359
-	strb	r0,[r2]
-	ldrb	r0,[r1]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj359
+	and	r0,r0,#255
+	ldr	r1,.Lj358
+	strb	r0,[r1]
+	ldr	r0,.Lj359
+	ldrb	r0,[r0]
 	orr	r0,r0,#1
+	and	r0,r0,#255
+	ldr	r1,.Lj359
 	strb	r0,[r1]
 .Lj409:
 .Lj398:
 # [652] a:=byte(aresult and $00FF);
 	ldr	r0,.Lj360
-# Peephole AndAnd2And done
-# Peephole AndStrb2Strb done
-# Rescheduled
-# Rescheduled
-	ldr	r1,.Lj358
 	ldrh	r0,[r0]
+# Peephole AndAnd2And done
+	and	r0,r0,#255
+	ldr	r1,.Lj358
 	strb	r0,[r1]
 # [653] end;
 	ldmfd	r13!,{r15}
@@ -2270,52 +2001,42 @@ UNIT6502_$$_ADC:
 UNIT6502_$$_ANA:
 # [657] begin
 	stmfd	r13!,{r14}
-# Rescheduled
 # [658] penaltyop := 1;
-	ldr	r1,.Lj418
 	mov	r0,#1
+	ldr	r1,.Lj418
 	strb	r0,[r1]
 # [659] value := getvalue;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj419
-# Rescheduled
+	ldr	r1,.Lj419
+	strh	r0,[r1]
 # [660] aresult := a and value;
-	ldr	r1,.Lj420
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj420
+	ldrb	r1,[r0]
 	ldr	r0,.Lj419
-	ldrb	r1,[r1]
 	ldrh	r0,[r0]
-# Rescheduled
-	ldr	r2,.Lj422
-	and	r1,r0,r1
-# Rescheduled
+	and	r0,r0,r1
+	ldr	r1,.Lj422
+	strh	r0,[r1]
 # [661] if (aresult and $00FF)<>0 then clearzero else setzero;
 	ldr	r0,.Lj422
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#255
 	beq	.Lj425
 	ldr	r0,.Lj426
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj426
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj426
+	strb	r1,[r0]
 	b	.Lj428
 .Lj425:
 	ldr	r0,.Lj426
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj426
 	orr	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj426
+	strb	r1,[r0]
 .Lj428:
 # [662] if (aresult and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj422
@@ -2325,29 +2046,24 @@ UNIT6502_$$_ANA:
 	beq	.Lj433
 	ldr	r0,.Lj426
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj426
 	orr	r0,r0,#128
+	ldr	r1,.Lj426
 	strb	r0,[r1]
 	b	.Lj436
 .Lj433:
 	ldr	r0,.Lj426
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj426
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj426
 	strb	r0,[r1]
 .Lj436:
 # [663] a:=byte(aresult and $00FF);
 	ldr	r0,.Lj422
-# Peephole AndAnd2And done
-# Peephole AndStrb2Strb done
-# Rescheduled
-# Rescheduled
-	ldr	r1,.Lj420
 	ldrh	r0,[r0]
+# Peephole AndAnd2And done
+	and	r0,r0,#255
+	ldr	r1,.Lj420
 	strb	r0,[r1]
 # [664] end;
 	ldmfd	r13!,{r15}
@@ -2371,43 +2087,35 @@ UNIT6502_$$_ASL:
 	stmfd	r13!,{r14}
 # [669] value := getvalue;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj443
-# Rescheduled
-# [670] aresult := value shl 1;
 	ldr	r1,.Lj443
-	strh	r0,[r2]
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [670] aresult := value shl 1;
+	ldr	r0,.Lj443
+	ldrh	r0,[r0]
 	mov	r0,r0,lsl #1
-# Rescheduled
-	ldr	r2,.Lj445
 	uxth	r1,r0
-# Rescheduled
+	ldr	r0,.Lj445
+	strh	r1,[r0]
 # [671] if (aresult and $FF00) <>0 then setcarry else clearcarry;
 	ldr	r0,.Lj445
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#65280
 	beq	.Lj448
 	ldr	r0,.Lj449
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj449
 	orr	r0,r0,#1
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj449
+	strb	r1,[r0]
 	b	.Lj451
 .Lj448:
 	ldr	r0,.Lj449
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj449
 	bic	r0,r0,#1
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj449
+	strb	r1,[r0]
 .Lj451:
 # [672] if (aresult and $00FF)<>0 then clearzero else setzero;
 	ldr	r0,.Lj445
@@ -2417,21 +2125,17 @@ UNIT6502_$$_ASL:
 	beq	.Lj456
 	ldr	r0,.Lj449
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj449
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj449
+	strb	r1,[r0]
 	b	.Lj459
 .Lj456:
 	ldr	r0,.Lj449
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj449
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj449
 	strb	r0,[r1]
 .Lj459:
 # [673] if (aresult and $0080)<>0 then setsign else clearsign;
@@ -2442,19 +2146,16 @@ UNIT6502_$$_ASL:
 	beq	.Lj464
 	ldr	r0,.Lj449
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj449
 	orr	r0,r0,#128
+	ldr	r1,.Lj449
 	strb	r0,[r1]
 	b	.Lj467
 .Lj464:
 	ldr	r0,.Lj449
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj449
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj449
 	strb	r0,[r1]
 .Lj467:
 # [674] putvalue(aresult);
@@ -2484,49 +2185,40 @@ UNIT6502_$$_BCC:
 	bne	.Lj475
 # [682] oldpc := pc;
 	ldr	r0,.Lj476
-# Rescheduled
-	ldr	r2,.Lj477
-	ldrh	r0,[r0]
-# Rescheduled
+	ldrh	r1,[r0]
+	ldr	r0,.Lj477
+	strh	r1,[r0]
 # [683] pc += reladdr;
-	ldr	r1,.Lj476
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj476
+	ldrh	r1,[r0]
 	ldr	r0,.Lj479
-# Rescheduled
 	ldrh	r0,[r0]
-	ldrh	r1,[r1]
 	add	r0,r0,r1
-# Rescheduled
-	ldr	r2,.Lj476
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [684] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
-	ldr	r1,.Lj477
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
+	uxth	r0,r0
 	ldr	r1,.Lj476
-	and	r2,r0,#65280
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [684] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
+	ldr	r0,.Lj477
+	ldrh	r0,[r0]
+	and	r1,r0,#65280
+	ldr	r0,.Lj476
+	ldrh	r0,[r0]
 	and	r0,r0,#65280
-	cmp	r2,r0
+	cmp	r1,r0
 	beq	.Lj484
 # [685] else clockticks6502+=1;
 	ldr	r0,.Lj485
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj485
-	add	r0,r0,#2
-	str	r0,[r1]
+	add	r1,r0,#2
+	ldr	r0,.Lj485
+	str	r1,[r0]
 	b	.Lj487
 .Lj484:
 	ldr	r0,.Lj485
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj485
-	add	r0,r0,#1
-	str	r0,[r1]
+	add	r1,r0,#1
+	ldr	r0,.Lj485
+	str	r1,[r0]
 .Lj487:
 .Lj475:
 # [687] end;
@@ -2556,49 +2248,40 @@ UNIT6502_$$_BCS:
 	bne	.Lj494
 # [694] oldpc := pc;
 	ldr	r0,.Lj495
-# Rescheduled
-	ldr	r2,.Lj496
-	ldrh	r0,[r0]
-# Rescheduled
+	ldrh	r1,[r0]
+	ldr	r0,.Lj496
+	strh	r1,[r0]
 # [695] pc += reladdr;
-	ldr	r1,.Lj495
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj495
+	ldrh	r1,[r0]
 	ldr	r0,.Lj498
-# Rescheduled
 	ldrh	r0,[r0]
-	ldrh	r1,[r1]
 	add	r0,r0,r1
-# Rescheduled
-	ldr	r2,.Lj495
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [696] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
-	ldr	r1,.Lj496
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
+	uxth	r0,r0
 	ldr	r1,.Lj495
-	and	r2,r0,#65280
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [696] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
+	ldr	r0,.Lj496
+	ldrh	r0,[r0]
+	and	r1,r0,#65280
+	ldr	r0,.Lj495
+	ldrh	r0,[r0]
 	and	r0,r0,#65280
-	cmp	r2,r0
+	cmp	r1,r0
 	beq	.Lj503
 # [697] else clockticks6502+=1;
 	ldr	r0,.Lj504
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj504
-	add	r0,r0,#2
-	str	r0,[r1]
+	add	r1,r0,#2
+	ldr	r0,.Lj504
+	str	r1,[r0]
 	b	.Lj506
 .Lj503:
 	ldr	r0,.Lj504
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj504
-	add	r0,r0,#1
-	str	r0,[r1]
+	add	r1,r0,#1
+	ldr	r0,.Lj504
+	str	r1,[r0]
 .Lj506:
 .Lj494:
 # [699] end;
@@ -2628,49 +2311,40 @@ UNIT6502_$$_BEQ:
 	bne	.Lj513
 # [706] oldpc := pc;
 	ldr	r0,.Lj514
-# Rescheduled
-	ldr	r2,.Lj515
-	ldrh	r0,[r0]
-# Rescheduled
+	ldrh	r1,[r0]
+	ldr	r0,.Lj515
+	strh	r1,[r0]
 # [707] pc += reladdr;
-	ldr	r1,.Lj514
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj514
+	ldrh	r1,[r0]
 	ldr	r0,.Lj517
-# Rescheduled
 	ldrh	r0,[r0]
-	ldrh	r1,[r1]
 	add	r0,r0,r1
-# Rescheduled
-	ldr	r2,.Lj514
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [708] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
-	ldr	r1,.Lj515
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
+	uxth	r0,r0
 	ldr	r1,.Lj514
-	and	r2,r0,#65280
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [708] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
+	ldr	r0,.Lj515
+	ldrh	r0,[r0]
+	and	r1,r0,#65280
+	ldr	r0,.Lj514
+	ldrh	r0,[r0]
 	and	r0,r0,#65280
-	cmp	r2,r0
+	cmp	r1,r0
 	beq	.Lj522
 # [709] else clockticks6502+=1;
 	ldr	r0,.Lj523
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj523
-	add	r0,r0,#2
-	str	r0,[r1]
+	add	r1,r0,#2
+	ldr	r0,.Lj523
+	str	r1,[r0]
 	b	.Lj525
 .Lj522:
 	ldr	r0,.Lj523
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj523
-	add	r0,r0,#1
-	str	r0,[r1]
+	add	r1,r0,#1
+	ldr	r0,.Lj523
+	str	r1,[r0]
 .Lj525:
 .Lj513:
 # [711] end;
@@ -2695,59 +2369,47 @@ UNIT6502_$$_BIT:
 	stmfd	r13!,{r14}
 # [716] value := getvalue;;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj530
-# Rescheduled
+	ldr	r1,.Lj530
+	strh	r0,[r1]
 # [717] aresult := a and value;
-	ldr	r1,.Lj531
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj531
+	ldrb	r1,[r0]
 	ldr	r0,.Lj530
-	ldrb	r1,[r1]
 	ldrh	r0,[r0]
-# Rescheduled
-	ldr	r2,.Lj533
 	and	r1,r0,r1
-# Rescheduled
+	ldr	r0,.Lj533
+	strh	r1,[r0]
 # [718] if (aresult and $00FF)<>0 then clearzero else setzero;
 	ldr	r0,.Lj533
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#255
 	beq	.Lj536
 	ldr	r0,.Lj537
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj537
 	bic	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj537
 	strb	r0,[r1]
 	b	.Lj539
 .Lj536:
 	ldr	r0,.Lj537
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj537
 	orr	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj537
+	strb	r1,[r0]
 .Lj539:
 # [719] status := (status and $3F) or (value and $C0);
 	ldr	r0,.Lj537
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj530
-	and	r2,r0,#63
-	ldrh	r0,[r1]
+	and	r1,r0,#63
+	ldr	r0,.Lj530
+	ldrh	r0,[r0]
 	and	r0,r0,#192
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
+	orr	r0,r0,r1
+	and	r0,r0,#255
 	ldr	r1,.Lj537
-	orr	r0,r0,r2
 	strb	r0,[r1]
 # [720] end;
 	ldmfd	r13!,{r15}
@@ -2774,49 +2436,40 @@ UNIT6502_$$_BMI:
 	bne	.Lj549
 # [727] oldpc := pc;
 	ldr	r0,.Lj550
-# Rescheduled
-	ldr	r2,.Lj551
-	ldrh	r0,[r0]
-# Rescheduled
+	ldrh	r1,[r0]
+	ldr	r0,.Lj551
+	strh	r1,[r0]
 # [728] pc += reladdr;
-	ldr	r1,.Lj550
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj550
+	ldrh	r1,[r0]
 	ldr	r0,.Lj553
-# Rescheduled
 	ldrh	r0,[r0]
-	ldrh	r1,[r1]
 	add	r0,r0,r1
-# Rescheduled
-	ldr	r2,.Lj550
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [729] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
-	ldr	r1,.Lj551
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
+	uxth	r0,r0
 	ldr	r1,.Lj550
-	and	r2,r0,#65280
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [729] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
+	ldr	r0,.Lj551
+	ldrh	r0,[r0]
+	and	r1,r0,#65280
+	ldr	r0,.Lj550
+	ldrh	r0,[r0]
 	and	r0,r0,#65280
-	cmp	r2,r0
+	cmp	r1,r0
 	beq	.Lj558
 # [730] else clockticks6502+=1;
 	ldr	r0,.Lj559
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj559
-	add	r0,r0,#2
-	str	r0,[r1]
+	add	r1,r0,#2
+	ldr	r0,.Lj559
+	str	r1,[r0]
 	b	.Lj561
 .Lj558:
 	ldr	r0,.Lj559
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj559
-	add	r0,r0,#1
-	str	r0,[r1]
+	add	r1,r0,#1
+	ldr	r0,.Lj559
+	str	r1,[r0]
 .Lj561:
 .Lj549:
 # [732] end;
@@ -2846,49 +2499,40 @@ UNIT6502_$$_BNE:
 	bne	.Lj568
 # [739] oldpc := pc;
 	ldr	r0,.Lj569
-# Rescheduled
-	ldr	r2,.Lj570
-	ldrh	r0,[r0]
-# Rescheduled
+	ldrh	r1,[r0]
+	ldr	r0,.Lj570
+	strh	r1,[r0]
 # [740] pc += reladdr;
-	ldr	r1,.Lj569
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj569
+	ldrh	r1,[r0]
 	ldr	r0,.Lj572
-# Rescheduled
 	ldrh	r0,[r0]
-	ldrh	r1,[r1]
 	add	r0,r0,r1
-# Rescheduled
-	ldr	r2,.Lj569
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [741] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
-	ldr	r1,.Lj570
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
+	uxth	r0,r0
 	ldr	r1,.Lj569
-	and	r2,r0,#65280
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [741] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
+	ldr	r0,.Lj570
+	ldrh	r0,[r0]
+	and	r1,r0,#65280
+	ldr	r0,.Lj569
+	ldrh	r0,[r0]
 	and	r0,r0,#65280
-	cmp	r2,r0
+	cmp	r1,r0
 	beq	.Lj577
 # [742] else clockticks6502+=1;
 	ldr	r0,.Lj578
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj578
-	add	r0,r0,#2
-	str	r0,[r1]
+	add	r1,r0,#2
+	ldr	r0,.Lj578
+	str	r1,[r0]
 	b	.Lj580
 .Lj577:
 	ldr	r0,.Lj578
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj578
-	add	r0,r0,#1
-	str	r0,[r1]
+	add	r1,r0,#1
+	ldr	r0,.Lj578
+	str	r1,[r0]
 .Lj580:
 .Lj568:
 # [744] end;
@@ -2918,49 +2562,40 @@ UNIT6502_$$_BPL:
 	bne	.Lj587
 # [751] oldpc := pc;
 	ldr	r0,.Lj588
-# Rescheduled
-	ldr	r2,.Lj589
-	ldrh	r0,[r0]
-# Rescheduled
+	ldrh	r1,[r0]
+	ldr	r0,.Lj589
+	strh	r1,[r0]
 # [752] pc += reladdr;
-	ldr	r1,.Lj588
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj588
+	ldrh	r1,[r0]
 	ldr	r0,.Lj591
-# Rescheduled
 	ldrh	r0,[r0]
-	ldrh	r1,[r1]
 	add	r0,r0,r1
-# Rescheduled
-	ldr	r2,.Lj588
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [753] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
-	ldr	r1,.Lj589
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
+	uxth	r0,r0
 	ldr	r1,.Lj588
-	and	r2,r0,#65280
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [753] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
+	ldr	r0,.Lj589
+	ldrh	r0,[r0]
+	and	r1,r0,#65280
+	ldr	r0,.Lj588
+	ldrh	r0,[r0]
 	and	r0,r0,#65280
-	cmp	r2,r0
+	cmp	r1,r0
 	beq	.Lj596
 # [754] else clockticks6502+=1;
 	ldr	r0,.Lj597
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj597
-	add	r0,r0,#2
-	str	r0,[r1]
+	add	r1,r0,#2
+	ldr	r0,.Lj597
+	str	r1,[r0]
 	b	.Lj599
 .Lj596:
 	ldr	r0,.Lj597
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj597
-	add	r0,r0,#1
-	str	r0,[r1]
+	add	r1,r0,#1
+	ldr	r0,.Lj597
+	str	r1,[r0]
 .Lj599:
 .Lj587:
 # [756] end;
@@ -2984,49 +2619,40 @@ UNIT6502_$$_BRA:
 # [760] begin
 # [761] oldpc := pc;
 	ldr	r0,.Lj604
-# Rescheduled
-	ldr	r2,.Lj605
-	ldrh	r0,[r0]
-# Rescheduled
+	ldrh	r1,[r0]
+	ldr	r0,.Lj605
+	strh	r1,[r0]
 # [762] pc += reladdr;
-	ldr	r1,.Lj604
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj604
+	ldrh	r1,[r0]
 	ldr	r0,.Lj607
-# Rescheduled
 	ldrh	r0,[r0]
-	ldrh	r1,[r1]
 	add	r0,r0,r1
-# Rescheduled
-	ldr	r2,.Lj604
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [763] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
-	ldr	r1,.Lj605
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
+	uxth	r0,r0
 	ldr	r1,.Lj604
-	and	r2,r0,#65280
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [763] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
+	ldr	r0,.Lj605
+	ldrh	r0,[r0]
+	and	r1,r0,#65280
+	ldr	r0,.Lj604
+	ldrh	r0,[r0]
 	and	r0,r0,#65280
-	cmp	r2,r0
+	cmp	r1,r0
 	beq	.Lj612
 # [764] else clockticks6502+=1;
 	ldr	r0,.Lj613
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj613
-	add	r0,r0,#2
-	str	r0,[r1]
+	add	r1,r0,#2
+	ldr	r0,.Lj613
+	str	r1,[r0]
 	b	.Lj615
 .Lj612:
 	ldr	r0,.Lj613
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj613
-	add	r0,r0,#1
-	str	r0,[r1]
+	add	r1,r0,#1
+	ldr	r0,.Lj613
+	str	r1,[r0]
 .Lj615:
 # [765] end;
 	bx	r14
@@ -3045,19 +2671,16 @@ UNIT6502_$$_BRA:
 	.balign 4
 UNIT6502_$$_BRK:
 # [769] begin
-# Rescheduled
+	stmfd	r13!,{r4,r14}
 # [770] pc+=1;
 	ldr	r0,.Lj620
-	stmfd	r13!,{r4,r14}
 	ldrh	r0,[r0]
 	add	r0,r0,#1
-# Rescheduled
-	ldr	r2,.Lj620
 	uxth	r1,r0
-# Rescheduled
+	ldr	r0,.Lj620
+	strh	r1,[r0]
 # [771] push16(pc); //push next instruction address onto stack
 	ldr	r0,.Lj620
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_PUSH16$WORD
 # [772] push8(status or FLAG_BREAK); //push CPU status to stack
@@ -3069,11 +2692,9 @@ UNIT6502_$$_BRK:
 # [222] {$define setinterrupt:= status :=status or FLAG_INTERRUPT}
 	ldr	r0,.Lj623
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj623
 	orr	r0,r0,#4
+	and	r0,r0,#255
+	ldr	r1,.Lj623
 	strb	r0,[r1]
 # [774] pc := word(read6502($FFFE)) or (word(read6502($FFFF)) shl 8);
 	mov	r0,#254
@@ -3084,12 +2705,10 @@ UNIT6502_$$_BRK:
 	orr	r0,r0,#65280
 	bl	UNIT6502_$$_READ6502$LONGINT$$BYTE
 # Peephole FoldShiftProcess done
-# Rescheduled
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-	ldr	r1,.Lj620
 # [775] end;
 	orr	r0,r4,r0,lsl #8
+	uxth	r0,r0
+	ldr	r1,.Lj620
 	strh	r0,[r1]
 	ldmfd	r13!,{r4,r15}
 .Lj620:
@@ -3111,49 +2730,40 @@ UNIT6502_$$_BVC:
 	bne	.Lj631
 # [782] oldpc := pc;
 	ldr	r0,.Lj632
-# Rescheduled
-	ldr	r2,.Lj633
-	ldrh	r0,[r0]
-# Rescheduled
+	ldrh	r1,[r0]
+	ldr	r0,.Lj633
+	strh	r1,[r0]
 # [783] pc += reladdr;
-	ldr	r1,.Lj632
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj632
+	ldrh	r1,[r0]
 	ldr	r0,.Lj635
-# Rescheduled
 	ldrh	r0,[r0]
-	ldrh	r1,[r1]
 	add	r0,r0,r1
-# Rescheduled
-	ldr	r2,.Lj632
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [784] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
-	ldr	r1,.Lj633
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
+	uxth	r0,r0
 	ldr	r1,.Lj632
-	and	r2,r0,#65280
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [784] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
+	ldr	r0,.Lj633
+	ldrh	r0,[r0]
+	and	r1,r0,#65280
+	ldr	r0,.Lj632
+	ldrh	r0,[r0]
 	and	r0,r0,#65280
-	cmp	r2,r0
+	cmp	r1,r0
 	beq	.Lj640
 # [785] else clockticks6502+=1;
 	ldr	r0,.Lj641
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj641
-	add	r0,r0,#2
-	str	r0,[r1]
+	add	r1,r0,#2
+	ldr	r0,.Lj641
+	str	r1,[r0]
 	b	.Lj643
 .Lj640:
 	ldr	r0,.Lj641
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj641
-	add	r0,r0,#1
-	str	r0,[r1]
+	add	r1,r0,#1
+	ldr	r0,.Lj641
+	str	r1,[r0]
 .Lj643:
 .Lj631:
 # [787] end;
@@ -3183,49 +2793,40 @@ UNIT6502_$$_BVS:
 	bne	.Lj650
 # [794] oldpc := pc;
 	ldr	r0,.Lj651
-# Rescheduled
-	ldr	r2,.Lj652
-	ldrh	r0,[r0]
-# Rescheduled
+	ldrh	r1,[r0]
+	ldr	r0,.Lj652
+	strh	r1,[r0]
 # [795] pc += reladdr;
-	ldr	r1,.Lj651
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj651
+	ldrh	r1,[r0]
 	ldr	r0,.Lj654
-# Rescheduled
 	ldrh	r0,[r0]
-	ldrh	r1,[r1]
 	add	r0,r0,r1
-# Rescheduled
-	ldr	r2,.Lj651
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [796] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
-	ldr	r1,.Lj652
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
+	uxth	r0,r0
 	ldr	r1,.Lj651
-	and	r2,r0,#65280
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [796] if ((oldpc and $FF00) <> (pc and $FF00)) then clockticks6502 += 2 //check if jump crossed a page boundary
+	ldr	r0,.Lj652
+	ldrh	r0,[r0]
+	and	r1,r0,#65280
+	ldr	r0,.Lj651
+	ldrh	r0,[r0]
 	and	r0,r0,#65280
-	cmp	r2,r0
+	cmp	r1,r0
 	beq	.Lj659
 # [797] else clockticks6502+=1;
 	ldr	r0,.Lj660
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj660
-	add	r0,r0,#2
-	str	r0,[r1]
+	add	r1,r0,#2
+	ldr	r0,.Lj660
+	str	r1,[r0]
 	b	.Lj662
 .Lj659:
 	ldr	r0,.Lj660
 	ldr	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj660
-	add	r0,r0,#1
-	str	r0,[r1]
+	add	r1,r0,#1
+	ldr	r0,.Lj660
+	str	r1,[r0]
 .Lj662:
 .Lj650:
 # [799] end;
@@ -3249,11 +2850,9 @@ UNIT6502_$$_CLC:
 # [803] begin
 	ldr	r0,.Lj667
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj667
 	bic	r0,r0,#1
+	and	r0,r0,#255
+	ldr	r1,.Lj667
 	strb	r0,[r1]
 # [805] end;
 	bx	r14
@@ -3269,11 +2868,9 @@ UNIT6502_$$_CLD:
 # [225] {$define cleardecimal:= status := status and not(FLAG_DECIMAL)}
 	ldr	r0,.Lj671
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj671
 	bic	r0,r0,#8
+	and	r0,r0,#255
+	ldr	r1,.Lj671
 	strb	r0,[r1]
 # [811] end;
 	bx	r14
@@ -3289,11 +2886,9 @@ UNIT6502_$$_CLI:
 # [223] {$define clearinterrupt:= status:= status and not(FLAG_INTERRUPT)}
 	ldr	r0,.Lj675
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj675
 	bic	r0,r0,#4
+	and	r0,r0,#255
+	ldr	r1,.Lj675
 	strb	r0,[r1]
 # [817] end;
 	bx	r14
@@ -3308,11 +2903,9 @@ UNIT6502_$$_CLV:
 # [821] begin
 	ldr	r0,.Lj679
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj679
 	bic	r0,r0,#64
+	and	r0,r0,#255
+	ldr	r1,.Lj679
 	strb	r0,[r1]
 # [823] end;
 	bx	r14
@@ -3326,87 +2919,69 @@ UNIT6502_$$_CLV:
 UNIT6502_$$_CMP:
 # [827] begin
 	stmfd	r13!,{r14}
-# Rescheduled
 # [828] penaltyop := 1;
-	ldr	r0,.Lj683
-	mov	r1,#1
-	strb	r1,[r0]
+	mov	r0,#1
+	ldr	r1,.Lj683
+	strb	r0,[r1]
 # [829] value := byte(getvalue);
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r1,.Lj684
-	and	r0,r0,#255
-# Rescheduled
-# [830] aresult := word(a) - value;
-	ldr	r2,.Lj685
-	strh	r0,[r1]
-# Rescheduled
-	ldr	r0,.Lj684
-# Rescheduled
-	ldrh	r0,[r0]
-	ldrb	r1,[r2]
-	sub	r0,r1,r0
-# Rescheduled
-	ldr	r2,.Lj687
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [831] if (a >= (value and $00FF)) then setcarry else clearcarry;
-	ldr	r1,.Lj684
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
-	ldr	r2,.Lj685
 	and	r1,r0,#255
-	ldrb	r0,[r2]
+	ldr	r0,.Lj684
+	strh	r1,[r0]
+# [830] aresult := word(a) - value;
+	ldr	r0,.Lj685
+	ldrb	r1,[r0]
+	ldr	r0,.Lj684
+	ldrh	r0,[r0]
+	sub	r0,r1,r0
+	uxth	r0,r0
+	ldr	r1,.Lj687
+	strh	r0,[r1]
+# [831] if (a >= (value and $00FF)) then setcarry else clearcarry;
+	ldr	r0,.Lj684
+	ldrh	r0,[r0]
+	and	r1,r0,#255
+	ldr	r0,.Lj685
+	ldrb	r0,[r0]
 	cmp	r1,r0
 	bhi	.Lj691
 	ldr	r0,.Lj692
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj692
 	orr	r0,r0,#1
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj692
+	strb	r1,[r0]
 	b	.Lj694
 .Lj691:
 	ldr	r0,.Lj692
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj692
 	bic	r0,r0,#1
+	and	r0,r0,#255
+	ldr	r1,.Lj692
 	strb	r0,[r1]
 .Lj694:
 # [832] if (a = (byte(value and $00FF))) then setzero else clearzero;
 	ldr	r0,.Lj684
 	ldrh	r0,[r0]
 # Peephole AndAnd2And done
-# Rescheduled
-# Rescheduled
-	ldr	r2,.Lj685
 	and	r1,r0,#255
-	ldrb	r0,[r2]
+	ldr	r0,.Lj685
+	ldrb	r0,[r0]
 	cmp	r1,r0
 	bne	.Lj700
 	ldr	r0,.Lj692
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj692
 	orr	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj692
+	strb	r1,[r0]
 	b	.Lj703
 .Lj700:
 	ldr	r0,.Lj692
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj692
 	bic	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj692
 	strb	r0,[r1]
 .Lj703:
 # [833] if (aresult and $0080)<>0 then setsign else clearsign;
@@ -3417,20 +2992,17 @@ UNIT6502_$$_CMP:
 	beq	.Lj708
 	ldr	r0,.Lj692
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj692
 	orr	r0,r0,#128
+	ldr	r1,.Lj692
 	strb	r0,[r1]
 	b	.Lj711
 .Lj708:
 	ldr	r0,.Lj692
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj692
 	bic	r0,r0,#128
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj692
+	strb	r1,[r0]
 .Lj711:
 # [834] end;
 	ldmfd	r13!,{r15}
@@ -3454,79 +3026,62 @@ UNIT6502_$$_CPX:
 	stmfd	r13!,{r14}
 # [839] value := getvalue;;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
 	ldr	r1,.Lj716
-# Rescheduled
-# [840] aresult := word(x) - value;
-	ldr	r2,.Lj717
 	strh	r0,[r1]
-# Rescheduled
+# [840] aresult := word(x) - value;
+	ldr	r0,.Lj717
+	ldrb	r1,[r0]
 	ldr	r0,.Lj716
-# Rescheduled
 	ldrh	r0,[r0]
-	ldrb	r1,[r2]
 	sub	r0,r1,r0
-# Rescheduled
-	ldr	r2,.Lj719
-# Peephole UXTHStrh2Strh done
-# Rescheduled
+	uxth	r0,r0
+	ldr	r1,.Lj719
+	strh	r0,[r1]
 # [841] if (x >= (value and $00FF)) then setcarry else clearcarry;
-	ldr	r1,.Lj716
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
-	ldr	r2,.Lj717
+	ldr	r0,.Lj716
+	ldrh	r0,[r0]
 	and	r1,r0,#255
-	ldrb	r0,[r2]
+	ldr	r0,.Lj717
+	ldrb	r0,[r0]
 	cmp	r1,r0
 	bhi	.Lj723
 	ldr	r0,.Lj724
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj724
 	orr	r0,r0,#1
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj724
+	strb	r1,[r0]
 	b	.Lj726
 .Lj723:
 	ldr	r0,.Lj724
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj724
 	bic	r0,r0,#1
+	and	r0,r0,#255
+	ldr	r1,.Lj724
 	strb	r0,[r1]
 .Lj726:
 # [842] if (x = (byte(value and $00FF))) then setzero else clearzero;
 	ldr	r0,.Lj716
 	ldrh	r0,[r0]
 # Peephole AndAnd2And done
-# Rescheduled
-# Rescheduled
-	ldr	r2,.Lj717
 	and	r1,r0,#255
-	ldrb	r0,[r2]
+	ldr	r0,.Lj717
+	ldrb	r0,[r0]
 	cmp	r1,r0
 	bne	.Lj732
 	ldr	r0,.Lj724
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj724
 	orr	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj724
+	strb	r1,[r0]
 	b	.Lj735
 .Lj732:
 	ldr	r0,.Lj724
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj724
 	bic	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj724
 	strb	r0,[r1]
 .Lj735:
 # [843] if (aresult and $0080)<>0 then setsign else clearsign;
@@ -3537,20 +3092,17 @@ UNIT6502_$$_CPX:
 	beq	.Lj740
 	ldr	r0,.Lj724
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj724
 	orr	r0,r0,#128
+	ldr	r1,.Lj724
 	strb	r0,[r1]
 	b	.Lj743
 .Lj740:
 	ldr	r0,.Lj724
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj724
 	bic	r0,r0,#128
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj724
+	strb	r1,[r0]
 .Lj743:
 # [844] end;
 	ldmfd	r13!,{r15}
@@ -3572,77 +3124,61 @@ UNIT6502_$$_CPY:
 	stmfd	r13!,{r14}
 # [849] value := getvalue;;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj748
-# Rescheduled
+	ldr	r1,.Lj748
+	strh	r0,[r1]
 # [850] aresult := word(y) - value;
-	ldr	r1,.Lj749
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj749
+	ldrb	r1,[r0]
 	ldr	r0,.Lj748
-# Rescheduled
 	ldrh	r0,[r0]
-	ldrb	r1,[r1]
 	sub	r0,r1,r0
-# Rescheduled
-	ldr	r2,.Lj751
 	uxth	r1,r0
-# Rescheduled
+	ldr	r0,.Lj751
+	strh	r1,[r0]
 # [851] if (y >= (value and $00FF)) then setcarry else clearcarry;
 	ldr	r0,.Lj748
-	strh	r1,[r2]
 	ldrh	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj749
-	and	r2,r0,#255
-	ldrb	r0,[r1]
-	cmp	r2,r0
+	and	r1,r0,#255
+	ldr	r0,.Lj749
+	ldrb	r0,[r0]
+	cmp	r1,r0
 	bhi	.Lj755
 	ldr	r0,.Lj756
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj756
 	orr	r0,r0,#1
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj756
+	strb	r1,[r0]
 	b	.Lj758
 .Lj755:
 	ldr	r0,.Lj756
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj756
 	bic	r0,r0,#1
+	and	r0,r0,#255
+	ldr	r1,.Lj756
 	strb	r0,[r1]
 .Lj758:
 # [852] if (y = (value and $00FF)) then setzero else clearzero;
 	ldr	r0,.Lj748
 	ldrh	r0,[r0]
-# Rescheduled
-	ldr	r2,.Lj749
 	and	r1,r0,#255
-	ldrb	r0,[r2]
+	ldr	r0,.Lj749
+	ldrb	r0,[r0]
 	cmp	r1,r0
 	bne	.Lj764
 	ldr	r0,.Lj756
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj756
 	orr	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj756
+	strb	r1,[r0]
 	b	.Lj767
 .Lj764:
 	ldr	r0,.Lj756
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj756
 	bic	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj756
 	strb	r0,[r1]
 .Lj767:
 # [853] if (aresult and $0080)<>0 then setsign else clearsign;
@@ -3653,20 +3189,17 @@ UNIT6502_$$_CPY:
 	beq	.Lj772
 	ldr	r0,.Lj756
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj756
 	orr	r0,r0,#128
+	ldr	r1,.Lj756
 	strb	r0,[r1]
 	b	.Lj775
 .Lj772:
 	ldr	r0,.Lj756
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj756
 	bic	r0,r0,#128
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj756
+	strb	r1,[r0]
 .Lj775:
 # [854] end;
 	ldmfd	r13!,{r15}
@@ -3688,40 +3221,33 @@ UNIT6502_$$_DEA:
 	stmfd	r13!,{r14}
 # [859] value := getvalue;;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj780
-# Rescheduled
-# [860] aresult := value - 1;
 	ldr	r1,.Lj780
-	strh	r0,[r2]
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [860] aresult := value - 1;
+	ldr	r0,.Lj780
+	ldrh	r0,[r0]
 	sub	r0,r0,#1
-# Rescheduled
-	ldr	r2,.Lj782
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [861] if (aresult and $0080)<>0 then setsign else clearsign;
+	uxth	r0,r0
 	ldr	r1,.Lj782
-	strh	r0,[r2]
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [861] if (aresult and $0080)<>0 then setsign else clearsign;
+	ldr	r0,.Lj782
+	ldrh	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj785
 	ldr	r0,.Lj786
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj786
-	orr	r0,r0,#128
-	strb	r0,[r1]
+	orr	r1,r0,#128
+	ldr	r0,.Lj786
+	strb	r1,[r0]
 	b	.Lj788
 .Lj785:
 	ldr	r0,.Lj786
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj786
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj786
 	strb	r0,[r1]
 .Lj788:
 # [862] if (aresult and $00FF)<>0 then clearzero else setzero;
@@ -3732,21 +3258,17 @@ UNIT6502_$$_DEA:
 	beq	.Lj793
 	ldr	r0,.Lj786
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj786
 	bic	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj786
 	strb	r0,[r1]
 	b	.Lj796
 .Lj793:
 	ldr	r0,.Lj786
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj786
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj786
 	strb	r0,[r1]
 .Lj796:
 # [863] putvalue(aresult);
@@ -3772,32 +3294,27 @@ UNIT6502_$$_DEX:
 	ldr	r0,.Lj802
 	ldrb	r0,[r0]
 	sub	r0,r0,#1
-# Rescheduled
-	ldr	r2,.Lj802
 	and	r1,r0,#255
-# Rescheduled
+	ldr	r0,.Lj802
+	strb	r1,[r0]
 # [870] if (x and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj802
-	strb	r1,[r2]
 	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj806
 	ldr	r0,.Lj807
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj807
 	orr	r0,r0,#128
+	ldr	r1,.Lj807
 	strb	r0,[r1]
 	b	.Lj809
 .Lj806:
 	ldr	r0,.Lj807
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj807
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj807
 	strb	r0,[r1]
 .Lj809:
 # [871] if (x and $00FF)<>0 then clearzero else setzero;
@@ -3807,21 +3324,17 @@ UNIT6502_$$_DEX:
 	beq	.Lj814
 	ldr	r0,.Lj807
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj807
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj807
+	strb	r1,[r0]
 	b	.Lj817
 .Lj814:
 	ldr	r0,.Lj807
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj807
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj807
 	strb	r0,[r1]
 .Lj817:
 # [872] end;
@@ -3841,32 +3354,27 @@ UNIT6502_$$_DEY:
 	ldr	r0,.Lj822
 	ldrb	r0,[r0]
 	sub	r0,r0,#1
-# Rescheduled
-	ldr	r2,.Lj822
 	and	r1,r0,#255
-# Rescheduled
+	ldr	r0,.Lj822
+	strb	r1,[r0]
 # [878] if (y and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj822
-	strb	r1,[r2]
 	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj826
 	ldr	r0,.Lj827
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj827
 	orr	r0,r0,#128
+	ldr	r1,.Lj827
 	strb	r0,[r1]
 	b	.Lj829
 .Lj826:
 	ldr	r0,.Lj827
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj827
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj827
 	strb	r0,[r1]
 .Lj829:
 # [879] if (y and $00FF)<>0 then clearzero else setzero;
@@ -3876,21 +3384,17 @@ UNIT6502_$$_DEY:
 	beq	.Lj834
 	ldr	r0,.Lj827
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj827
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj827
+	strb	r1,[r0]
 	b	.Lj837
 .Lj834:
 	ldr	r0,.Lj827
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj827
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj827
 	strb	r0,[r1]
 .Lj837:
 # [880] end;
@@ -3907,49 +3411,40 @@ UNIT6502_$$_DEY:
 UNIT6502_$$_EOR:
 # [884] begin
 	stmfd	r13!,{r14}
-# Rescheduled
 # [885] penaltyop := 1;
-	ldr	r1,.Lj842
 	mov	r0,#1
+	ldr	r1,.Lj842
 	strb	r0,[r1]
 # [886] value := getvalue;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj843
-# Rescheduled
+	ldr	r1,.Lj843
+	strh	r0,[r1]
 # [887] aresult := a xor value;
-	ldr	r1,.Lj844
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj844
+	ldrb	r1,[r0]
 	ldr	r0,.Lj843
-	ldrb	r1,[r1]
 	ldrh	r0,[r0]
-# Rescheduled
-	ldr	r2,.Lj846
-	eor	r1,r0,r1
-# Rescheduled
+	eor	r0,r0,r1
+	ldr	r1,.Lj846
+	strh	r0,[r1]
 # [888] if (aresult and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj846
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj849
 	ldr	r0,.Lj850
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj850
 	orr	r0,r0,#128
+	ldr	r1,.Lj850
 	strb	r0,[r1]
 	b	.Lj852
 .Lj849:
 	ldr	r0,.Lj850
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj850
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj850
 	strb	r0,[r1]
 .Lj852:
 # [889] if (aresult and $00FF)<>0 then clearzero else setzero;
@@ -3960,31 +3455,25 @@ UNIT6502_$$_EOR:
 	beq	.Lj857
 	ldr	r0,.Lj850
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj850
 	bic	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj850
 	strb	r0,[r1]
 	b	.Lj860
 .Lj857:
 	ldr	r0,.Lj850
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj850
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj850
 	strb	r0,[r1]
 .Lj860:
 # [890] a:=byte(aresult and $00FF);
 	ldr	r0,.Lj846
-# Peephole AndAnd2And done
-# Peephole AndStrb2Strb done
-# Rescheduled
-# Rescheduled
-	ldr	r1,.Lj844
 	ldrh	r0,[r0]
+# Peephole AndAnd2And done
+	and	r0,r0,#255
+	ldr	r1,.Lj844
 	strb	r0,[r1]
 # [891] end;
 	ldmfd	r13!,{r15}
@@ -4008,40 +3497,33 @@ UNIT6502_$$_INA:
 	stmfd	r13!,{r14}
 # [896] value := getvalue;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj867
-# Rescheduled
-# [897] aresult := value + 1;
 	ldr	r1,.Lj867
-	strh	r0,[r2]
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [897] aresult := value + 1;
+	ldr	r0,.Lj867
+	ldrh	r0,[r0]
 	add	r0,r0,#1
-# Rescheduled
-	ldr	r2,.Lj869
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-# [898] if (aresult and $0080)<>0 then setsign else clearsign;
+	uxth	r0,r0
 	ldr	r1,.Lj869
-	strh	r0,[r2]
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [898] if (aresult and $0080)<>0 then setsign else clearsign;
+	ldr	r0,.Lj869
+	ldrh	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj872
 	ldr	r0,.Lj873
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj873
-	orr	r0,r0,#128
-	strb	r0,[r1]
+	orr	r1,r0,#128
+	ldr	r0,.Lj873
+	strb	r1,[r0]
 	b	.Lj875
 .Lj872:
 	ldr	r0,.Lj873
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj873
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj873
 	strb	r0,[r1]
 .Lj875:
 # [899] if (aresult and $00FF)<>0 then clearzero else setzero;
@@ -4052,21 +3534,17 @@ UNIT6502_$$_INA:
 	beq	.Lj880
 	ldr	r0,.Lj873
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj873
 	bic	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj873
 	strb	r0,[r1]
 	b	.Lj883
 .Lj880:
 	ldr	r0,.Lj873
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj873
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj873
 	strb	r0,[r1]
 .Lj883:
 # [900] putvalue(aresult);
@@ -4092,32 +3570,27 @@ UNIT6502_$$_INX:
 	ldr	r0,.Lj889
 	ldrb	r0,[r0]
 	add	r0,r0,#1
-# Rescheduled
-	ldr	r2,.Lj889
 	and	r1,r0,#255
-# Rescheduled
+	ldr	r0,.Lj889
+	strb	r1,[r0]
 # [907] if (x and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj889
-	strb	r1,[r2]
 	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj893
 	ldr	r0,.Lj894
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj894
 	orr	r0,r0,#128
+	ldr	r1,.Lj894
 	strb	r0,[r1]
 	b	.Lj896
 .Lj893:
 	ldr	r0,.Lj894
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj894
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj894
 	strb	r0,[r1]
 .Lj896:
 # [908] if (x and $00FF)<>0 then clearzero else setzero;
@@ -4127,21 +3600,17 @@ UNIT6502_$$_INX:
 	beq	.Lj901
 	ldr	r0,.Lj894
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj894
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj894
+	strb	r1,[r0]
 	b	.Lj904
 .Lj901:
 	ldr	r0,.Lj894
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj894
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj894
 	strb	r0,[r1]
 .Lj904:
 # [909] end;
@@ -4161,32 +3630,27 @@ UNIT6502_$$_INY:
 	ldr	r0,.Lj909
 	ldrb	r0,[r0]
 	add	r0,r0,#1
-# Rescheduled
-	ldr	r2,.Lj909
 	and	r1,r0,#255
-# Rescheduled
+	ldr	r0,.Lj909
+	strb	r1,[r0]
 # [915] if (y and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj909
-	strb	r1,[r2]
 	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj913
 	ldr	r0,.Lj914
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj914
 	orr	r0,r0,#128
+	ldr	r1,.Lj914
 	strb	r0,[r1]
 	b	.Lj916
 .Lj913:
 	ldr	r0,.Lj914
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj914
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj914
 	strb	r0,[r1]
 .Lj916:
 # [916] if (y and $00FF)<>0 then clearzero else setzero;
@@ -4196,21 +3660,17 @@ UNIT6502_$$_INY:
 	beq	.Lj921
 	ldr	r0,.Lj914
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj914
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj914
+	strb	r1,[r0]
 	b	.Lj924
 .Lj921:
 	ldr	r0,.Lj914
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj914
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj914
 	strb	r0,[r1]
 .Lj924:
 # [917] end;
@@ -4228,8 +3688,6 @@ UNIT6502_$$_JMP:
 # [921] begin
 # [922] pc := ea;
 	ldr	r0,.Lj929
-# Rescheduled
-# Rescheduled
 	ldrh	r0,[r0]
 	ldr	r1,.Lj930
 	strh	r0,[r1]
@@ -4246,18 +3704,15 @@ UNIT6502_$$_JMP:
 	.balign 4
 UNIT6502_$$_JSR:
 # [927] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [928] push16(pc - 1);
 	ldr	r0,.Lj933
-	stmfd	r13!,{r14}
 	ldrh	r0,[r0]
 	sub	r0,r0,#1
 	uxth	r0,r0
 	bl	UNIT6502_$$_PUSH16$WORD
 # [929] pc := ea;
 	ldr	r0,.Lj934
-# Rescheduled
-# Rescheduled
 	ldrh	r0,[r0]
 	ldr	r1,.Lj933
 	strh	r0,[r1]
@@ -4275,47 +3730,39 @@ UNIT6502_$$_JSR:
 UNIT6502_$$_LDA:
 # [934] begin
 	stmfd	r13!,{r14}
-# Rescheduled
 # [935] penaltyop := 1;
-	ldr	r0,.Lj938
 	mov	r1,#1
+	ldr	r0,.Lj938
 	strb	r1,[r0]
 # [936] value := getvalue;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj939
-# Rescheduled
-# [937] a := (value and $00FF);
 	ldr	r1,.Lj939
-	strh	r0,[r2]
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [937] a := (value and $00FF);
+	ldr	r0,.Lj939
+	ldrh	r0,[r0]
 # Peephole AndAnd2And done
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r2,.Lj941
-# Rescheduled
-# [938] if (a and $0080)<>0 then setsign else clearsign;
+	and	r0,r0,#255
 	ldr	r1,.Lj941
-	strb	r0,[r2]
-	ldrb	r0,[r1]
+	strb	r0,[r1]
+# [938] if (a and $0080)<>0 then setsign else clearsign;
+	ldr	r0,.Lj941
+	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj944
 	ldr	r0,.Lj945
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj945
-	orr	r0,r0,#128
-	strb	r0,[r1]
+	orr	r1,r0,#128
+	ldr	r0,.Lj945
+	strb	r1,[r0]
 	b	.Lj947
 .Lj944:
 	ldr	r0,.Lj945
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj945
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj945
 	strb	r0,[r1]
 .Lj947:
 # [939] if (a and $00FF)<>0 then clearzero else setzero;
@@ -4325,21 +3772,17 @@ UNIT6502_$$_LDA:
 	beq	.Lj952
 	ldr	r0,.Lj945
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj945
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj945
+	strb	r1,[r0]
 	b	.Lj955
 .Lj952:
 	ldr	r0,.Lj945
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj945
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj945
 	strb	r0,[r1]
 .Lj955:
 # [940] end;
@@ -4362,12 +3805,10 @@ UNIT6502_$$_LDC:
 	stmfd	r13!,{r14}
 # [946] cs^:=getvalue32 shl 8;
 	bl	UNIT6502_$$_GETVALUE32$$LONGWORD
-# Rescheduled
-	ldr	r1,.Lj960
-# Rescheduled
-	ldr	r1,[r1]
-	mov	r0,r0,lsl #8
-	str	r0,[r1]
+	mov	r1,r0,lsl #8
+	ldr	r0,.Lj960
+	ldr	r0,[r0]
+	str	r1,[r0]
 # [947] end;
 	ldmfd	r13!,{r15}
 .Lj960:
@@ -4382,12 +3823,10 @@ UNIT6502_$$_LDD:
 	stmfd	r13!,{r14}
 # [952] ds^:=getvalue32 shl 8;
 	bl	UNIT6502_$$_GETVALUE32$$LONGWORD
-# Rescheduled
-	ldr	r1,.Lj963
-# Rescheduled
-	ldr	r1,[r1]
-	mov	r0,r0,lsl #8
-	str	r0,[r1]
+	mov	r1,r0,lsl #8
+	ldr	r0,.Lj963
+	ldr	r0,[r0]
+	str	r1,[r0]
 # [953] end;
 	ldmfd	r13!,{r15}
 .Lj963:
@@ -4400,47 +3839,39 @@ UNIT6502_$$_LDD:
 UNIT6502_$$_LDX:
 # [958] begin
 	stmfd	r13!,{r14}
-# Rescheduled
 # [959] penaltyop := 1;
-	ldr	r0,.Lj966
 	mov	r1,#1
+	ldr	r0,.Lj966
 	strb	r1,[r0]
 # [960] value := getvalue;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj967
-# Rescheduled
-# [961] x := (value and $00FF);
 	ldr	r1,.Lj967
-	strh	r0,[r2]
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [961] x := (value and $00FF);
+	ldr	r0,.Lj967
+	ldrh	r0,[r0]
 # Peephole AndAnd2And done
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r2,.Lj969
-# Rescheduled
-# [962] if (x and $0080)<>0 then setsign else clearsign;
+	and	r0,r0,#255
 	ldr	r1,.Lj969
-	strb	r0,[r2]
-	ldrb	r0,[r1]
+	strb	r0,[r1]
+# [962] if (x and $0080)<>0 then setsign else clearsign;
+	ldr	r0,.Lj969
+	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj972
 	ldr	r0,.Lj973
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj973
-	orr	r0,r0,#128
-	strb	r0,[r1]
+	orr	r1,r0,#128
+	ldr	r0,.Lj973
+	strb	r1,[r0]
 	b	.Lj975
 .Lj972:
 	ldr	r0,.Lj973
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj973
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj973
 	strb	r0,[r1]
 .Lj975:
 # [963] if (x and $00FF)<>0 then clearzero else setzero;
@@ -4450,21 +3881,17 @@ UNIT6502_$$_LDX:
 	beq	.Lj980
 	ldr	r0,.Lj973
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj973
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj973
+	strb	r1,[r0]
 	b	.Lj983
 .Lj980:
 	ldr	r0,.Lj973
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj973
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj973
 	strb	r0,[r1]
 .Lj983:
 # [964] end;
@@ -4485,47 +3912,39 @@ UNIT6502_$$_LDX:
 UNIT6502_$$_LDY:
 # [968] begin
 	stmfd	r13!,{r14}
-# Rescheduled
 # [969] penaltyop := 1;
-	ldr	r0,.Lj988
 	mov	r1,#1
+	ldr	r0,.Lj988
 	strb	r1,[r0]
 # [970] value := getvalue;;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj989
-# Rescheduled
-# [971] y := (value and $00FF);
 	ldr	r1,.Lj989
-	strh	r0,[r2]
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [971] y := (value and $00FF);
+	ldr	r0,.Lj989
+	ldrh	r0,[r0]
 # Peephole AndAnd2And done
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r2,.Lj991
-# Rescheduled
-# [972] if (y and $0080)<>0 then setsign else clearsign;
+	and	r0,r0,#255
 	ldr	r1,.Lj991
-	strb	r0,[r2]
-	ldrb	r0,[r1]
+	strb	r0,[r1]
+# [972] if (y and $0080)<>0 then setsign else clearsign;
+	ldr	r0,.Lj991
+	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj994
 	ldr	r0,.Lj995
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj995
-	orr	r0,r0,#128
-	strb	r0,[r1]
+	orr	r1,r0,#128
+	ldr	r0,.Lj995
+	strb	r1,[r0]
 	b	.Lj997
 .Lj994:
 	ldr	r0,.Lj995
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj995
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj995
 	strb	r0,[r1]
 .Lj997:
 # [973] if (y and $00FF)<>0 then clearzero else setzero;
@@ -4535,21 +3954,17 @@ UNIT6502_$$_LDY:
 	beq	.Lj1002
 	ldr	r0,.Lj995
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj995
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj995
+	strb	r1,[r0]
 	b	.Lj1005
 .Lj1002:
 	ldr	r0,.Lj995
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj995
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj995
 	strb	r0,[r1]
 .Lj1005:
 # [974] end;
@@ -4572,44 +3987,36 @@ UNIT6502_$$_LSR:
 	stmfd	r13!,{r14}
 # [979] value := getvalue and $FF;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj1010
-	and	r0,r0,#255
-# Rescheduled
+	and	r1,r0,#255
+	ldr	r0,.Lj1010
+	strh	r1,[r0]
 # [980] aresult := value shr 1;
-	ldr	r1,.Lj1010
-	strh	r0,[r2]
-	ldrh	r0,[r1]
+	ldr	r0,.Lj1010
+	ldrh	r0,[r0]
 	mov	r0,r0,lsr #1
-# Rescheduled
-	ldr	r2,.Lj1012
 	uxth	r1,r0
-# Rescheduled
+	ldr	r0,.Lj1012
+	strh	r1,[r0]
 # [981] if (value and 1)=1 then setcarry else clearcarry;
 	ldr	r0,.Lj1010
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 	and	r0,r0,#1
 	cmp	r0,#1
 	bne	.Lj1015
 	ldr	r0,.Lj1016
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1016
 	orr	r0,r0,#1
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1016
+	strb	r1,[r0]
 	b	.Lj1018
 .Lj1015:
 	ldr	r0,.Lj1016
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1016
 	bic	r0,r0,#1
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1016
+	strb	r1,[r0]
 .Lj1018:
 # [982] if (aresult and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj1012
@@ -4619,20 +4026,17 @@ UNIT6502_$$_LSR:
 	beq	.Lj1023
 	ldr	r0,.Lj1016
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1016
 	orr	r0,r0,#128
+	ldr	r1,.Lj1016
 	strb	r0,[r1]
 	b	.Lj1026
 .Lj1023:
 	ldr	r0,.Lj1016
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1016
 	bic	r0,r0,#128
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1016
+	strb	r1,[r0]
 .Lj1026:
 # [983] if (aresult and $00FF)<>0 then clearzero else setzero;
 	ldr	r0,.Lj1012
@@ -4642,21 +4046,17 @@ UNIT6502_$$_LSR:
 	beq	.Lj1031
 	ldr	r0,.Lj1016
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1016
 	bic	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1016
 	strb	r0,[r1]
 	b	.Lj1034
 .Lj1031:
 	ldr	r0,.Lj1016
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1016
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1016
 	strb	r0,[r1]
 .Lj1034:
 # [984] putvalue(aresult);
@@ -4697,45 +4097,39 @@ UNIT6502_$$_NOP:
 	beq	.Lj1047
 	b	.Lj1041
 .Lj1042:
-# Rescheduled
 # [991] $1C:  penaltyop := 1;
-	ldr	r1,.Lj1049
 	mov	r0,#1
+	ldr	r1,.Lj1049
 	strb	r0,[r1]
 	b	.Lj1040
 .Lj1043:
-# Rescheduled
 # [992] $3C:  penaltyop := 1;
-	ldr	r1,.Lj1049
 	mov	r0,#1
+	ldr	r1,.Lj1049
 	strb	r0,[r1]
 	b	.Lj1040
 .Lj1044:
-# Rescheduled
 # [993] $5C:  penaltyop := 1;
-	ldr	r1,.Lj1049
 	mov	r0,#1
+	ldr	r1,.Lj1049
 	strb	r0,[r1]
 	b	.Lj1040
 .Lj1045:
-# Rescheduled
 # [994] $7C:  penaltyop := 1;
-	ldr	r1,.Lj1049
 	mov	r0,#1
+	ldr	r1,.Lj1049
 	strb	r0,[r1]
 	b	.Lj1040
 .Lj1046:
-# Rescheduled
 # [995] $DC:  penaltyop := 1;
-	ldr	r1,.Lj1049
 	mov	r0,#1
+	ldr	r1,.Lj1049
 	strb	r0,[r1]
 	b	.Lj1040
 .Lj1047:
-# Rescheduled
 # [996] $FC:  penaltyop := 1;
-	ldr	r1,.Lj1049
 	mov	r0,#1
+	ldr	r1,.Lj1049
 	strb	r0,[r1]
 .Lj1041:
 .Lj1040:
@@ -4753,49 +4147,40 @@ UNIT6502_$$_NOP:
 UNIT6502_$$_ORA:
 # [1002] begin
 	stmfd	r13!,{r14}
-# Rescheduled
 # [1003] penaltyop := 1;
-	ldr	r1,.Lj1057
 	mov	r0,#1
+	ldr	r1,.Lj1057
 	strb	r0,[r1]
 # [1004] value := getvalue;;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj1058
-# Rescheduled
+	ldr	r1,.Lj1058
+	strh	r0,[r1]
 # [1005] aresult := a or value;
-	ldr	r1,.Lj1059
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj1059
+	ldrb	r1,[r0]
 	ldr	r0,.Lj1058
-	ldrb	r1,[r1]
 	ldrh	r0,[r0]
-# Rescheduled
-	ldr	r2,.Lj1061
-	orr	r1,r0,r1
-# Rescheduled
+	orr	r0,r0,r1
+	ldr	r1,.Lj1061
+	strh	r0,[r1]
 # [1006] if (aresult and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj1061
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj1064
 	ldr	r0,.Lj1065
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1065
 	orr	r0,r0,#128
+	ldr	r1,.Lj1065
 	strb	r0,[r1]
 	b	.Lj1067
 .Lj1064:
 	ldr	r0,.Lj1065
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1065
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj1065
 	strb	r0,[r1]
 .Lj1067:
 # [1007] if (aresult and $00FF)<>0 then clearzero else setzero;
@@ -4806,31 +4191,25 @@ UNIT6502_$$_ORA:
 	beq	.Lj1072
 	ldr	r0,.Lj1065
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1065
 	bic	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1065
 	strb	r0,[r1]
 	b	.Lj1075
 .Lj1072:
 	ldr	r0,.Lj1065
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1065
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1065
 	strb	r0,[r1]
 .Lj1075:
 # [1008] a:=byte(aresult and $00FF);
 	ldr	r0,.Lj1061
-# Peephole AndAnd2And done
-# Peephole AndStrb2Strb done
-# Rescheduled
-# Rescheduled
-	ldr	r1,.Lj1059
 	ldrh	r0,[r0]
+# Peephole AndAnd2And done
+	and	r0,r0,#255
+	ldr	r1,.Lj1059
 	strb	r0,[r1]
 # [1009] end;
 	ldmfd	r13!,{r15}
@@ -4851,10 +4230,9 @@ UNIT6502_$$_ORA:
 	.balign 4
 UNIT6502_$$_PHA:
 # [1013] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [1014] push8(a);
 	ldr	r0,.Lj1082
-	stmfd	r13!,{r14}
 	ldrb	r0,[r0]
 	bl	UNIT6502_$$_PUSH8$WORD
 # [1015] end;
@@ -4868,10 +4246,9 @@ UNIT6502_$$_PHA:
 	.balign 4
 UNIT6502_$$_PHC:
 # [1019] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [1020] push32(cs^ shr 8);
 	ldr	r0,.Lj1085
-	stmfd	r13!,{r14}
 	ldr	r0,[r0]
 	ldr	r0,[r0]
 	mov	r0,r0,lsr #8
@@ -4887,10 +4264,9 @@ UNIT6502_$$_PHC:
 	.balign 4
 UNIT6502_$$_PHD:
 # [1025] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [1026] push32(ds^ shr 8);
 	ldr	r0,.Lj1088
-	stmfd	r13!,{r14}
 	ldr	r0,[r0]
 	ldr	r0,[r0]
 	mov	r0,r0,lsr #8
@@ -4906,10 +4282,9 @@ UNIT6502_$$_PHD:
 	.balign 4
 UNIT6502_$$_PHX:
 # [1031] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [1032] push8(x);
 	ldr	r0,.Lj1091
-	stmfd	r13!,{r14}
 	ldrb	r0,[r0]
 	bl	UNIT6502_$$_PUSH8$WORD
 # [1033] end;
@@ -4923,10 +4298,9 @@ UNIT6502_$$_PHX:
 	.balign 4
 UNIT6502_$$_PHY:
 # [1037] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [1038] push8(y);
 	ldr	r0,.Lj1094
-	stmfd	r13!,{r14}
 	ldrb	r0,[r0]
 	bl	UNIT6502_$$_PUSH8$WORD
 # [1039] end;
@@ -4940,10 +4314,9 @@ UNIT6502_$$_PHY:
 	.balign 4
 UNIT6502_$$_PHP:
 # [1043] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [1044] push8(status or FLAG_BREAK);
 	ldr	r0,.Lj1097
-	stmfd	r13!,{r14}
 	ldrb	r0,[r0]
 	orr	r0,r0,#16
 	uxth	r0,r0
@@ -4962,31 +4335,26 @@ UNIT6502_$$_PLA:
 	stmfd	r13!,{r14}
 # [1050] a := pull8;
 	bl	UNIT6502_$$_PULL8$$BYTE
-# Rescheduled
-	ldr	r2,.Lj1100
-# Rescheduled
-# [1051] if (a and $0080)<>0 then setsign else clearsign;
 	ldr	r1,.Lj1100
-	strb	r0,[r2]
-	ldrb	r0,[r1]
+	strb	r0,[r1]
+# [1051] if (a and $0080)<>0 then setsign else clearsign;
+	ldr	r0,.Lj1100
+	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj1103
 	ldr	r0,.Lj1104
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1104
 	orr	r0,r0,#128
+	ldr	r1,.Lj1104
 	strb	r0,[r1]
 	b	.Lj1106
 .Lj1103:
 	ldr	r0,.Lj1104
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1104
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj1104
 	strb	r0,[r1]
 .Lj1106:
 # [1052] if (a and $00FF)<>0 then clearzero else setzero;
@@ -4996,21 +4364,17 @@ UNIT6502_$$_PLA:
 	beq	.Lj1111
 	ldr	r0,.Lj1104
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1104
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1104
+	strb	r1,[r0]
 	b	.Lj1114
 .Lj1111:
 	ldr	r0,.Lj1104
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1104
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1104
 	strb	r0,[r1]
 .Lj1114:
 # [1053] end;
@@ -5029,12 +4393,10 @@ UNIT6502_$$_PLC:
 	stmfd	r13!,{r14}
 # [1058] cs^:=pull32 shl 8;
 	bl	UNIT6502_$$_PULL32$$LONGWORD
-# Rescheduled
-	ldr	r1,.Lj1119
-# Rescheduled
-	ldr	r1,[r1]
-	mov	r0,r0,lsl #8
-	str	r0,[r1]
+	mov	r1,r0,lsl #8
+	ldr	r0,.Lj1119
+	ldr	r0,[r0]
+	str	r1,[r0]
 # [1059] end;
 	ldmfd	r13!,{r15}
 .Lj1119:
@@ -5049,12 +4411,10 @@ UNIT6502_$$_PLD:
 	stmfd	r13!,{r14}
 # [1064] ds^:=pull32 shl 8;
 	bl	UNIT6502_$$_PULL32$$LONGWORD
-# Rescheduled
-	ldr	r1,.Lj1122
-# Rescheduled
-	ldr	r1,[r1]
-	mov	r0,r0,lsl #8
-	str	r0,[r1]
+	mov	r1,r0,lsl #8
+	ldr	r0,.Lj1122
+	ldr	r0,[r0]
+	str	r1,[r0]
 # [1065] end;
 	ldmfd	r13!,{r15}
 .Lj1122:
@@ -5069,31 +4429,26 @@ UNIT6502_$$_PLX:
 	stmfd	r13!,{r14}
 # [1070] x := pull8;
 	bl	UNIT6502_$$_PULL8$$BYTE
-# Rescheduled
-	ldr	r2,.Lj1125
-# Rescheduled
-# [1071] if (x and $0080)<>0 then setsign else clearsign;
 	ldr	r1,.Lj1125
-	strb	r0,[r2]
-	ldrb	r0,[r1]
+	strb	r0,[r1]
+# [1071] if (x and $0080)<>0 then setsign else clearsign;
+	ldr	r0,.Lj1125
+	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj1128
 	ldr	r0,.Lj1129
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1129
 	orr	r0,r0,#128
+	ldr	r1,.Lj1129
 	strb	r0,[r1]
 	b	.Lj1131
 .Lj1128:
 	ldr	r0,.Lj1129
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1129
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj1129
 	strb	r0,[r1]
 .Lj1131:
 # [1072] if (x and $00FF)<>0 then clearzero else setzero;
@@ -5103,21 +4458,17 @@ UNIT6502_$$_PLX:
 	beq	.Lj1136
 	ldr	r0,.Lj1129
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1129
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1129
+	strb	r1,[r0]
 	b	.Lj1139
 .Lj1136:
 	ldr	r0,.Lj1129
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1129
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1129
 	strb	r0,[r1]
 .Lj1139:
 # [1073] end;
@@ -5136,31 +4487,26 @@ UNIT6502_$$_PLY:
 	stmfd	r13!,{r14}
 # [1078] y := pull8;
 	bl	UNIT6502_$$_PULL8$$BYTE
-# Rescheduled
-	ldr	r2,.Lj1144
-# Rescheduled
-# [1079] if (y and $0080)<>0 then setsign else clearsign;
 	ldr	r1,.Lj1144
-	strb	r0,[r2]
-	ldrb	r0,[r1]
+	strb	r0,[r1]
+# [1079] if (y and $0080)<>0 then setsign else clearsign;
+	ldr	r0,.Lj1144
+	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj1147
 	ldr	r0,.Lj1148
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1148
 	orr	r0,r0,#128
+	ldr	r1,.Lj1148
 	strb	r0,[r1]
 	b	.Lj1150
 .Lj1147:
 	ldr	r0,.Lj1148
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1148
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj1148
 	strb	r0,[r1]
 .Lj1150:
 # [1080] if (y and $00FF)<>0 then clearzero else setzero;
@@ -5170,21 +4516,17 @@ UNIT6502_$$_PLY:
 	beq	.Lj1155
 	ldr	r0,.Lj1148
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1148
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1148
+	strb	r1,[r0]
 	b	.Lj1158
 .Lj1155:
 	ldr	r0,.Lj1148
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1148
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1148
 	strb	r0,[r1]
 .Lj1158:
 # [1081] end;
@@ -5203,11 +4545,9 @@ UNIT6502_$$_PLP:
 	stmfd	r13!,{r14}
 # [1086] status := pull8 or FLAG_CONSTANT;
 	bl	UNIT6502_$$_PULL8$$BYTE
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1163
 	orr	r0,r0,#32
+	and	r0,r0,#255
+	ldr	r1,.Lj1163
 	strb	r0,[r1]
 # [1087] end;
 	ldmfd	r13!,{r15}
@@ -5223,49 +4563,40 @@ UNIT6502_$$_ROL:
 	stmfd	r13!,{r14}
 # [1092] value := getvalue;;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj1166
-# Rescheduled
-# [1093] aresult := (value shl 1) or (status and FLAG_CARRY);
-	ldr	r1,.Lj1167
-	strh	r0,[r2]
-	ldrb	r0,[r1]
-# Rescheduled
 	ldr	r1,.Lj1166
-	and	r2,r0,#1
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [1093] aresult := (value shl 1) or (status and FLAG_CARRY);
+	ldr	r0,.Lj1167
+	ldrb	r0,[r0]
+	and	r1,r0,#1
+	ldr	r0,.Lj1166
+	ldrh	r0,[r0]
 # Peephole FoldShiftProcess done
 # [1098] end;
-	orr	r0,r2,r0,lsl #1
-# Rescheduled
-	ldr	r2,.Lj1169
+	orr	r0,r1,r0,lsl #1
 	uxth	r1,r0
-# Rescheduled
+	ldr	r0,.Lj1169
+	strh	r1,[r0]
 # [1094] if (aresult and $FF00) <>0 then setcarry else clearcarry;
 	ldr	r0,.Lj1169
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#65280
 	beq	.Lj1172
 	ldr	r0,.Lj1167
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1167
 	orr	r0,r0,#1
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1167
+	strb	r1,[r0]
 	b	.Lj1175
 .Lj1172:
 	ldr	r0,.Lj1167
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1167
 	bic	r0,r0,#1
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1167
+	strb	r1,[r0]
 .Lj1175:
 # [1095] if (aresult and $00FF)<>0 then clearzero else setzero;
 	ldr	r0,.Lj1169
@@ -5275,21 +4606,17 @@ UNIT6502_$$_ROL:
 	beq	.Lj1180
 	ldr	r0,.Lj1167
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1167
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1167
+	strb	r1,[r0]
 	b	.Lj1183
 .Lj1180:
 	ldr	r0,.Lj1167
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1167
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1167
 	strb	r0,[r1]
 .Lj1183:
 # [1096] if (aresult and $0080)<>0 then setsign else clearsign;
@@ -5300,20 +4627,17 @@ UNIT6502_$$_ROL:
 	beq	.Lj1188
 	ldr	r0,.Lj1167
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1167
 	orr	r0,r0,#128
+	ldr	r1,.Lj1167
 	strb	r0,[r1]
 	b	.Lj1191
 .Lj1188:
 	ldr	r0,.Lj1167
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1167
 	bic	r0,r0,#128
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1167
+	strb	r1,[r0]
 .Lj1191:
 # [1097] putvalue(aresult);
 	ldr	r0,.Lj1169
@@ -5336,49 +4660,40 @@ UNIT6502_$$_ROR:
 	stmfd	r13!,{r14}
 # [1103] value := getvalue;;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj1197
-# Rescheduled
-# [1104] aresult := (value shr 1) or ((status and FLAG_CARRY) shl 7);
-	ldr	r1,.Lj1198
-	strh	r0,[r2]
-	ldrb	r0,[r1]
-	and	r0,r0,#1
-# Rescheduled
 	ldr	r1,.Lj1197
-	mov	r2,r0,lsl #7
-	ldrh	r0,[r1]
+	strh	r0,[r1]
+# [1104] aresult := (value shr 1) or ((status and FLAG_CARRY) shl 7);
+	ldr	r0,.Lj1198
+	ldrb	r0,[r0]
+	and	r0,r0,#1
+	mov	r1,r0,lsl #7
+	ldr	r0,.Lj1197
+	ldrh	r0,[r0]
 # Peephole FoldShiftProcess done
 # [1109] end;
-	orr	r0,r2,r0,lsr #1
-# Rescheduled
-	ldr	r2,.Lj1200
+	orr	r0,r1,r0,lsr #1
 	uxth	r1,r0
-# Rescheduled
+	ldr	r0,.Lj1200
+	strh	r1,[r0]
 # [1105] if (value and 1)=1 then setcarry else clearcarry;
 	ldr	r0,.Lj1197
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 	and	r0,r0,#1
 	cmp	r0,#1
 	bne	.Lj1203
 	ldr	r0,.Lj1198
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1198
 	orr	r0,r0,#1
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1198
+	strb	r1,[r0]
 	b	.Lj1206
 .Lj1203:
 	ldr	r0,.Lj1198
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1198
 	bic	r0,r0,#1
+	and	r0,r0,#255
+	ldr	r1,.Lj1198
 	strb	r0,[r1]
 .Lj1206:
 # [1106] if (aresult and $00FF)<>0 then clearzero else setzero;
@@ -5389,22 +4704,18 @@ UNIT6502_$$_ROR:
 	beq	.Lj1211
 	ldr	r0,.Lj1198
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1198
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1198
+	strb	r1,[r0]
 	b	.Lj1214
 .Lj1211:
 	ldr	r0,.Lj1198
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1198
 	orr	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1198
+	strb	r1,[r0]
 .Lj1214:
 # [1107] if (aresult and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj1200
@@ -5414,20 +4725,17 @@ UNIT6502_$$_ROR:
 	beq	.Lj1219
 	ldr	r0,.Lj1198
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1198
 	orr	r0,r0,#128
+	ldr	r1,.Lj1198
 	strb	r0,[r1]
 	b	.Lj1222
 .Lj1219:
 	ldr	r0,.Lj1198
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1198
 	bic	r0,r0,#128
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1198
+	strb	r1,[r0]
 .Lj1222:
 # [1108] putvalue(aresult);
 	ldr	r0,.Lj1200
@@ -5450,33 +4758,25 @@ UNIT6502_$$_RTI:
 	stmfd	r13!,{r14}
 # [1114] status := pull8;
 	bl	UNIT6502_$$_PULL8$$BYTE
-# Rescheduled
 	ldr	r1,.Lj1228
 	strb	r0,[r1]
 # [1115] value := pull16;
 	bl	UNIT6502_$$_PULL16$$WORD
-# Rescheduled
 	ldr	r1,.Lj1229
-# Rescheduled
-# [1116] pc := value;
-	ldr	r2,.Lj1229
 	strh	r0,[r1]
-# Rescheduled
-	ldr	r3,.Lj1231
-	ldrh	r1,[r2]
-# Rescheduled
+# [1116] pc := value;
+	ldr	r0,.Lj1229
+	ldrh	r0,[r0]
+	ldr	r1,.Lj1231
+	strh	r0,[r1]
 # [1117] cs:=@csa;
 	ldr	r0,.Lj1232
-	strh	r1,[r3]
-# Rescheduled
-	ldr	r2,.Lj1233
-# Rescheduled
+	ldr	r1,.Lj1233
+	str	r0,[r1]
 # [1118] ds:=@dsa;
-	ldr	r1,.Lj1234
-	str	r0,[r2]
-# Rescheduled
-	ldr	r0,.Lj1235
-	str	r1,[r0]
+	ldr	r0,.Lj1234
+	ldr	r1,.Lj1235
+	str	r0,[r1]
 # [1119] end;
 	ldmfd	r13!,{r15}
 .Lj1228:
@@ -5503,18 +4803,14 @@ UNIT6502_$$_RTS:
 	stmfd	r13!,{r14}
 # [1124] value := pull16;
 	bl	UNIT6502_$$_PULL16$$WORD
-# Rescheduled
-	ldr	r2,.Lj1238
-# Rescheduled
-# [1125] pc := value + 1;
 	ldr	r1,.Lj1238
-	strh	r0,[r2]
-	ldrh	r0,[r1]
-# Rescheduled
-# Peephole UXTHStrh2Strh done
-# Rescheduled
-	ldr	r1,.Lj1240
+	strh	r0,[r1]
+# [1125] pc := value + 1;
+	ldr	r0,.Lj1238
+	ldrh	r0,[r0]
 	add	r0,r0,#1
+	uxth	r0,r0
+	ldr	r1,.Lj1240
 	strh	r0,[r1]
 # [1126] end;
 	ldmfd	r13!,{r15}
@@ -5530,58 +4826,47 @@ UNIT6502_$$_RTS:
 UNIT6502_$$_SBC:
 # [1130] begin
 	stmfd	r13!,{r14}
-# Rescheduled
 # [1131] penaltyop := 1;
-	ldr	r1,.Lj1243
 	mov	r0,#1
+	ldr	r1,.Lj1243
 	strb	r0,[r1]
 # [1132] value := getvalue xor $00FF;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj1244
 	eor	r0,r0,#255
-# Rescheduled
+	ldr	r1,.Lj1244
+	strh	r0,[r1]
 # [1133] aresult := word(a) + value + (status and FLAG_CARRY);
-	ldr	r1,.Lj1245
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj1245
+	ldrb	r1,[r0]
 	ldr	r0,.Lj1244
-	ldrb	r1,[r1]
 	ldrh	r0,[r0]
-# Rescheduled
-	ldr	r2,.Lj1247
 	add	r1,r0,r1
-	ldrb	r0,[r2]
+	ldr	r0,.Lj1247
+	ldrb	r0,[r0]
 	and	r0,r0,#1
 	add	r0,r0,r1
-# Rescheduled
-	ldr	r2,.Lj1248
 	uxth	r1,r0
-# Rescheduled
+	ldr	r0,.Lj1248
+	strh	r1,[r0]
 # [1134] if (aresult and $FF00) <>0 then setcarry else clearcarry;
 	ldr	r0,.Lj1248
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#65280
 	beq	.Lj1251
 	ldr	r0,.Lj1247
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1247
 	orr	r0,r0,#1
+	and	r0,r0,#255
+	ldr	r1,.Lj1247
 	strb	r0,[r1]
 	b	.Lj1254
 .Lj1251:
 	ldr	r0,.Lj1247
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1247
 	bic	r0,r0,#1
+	and	r0,r0,#255
+	ldr	r1,.Lj1247
 	strb	r0,[r1]
 .Lj1254:
 # [1135] if (aresult and $00FF)<>0 then clearzero else setzero;
@@ -5592,37 +4877,29 @@ UNIT6502_$$_SBC:
 	beq	.Lj1259
 	ldr	r0,.Lj1247
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1247
 	bic	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1247
 	strb	r0,[r1]
 	b	.Lj1262
 .Lj1259:
 	ldr	r0,.Lj1247
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1247
 	orr	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1247
+	strb	r1,[r0]
 .Lj1262:
 # [1136] if ((aresult xor a) and (aresult xor value) and $0080)<>0 then setoverflow else clearoverflow;
 	ldr	r0,.Lj1245
-# Rescheduled
-	ldr	r1,.Lj1248
-	ldrb	r2,[r0]
-	ldrh	r0,[r1]
-# Rescheduled
-	ldr	r1,.Lj1248
-	eor	r2,r0,r2
-# Rescheduled
-	ldr	r0,.Lj1244
-# Rescheduled
+	ldrb	r1,[r0]
+	ldr	r0,.Lj1248
 	ldrh	r0,[r0]
-	ldrh	r1,[r1]
+	eor	r2,r0,r1
+	ldr	r0,.Lj1248
+	ldrh	r1,[r0]
+	ldr	r0,.Lj1244
+	ldrh	r0,[r0]
 	eor	r0,r0,r1
 	and	r0,r0,r2
 # Peephole OpCmp2OpS done
@@ -5630,21 +4907,17 @@ UNIT6502_$$_SBC:
 	beq	.Lj1270
 	ldr	r0,.Lj1247
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1247
 	orr	r0,r0,#64
+	and	r0,r0,#255
+	ldr	r1,.Lj1247
 	strb	r0,[r1]
 	b	.Lj1273
 .Lj1270:
 	ldr	r0,.Lj1247
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1247
 	bic	r0,r0,#64
+	and	r0,r0,#255
+	ldr	r1,.Lj1247
 	strb	r0,[r1]
 .Lj1273:
 # [1137] if (aresult and $0080)<>0 then setsign else clearsign;
@@ -5655,19 +4928,16 @@ UNIT6502_$$_SBC:
 	beq	.Lj1278
 	ldr	r0,.Lj1247
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1247
 	orr	r0,r0,#128
+	ldr	r1,.Lj1247
 	strb	r0,[r1]
 	b	.Lj1281
 .Lj1278:
 	ldr	r0,.Lj1247
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1247
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj1247
 	strb	r0,[r1]
 .Lj1281:
 # [1139] if (status and FLAG_DECIMAL)<>0 then
@@ -5677,32 +4947,27 @@ UNIT6502_$$_SBC:
 	ands	r0,r0,#8
 	beq	.Lj1286
 # [1141] inc(clockticks6502);
-	ldr	r2,.Lj1287
-	ldr	r0,[r2]
-	add	r1,r0,#1
-# Rescheduled
+	ldr	r1,.Lj1287
+	ldr	r0,[r1]
+	add	r0,r0,#1
+	str	r0,[r1]
 	ldr	r0,.Lj1247
-	str	r1,[r2]
 	ldrb	r0,[r0]
 	bic	r0,r0,#1
-# Rescheduled
-	ldr	r2,.Lj1247
-	and	r1,r0,#255
-# Rescheduled
+	and	r0,r0,#255
+	ldr	r1,.Lj1247
+	strb	r0,[r1]
 # [1143] if ((a and $0F) > $09) then a += $06;
 	ldr	r0,.Lj1245
-	strb	r1,[r2]
 	ldrb	r0,[r0]
 	and	r0,r0,#15
 	cmp	r0,#9
 	ble	.Lj1292
 	ldr	r0,.Lj1245
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1245
 	add	r0,r0,#6
+	and	r0,r0,#255
+	ldr	r1,.Lj1245
 	strb	r0,[r1]
 .Lj1292:
 # [1144] if ((a and $F0) > $90) then
@@ -5715,29 +4980,23 @@ UNIT6502_$$_SBC:
 	ldr	r0,.Lj1245
 	ldrb	r0,[r0]
 	add	r0,r0,#96
-# Rescheduled
-	ldr	r2,.Lj1245
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1247
-	strb	r0,[r2]
-	ldrb	r0,[r1]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1247
+	and	r0,r0,#255
+	ldr	r1,.Lj1245
+	strb	r0,[r1]
+	ldr	r0,.Lj1247
+	ldrb	r0,[r0]
 	orr	r0,r0,#1
+	and	r0,r0,#255
+	ldr	r1,.Lj1247
 	strb	r0,[r1]
 .Lj1297:
 .Lj1286:
 # [1151] a:=byte(aresult and $00FF);
 	ldr	r0,.Lj1248
-# Peephole AndAnd2And done
-# Peephole AndStrb2Strb done
-# Rescheduled
-# Rescheduled
-	ldr	r1,.Lj1245
 	ldrh	r0,[r0]
+# Peephole AndAnd2And done
+	and	r0,r0,#255
+	ldr	r1,.Lj1245
 	strb	r0,[r1]
 # [1152] end;
 	ldmfd	r13!,{r15}
@@ -5762,11 +5021,9 @@ UNIT6502_$$_SEC:
 # [1156] begin
 	ldr	r0,.Lj1306
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1306
 	orr	r0,r0,#1
+	and	r0,r0,#255
+	ldr	r1,.Lj1306
 	strb	r0,[r1]
 # [1158] end;
 	bx	r14
@@ -5782,11 +5039,9 @@ UNIT6502_$$_SED:
 # [224] {$define setdecimal:= status :=status or FLAG_DECIMAL}
 	ldr	r0,.Lj1310
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1310
 	orr	r0,r0,#8
+	and	r0,r0,#255
+	ldr	r1,.Lj1310
 	strb	r0,[r1]
 # [1164] end;
 	bx	r14
@@ -5801,11 +5056,9 @@ UNIT6502_$$_SEI:
 # [1168] begin
 	ldr	r0,.Lj1314
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1314
 	orr	r0,r0,#4
+	and	r0,r0,#255
+	ldr	r1,.Lj1314
 	strb	r0,[r1]
 # [1170] end;
 	bx	r14
@@ -5818,10 +5071,9 @@ UNIT6502_$$_SEI:
 	.balign 4
 UNIT6502_$$_STA:
 # [1174] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [1175] putvalue(a);
 	ldr	r0,.Lj1318
-	stmfd	r13!,{r14}
 	ldrb	r0,[r0]
 	bl	UNIT6502_$$_PUTVALUE$WORD
 # [1176] end;
@@ -5835,10 +5087,9 @@ UNIT6502_$$_STA:
 	.balign 4
 UNIT6502_$$_STC:
 # [1180] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [1181] putvalue32(cs^shr 8);
 	ldr	r0,.Lj1321
-	stmfd	r13!,{r14}
 	ldr	r0,[r0]
 	ldr	r0,[r0]
 	mov	r0,r0,lsr #8
@@ -5854,10 +5105,9 @@ UNIT6502_$$_STC:
 	.balign 4
 UNIT6502_$$_STD:
 # [1186] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [1187] putvalue32(ds^ shr 8);
 	ldr	r0,.Lj1324
-	stmfd	r13!,{r14}
 	ldr	r0,[r0]
 	ldr	r0,[r0]
 	mov	r0,r0,lsr #8
@@ -5873,10 +5123,9 @@ UNIT6502_$$_STD:
 	.balign 4
 UNIT6502_$$_STX:
 # [1192] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [1193] putvalue(x);
 	ldr	r0,.Lj1327
-	stmfd	r13!,{r14}
 	ldrb	r0,[r0]
 	bl	UNIT6502_$$_PUTVALUE$WORD
 # [1194] end;
@@ -5890,10 +5139,9 @@ UNIT6502_$$_STX:
 	.balign 4
 UNIT6502_$$_STY:
 # [1198] begin
-# Rescheduled
+	stmfd	r13!,{r14}
 # [1199] putvalue(y);
 	ldr	r0,.Lj1330
-	stmfd	r13!,{r14}
 	ldrb	r0,[r0]
 	bl	UNIT6502_$$_PUTVALUE$WORD
 # [1200] end;
@@ -5922,32 +5170,27 @@ UNIT6502_$$_TAX:
 # [1210] begin
 # [1211] x := a;
 	ldr	r0,.Lj1335
-# Rescheduled
-	ldr	r2,.Lj1336
-	ldrb	r1,[r0]
-# Rescheduled
+	ldrb	r0,[r0]
+	ldr	r1,.Lj1336
+	strb	r0,[r1]
 # [1212] if (x and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj1336
-	strb	r1,[r2]
 	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj1339
 	ldr	r0,.Lj1340
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1340
 	orr	r0,r0,#128
+	ldr	r1,.Lj1340
 	strb	r0,[r1]
 	b	.Lj1342
 .Lj1339:
 	ldr	r0,.Lj1340
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1340
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj1340
 	strb	r0,[r1]
 .Lj1342:
 # [1213] if (x and $00FF)<>0 then clearzero else setzero;
@@ -5957,21 +5200,17 @@ UNIT6502_$$_TAX:
 	beq	.Lj1347
 	ldr	r0,.Lj1340
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1340
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1340
+	strb	r1,[r0]
 	b	.Lj1350
 .Lj1347:
 	ldr	r0,.Lj1340
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1340
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1340
 	strb	r0,[r1]
 .Lj1350:
 # [1214] end;
@@ -5991,32 +5230,27 @@ UNIT6502_$$_TAY:
 # [1218] begin
 # [1219] y := a;
 	ldr	r0,.Lj1355
-# Rescheduled
-	ldr	r2,.Lj1356
-	ldrb	r1,[r0]
-# Rescheduled
+	ldrb	r0,[r0]
+	ldr	r1,.Lj1356
+	strb	r0,[r1]
 # [1220] if (y and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj1356
-	strb	r1,[r2]
 	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj1359
 	ldr	r0,.Lj1360
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1360
 	orr	r0,r0,#128
+	ldr	r1,.Lj1360
 	strb	r0,[r1]
 	b	.Lj1362
 .Lj1359:
 	ldr	r0,.Lj1360
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1360
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj1360
 	strb	r0,[r1]
 .Lj1362:
 # [1221] if (y and $00FF)<>0 then clearzero else setzero;
@@ -6026,21 +5260,17 @@ UNIT6502_$$_TAY:
 	beq	.Lj1367
 	ldr	r0,.Lj1360
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1360
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1360
+	strb	r1,[r0]
 	b	.Lj1370
 .Lj1367:
 	ldr	r0,.Lj1360
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1360
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1360
 	strb	r0,[r1]
 .Lj1370:
 # [1222] end;
@@ -6061,26 +5291,20 @@ UNIT6502_$$_TRB:
 	stmfd	r13!,{r14}
 # [1227] value:=getvalue;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj1375
-# Rescheduled
+	ldr	r1,.Lj1375
+	strh	r0,[r1]
 # [1228] aresult:=value and (not a);
-	ldr	r1,.Lj1376
-	strh	r0,[r2]
-	ldrb	r0,[r1]
+	ldr	r0,.Lj1376
+	ldrb	r0,[r0]
 	mvn	r1,r0,lsl #24
-# Rescheduled
+	mov	r1,r1,lsr #24
 	ldr	r0,.Lj1375
-# Peephole FoldShiftProcess done
 	ldrh	r0,[r0]
-# Rescheduled
-	ldr	r2,.Lj1378
-# [1231] end;
-	and	r1,r0,r1,lsr #24
-# Rescheduled
+	and	r1,r0,r1
+	ldr	r0,.Lj1378
+	strh	r1,[r0]
 # [1229] putvalue(aresult);
 	ldr	r0,.Lj1378
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_PUTVALUE$WORD
 # [1230] if (aresult and $00FF)<>0 then clearzero else setzero;
@@ -6091,23 +5315,20 @@ UNIT6502_$$_TRB:
 	beq	.Lj1382
 	ldr	r0,.Lj1383
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1383
 	bic	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1383
 	strb	r0,[r1]
 	b	.Lj1385
 .Lj1382:
 	ldr	r0,.Lj1383
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1383
 	orr	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1383
+	strb	r1,[r0]
 .Lj1385:
+# [1231] end;
 	ldmfd	r13!,{r15}
 .Lj1375:
 	.long	U_$UNIT6502_$$_VALUE
@@ -6127,23 +5348,18 @@ UNIT6502_$$_TSB:
 	stmfd	r13!,{r14}
 # [1236] value:=getvalue;
 	bl	UNIT6502_$$_GETVALUE$$WORD
-# Rescheduled
-	ldr	r2,.Lj1390
-# Rescheduled
+	ldr	r1,.Lj1390
+	strh	r0,[r1]
 # [1237] aresult:=value or a;
-	ldr	r1,.Lj1391
-	strh	r0,[r2]
-# Rescheduled
+	ldr	r0,.Lj1391
+	ldrb	r1,[r0]
 	ldr	r0,.Lj1390
-	ldrb	r1,[r1]
 	ldrh	r0,[r0]
-# Rescheduled
-	ldr	r2,.Lj1393
-	orr	r1,r0,r1
-# Rescheduled
+	orr	r0,r0,r1
+	ldr	r1,.Lj1393
+	strh	r0,[r1]
 # [1238] putvalue(aresult);
 	ldr	r0,.Lj1393
-	strh	r1,[r2]
 	ldrh	r0,[r0]
 	bl	UNIT6502_$$_PUTVALUE$WORD
 # [1239] if (aresult and $00FF)<>0 then clearzero else setzero;
@@ -6154,21 +5370,17 @@ UNIT6502_$$_TSB:
 	beq	.Lj1397
 	ldr	r0,.Lj1398
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1398
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1398
+	strb	r1,[r0]
 	b	.Lj1400
 .Lj1397:
 	ldr	r0,.Lj1398
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1398
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1398
 	strb	r0,[r1]
 .Lj1400:
 # [1240] end;
@@ -6190,32 +5402,27 @@ UNIT6502_$$_TSX:
 # [1244] begin
 # [1245] x := sp;
 	ldr	r0,.Lj1405
-# Rescheduled
-	ldr	r2,.Lj1406
-	ldrb	r1,[r0]
-# Rescheduled
+	ldrb	r0,[r0]
+	ldr	r1,.Lj1406
+	strb	r0,[r1]
 # [1246] if (x and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj1406
-	strb	r1,[r2]
 	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj1409
 	ldr	r0,.Lj1410
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1410
 	orr	r0,r0,#128
+	ldr	r1,.Lj1410
 	strb	r0,[r1]
 	b	.Lj1412
 .Lj1409:
 	ldr	r0,.Lj1410
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1410
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj1410
 	strb	r0,[r1]
 .Lj1412:
 # [1247] if (x and $00FF)<>0 then clearzero else setzero;
@@ -6225,21 +5432,17 @@ UNIT6502_$$_TSX:
 	beq	.Lj1417
 	ldr	r0,.Lj1410
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1410
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1410
+	strb	r1,[r0]
 	b	.Lj1420
 .Lj1417:
 	ldr	r0,.Lj1410
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1410
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1410
 	strb	r0,[r1]
 .Lj1420:
 # [1248] end;
@@ -6259,32 +5462,27 @@ UNIT6502_$$_TXA:
 # [1252] begin
 # [1253] a := x;
 	ldr	r0,.Lj1425
-# Rescheduled
-	ldr	r2,.Lj1426
-	ldrb	r1,[r0]
-# Rescheduled
+	ldrb	r0,[r0]
+	ldr	r1,.Lj1426
+	strb	r0,[r1]
 # [1254] if (a and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj1426
-	strb	r1,[r2]
 	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj1429
 	ldr	r0,.Lj1430
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1430
 	orr	r0,r0,#128
+	ldr	r1,.Lj1430
 	strb	r0,[r1]
 	b	.Lj1432
 .Lj1429:
 	ldr	r0,.Lj1430
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1430
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj1430
 	strb	r0,[r1]
 .Lj1432:
 # [1255] if (a and $00FF)<>0 then clearzero else setzero;
@@ -6294,21 +5492,17 @@ UNIT6502_$$_TXA:
 	beq	.Lj1437
 	ldr	r0,.Lj1430
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1430
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1430
+	strb	r1,[r0]
 	b	.Lj1440
 .Lj1437:
 	ldr	r0,.Lj1430
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1430
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1430
 	strb	r0,[r1]
 .Lj1440:
 # [1256] end;
@@ -6328,8 +5522,6 @@ UNIT6502_$$_TXS:
 # [1260] begin
 # [1261] sp := x;
 	ldr	r0,.Lj1445
-# Rescheduled
-# Rescheduled
 	ldrb	r0,[r0]
 	ldr	r1,.Lj1446
 	strb	r0,[r1]
@@ -6348,32 +5540,27 @@ UNIT6502_$$_TYA:
 # [1266] begin
 # [1267] a := y;
 	ldr	r0,.Lj1449
-# Rescheduled
-	ldr	r2,.Lj1450
-	ldrb	r1,[r0]
-# Rescheduled
+	ldrb	r0,[r0]
+	ldr	r1,.Lj1450
+	strb	r0,[r1]
 # [1268] if (a and $0080)<>0 then setsign else clearsign;
 	ldr	r0,.Lj1450
-	strb	r1,[r2]
 	ldrb	r0,[r0]
 # Peephole OpCmp2OpS done
 	ands	r0,r0,#128
 	beq	.Lj1453
 	ldr	r0,.Lj1454
 	ldrb	r0,[r0]
-# Rescheduled
-	ldr	r1,.Lj1454
 	orr	r0,r0,#128
+	ldr	r1,.Lj1454
 	strb	r0,[r1]
 	b	.Lj1456
 .Lj1453:
 	ldr	r0,.Lj1454
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1454
 	bic	r0,r0,#128
+	and	r0,r0,#255
+	ldr	r1,.Lj1454
 	strb	r0,[r1]
 .Lj1456:
 # [1269] if (a and $00FF)<>0 then clearzero else setzero;
@@ -6383,21 +5570,17 @@ UNIT6502_$$_TYA:
 	beq	.Lj1461
 	ldr	r0,.Lj1454
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1454
 	bic	r0,r0,#2
-	strb	r0,[r1]
+	and	r1,r0,#255
+	ldr	r0,.Lj1454
+	strb	r1,[r0]
 	b	.Lj1464
 .Lj1461:
 	ldr	r0,.Lj1454
 	ldrb	r0,[r0]
-# Rescheduled
-# Peephole AndStrb2Strb done
-# Rescheduled
-	ldr	r1,.Lj1454
 	orr	r0,r0,#2
+	and	r0,r0,#255
+	ldr	r1,.Lj1454
 	strb	r0,[r1]
 .Lj1464:
 # [1270] end;
@@ -6436,10 +5619,9 @@ UNIT6502_$$_SAX:
 	bl	UNIT6502_$$_STX
 # [1286] putvalue(a and x);
 	ldr	r0,.Lj1471
-# Rescheduled
-	ldr	r2,.Lj1472
 	ldrb	r1,[r0]
-	ldrb	r0,[r2]
+	ldr	r0,.Lj1472
+	ldrb	r0,[r0]
 	and	r0,r0,r1
 	bl	UNIT6502_$$_PUTVALUE$WORD
 # [1287] if (penaltyop<>0) and (penaltyaddr<>0) then dec (clockticks6502);
