@@ -162,6 +162,7 @@ var fh,filetype:integer;                // this needs cleaning...
      kbd:array[0..15] of TKeyboarddata;
      m:array[0..128] of Tmousedata;
        dummy:pointer;
+       pause1:boolean=false;
 // prototypes
 
 procedure initmachine;
@@ -195,6 +196,7 @@ procedure pwmbeep;
 procedure sdl_pauseaudio(mode:integer);   // instead of the real one
 //function sdl_sound_init:integer;
 procedure AudioCallback(b:integer);
+procedure getkey;
 
 
 const kdgraphics=1;
@@ -230,13 +232,25 @@ procedure Tkbd.Execute;
      var a,key:integer;
           q:cardinal;
 begin
-
+ThreadSetPriority(ThreadGetCurrent,6);
+threadsleep(1);
+ThreadSetCPU(ThreadGetCurrent,CPU_ID_2);
+threadsleep(1);
  repeat
-   a:=KeyboardReadex(@kbd[0], 8*sizeof(tkeyboarddata),1,q);
-   if (a=0) and (q>0) then
+   a:=KeyboardReadex(@kbd[0], 1*sizeof(tkeyboarddata),1,q);
+   if (a=0) and (q>0) then  for i:=1 to q do
      begin
+     //debug
+ //    box(300,300,200,200,18);
+ //    outtextxy(300,300,inttostr(q),44);
+ //    outtextxy(300,320,inttostr(ord(kbd[0].charcode)),44);
+ //    outtextxy(300,340,inttostr(kbd[0].modifiers),44);
+ //    outtextxy(300,360,inttostr(kbd[0].scancode),44);
+ //    outtextxy(300,380,inttostr(kbd[0].keycode),44);
+ //    outtextxy(300,400,inttostr(cardinal(kbd[0].charunicode)),44);
+
      key:=ord(kbd[0].charcode);
-     if kbd[0].modifiers and 16384 <>0 then
+     if kbd[0].modifiers and (16384+32768) <>0 then
        begin
        poke($206002b,1);
        if key<>0 then poke($2060028,key) else poke($2060028,kbd[0].KeyCode and 255);
@@ -267,15 +281,62 @@ begin
 
 end;
 
+procedure getkey;
+     var a,key:integer;
+          q:cardinal;
+begin
+
+
+   a:=KeyboardReadex(@kbd[0], 1*sizeof(tkeyboarddata),1,q);
+   if (a=0) and (q>0) then  // for i:=1 to q do
+     begin
+
+
+     key:=ord(kbd[0].charcode);
+ //    box(100,100,200,200,17);
+ //    outtextxy(200,200,inttostr(kbd[0].modifiers),40);
+     if kbd[0].modifiers and (16384+32768) <>0 then
+       begin
+       poke($206002b,1);
+       if key<>0 then poke($2060028,key) else poke($2060028,kbd[0].KeyCode and 255);
+       poke($2060029,kbd[0].modifiers and 255);
+       poke($206002a,(kbd[0].modifiers shr 8) and 255);
+       if key=0 then poke($206002b,peek($206002b) or $2);
+       CleanDataCacheRange($2060000,4096);
+       end;
+     end;
+
+
+ //   a:=mouseReadex(@m[0], 128*sizeof(tkeyboarddata),1,q);
+//   if (a=0) and (q>0) then
+//     begin
+//     key:=ord(kbd[0].charcode);
+//     if key<>0 then poke($60028,key) else poke($60028,kbd[0].KeyCode and 255);
+//     poke($60029,kbd[0].modifiers and 255);
+//     poke($6002a,(kbd[0].modifiers shr 8) and 255);
+//     if key=0 then poke($6002a,peek($6002a) or $20);
+//     if kbd[0].modifiers and 16384 <>0 then poke($6002b,1);
+//     CleanDataCacheRange($4060000,4096);
+//     end;
+
+
+
+
+
+
+end;
+
+
 procedure Taudio.Execute;
      var a,key:integer;
           q:cardinal;
 begin
-ThreadSetPriority(ThreadGetCurrent,7);
-ThreadSetCPU(ThreadGetCurrent,CPU_ID_2);
+ThreadSetPriority(ThreadGetCurrent,6);
+//threadsleep(1);
+ThreadSetCPU(ThreadGetCurrent,CPU_ID_1);
 threadsleep(1);
  repeat
- repeat threadsleep(1); a:= lpeek($3F007800) until (a and 2) <>0 ;
+ repeat threadsleep(2); a:= lpeek($3F007800) until (a and 2) <>0 ;
  if (a and 2)<>0
    then begin
 
@@ -284,7 +345,7 @@ threadsleep(1);
    lpoke($3F007800,3);
    CleanDataCacheRange($0205a000,$8000);
    end;
-  // threadsleep(10);
+ //  threadsleep(1);
  until terminated;
 
 end;
@@ -314,10 +375,10 @@ var id:integer;
 begin
 
 running:=1;
-//id:=getcurrentthreadid  ;
-//ThreadSetCPU(ThreadGetCurrent,CPU_ID_3);
+id:=getcurrentthreadid  ;
+ThreadSetCPU(ThreadGetCurrent,CPU_ID_3);
 //ThreadSetAffinity(ThreadGetCurrent,CPU_AFFINITY_3);
-//ThreadSetPriority(ThreadGetCurrent,6);
+ThreadSetPriority(ThreadGetCurrent,6);
 //SchedulerAllocationDisable(CPU_ID_3);
 Sleep(1);
 repeat
@@ -336,6 +397,7 @@ repeat
   FramebufferDeviceSetOffset(fb,0,0,True);
   FramebufferDeviceWaitSync(fb);
   poke ($2070000,1);
+//  getkey;
 
   vblank1:=0;
   t:=clockgettotal;
@@ -352,6 +414,7 @@ repeat
   FramebufferDeviceSetOffset(fb,0,1200,True);
   FramebufferDeviceWaitSync(fb);
   poke ($2070000,1);
+//  getkey;
   end;
 until terminated;
 running:=0;
@@ -370,9 +433,34 @@ procedure initmachine;
 var a,i:integer;
     bb:byte;
     fh2:integer;
+    Entry:TPageTableEntry ;
+
 
 begin
-dummy:=getmem(600000000);
+
+for i:=16 to 8191 do
+  begin
+  Entry:=PageTableGetEntry(i*4096);
+  Entry.Flags:=$3b2;         //3b2   orig 562
+  PageTableSetEntry(Entry);
+  end;
+{PageTableSetEntry(Entry);
+Entry:=PageTableGetEntry(4096+cardinal(@sid) and $FFFFF000);
+Entry.Flags:=$372;
+PageTableSetEntry(Entry);
+Entry:=PageTableGetEntry(4096+cardinal(@sid) and $FFFFF000);
+Entry.Flags:=$372;
+PageTableSetEntry(Entry);
+Entry:=PageTableGetEntry(8192+cardinal(@sid) and $FFFFF000);
+Entry.Flags:=$372;
+PageTableSetEntry(Entry);
+Entry:=PageTableGetEntry(12288+cardinal(@sid) and $FFFFF000);
+Entry.Flags:=$372;
+PageTableSetEntry(Entry);
+
+   }
+
+//dummy:=getmem(600000000);
 fh2:=fileopen('C:\retro\combinedwaveforms.bin',$40);   // load combined waveforms for SID
 fileread(fh2,combined,1024);
 fileclose(fh2);
@@ -385,7 +473,7 @@ siddata[$0e]:=$7FFFF8;
 siddata[$1e]:=$7FFFF8;
 siddata[$2e]:=$7FFFF8;
 p:=@tabl[0];
-
+reset6502;
 //if mode=0 then
  // begin
 //  fullscreen:=0;
@@ -459,8 +547,8 @@ for i:=0 to 1023 do
 fileclose(fh2);
 thread:=tretro.create(true);            // start frame refreshing thread
 thread.start;
-thread2:=tkbd.Create(true);
-thread2.start;
+//thread2:=tkbd.Create(true);
+//thread2.start;
 thread3:=taudio.Create(true);
 thread3.start;
 end;
@@ -494,49 +582,49 @@ end;
 //   rev. 2015.11.01
 // ----------------------------------------------------------------------
 
-procedure poke(addr:integer;b:byte);
+procedure poke(addr:integer;b:byte); inline;
 
 begin
 PByte(addr)^:=b;
 end;
 
-procedure dpoke(addr:integer;w:word);
+procedure dpoke(addr:integer;w:word); inline;
 
 begin
 PWord(addr and $FFFFFFFE)^:=w;
 end;
 
-procedure lpoke(addr:integer;c:cardinal);
+procedure lpoke(addr:integer;c:cardinal); inline;
 
 begin
 PCardinal(addr and $FFFFFFFC)^:=c;
 end;
 
-procedure slpoke(addr,i:integer);
+procedure slpoke(addr,i:integer); inline;
 
 begin
 PInteger(addr and $FFFFFFFC)^:=i;
 end;
 
-function peek(addr:integer):byte;
+function peek(addr:integer):byte; inline;
 
 begin
 peek:=Pbyte(addr)^;
 end;
 
-function dpeek(addr:integer):word;
+function dpeek(addr:integer):word; inline;
 
 begin
 dpeek:=PWord(addr and $FFFFFFFE)^;
 end;
 
-function lpeek(addr:integer):cardinal;
+function lpeek(addr:integer):cardinal; inline;
 
 begin
 lpeek:=PCardinal(addr and $FFFFFFFC)^;
 end;
 
-function slpeek(addr:integer):integer;
+function slpeek(addr:integer):integer;  inline;
 
 begin
 slpeek:=PInteger(addr and $FFFFFFFC)^;
@@ -960,7 +1048,7 @@ label p111,p112,p113,p114,p115,p116,p117;
 label p121,p122,p123,p124,p125,p126,p127;
 label p201,p202,p203,p204,p205,p206,p207,p208,p209;
 label p211,p212,p213,p214,p215,p216,p217,p218,p219;
-label p221,p222,p223,p224,p225,p226,p227,p228,p229;
+label p221,p222,p223,p224,p225,p226,p227,p228,p229,p297,p298,p299;
 const oldsc:integer=0;
       sc:integer=0;
       waveform1:word=0;
@@ -1027,11 +1115,17 @@ var i,sid1,sid1l,ind:integer;
            vol, fll:integer;
            sidptr:pointer;
 
+
 begin
 sidptr:=@siddata;
 if mode=1 then  // get regs
 
   begin
+
+
+
+
+
 //  ttt:=clockgettotal;
   siddata[$56]:=peek($2070003);
   siddata[$57]:=peek($2070004);
@@ -1098,7 +1192,7 @@ if mode=1 then  // get regs
         asm
                // adsr module
 
-               stmfd r13!,{r0-r7}
+               stmfd r13!,{r0-r12}
 
                ldr   r7, sidptr
                mov   r0,#0
@@ -1314,20 +1408,30 @@ p125:          cmp   r0,#4
 p126:          mov   r0,#0
                str   r0,[r7,#0xb0]
 
-p123:          ldmfd r13!,{r0-r7}
+p123:           //mov r1,[r7,##0x7000000
+             mov r0,#10
+          str r0,[r7,#0x1fc]
+
+      //  ldmfd r13!,{r0-r7}
                end;
-
-
                // end of adsr module
-for i:=1 to 10 do
-              // repeat
+
+//for i:=1 to 10 do
+//lpoke($7000000,10);
+
+ //p297:
+ //              asm
+
+ //              end;
+
+
                asm
-               stmfd r13!,{r0-r12}
-               ldr   r4,sidptr
+       //         stmfd r13!,{r0-r12}
+ p297:               ldr   r4,sidptr
 
                // phase accum 1
 
-               ldr   r0,[r4,#0x20]
+             ldr   r0,[r4,#0x20]
                ldr   r3,[r4,#0x00]
                adds  r0,r0,r3,lsl #5//8    // PA @ 24 higher bits
                ldrcs r1,[r4,#0x60]
@@ -1944,19 +2048,58 @@ p224:          ldr r0,[r4,#0x30]
                str r8,[r7,#0x1ac]
                add r0,#1
                str r0,[r7,#0x1a8]
+
+              // mov r1,#0x7000000
+               ldr r0,[r7,#0x1fc]
+               sub r0,#1
+               str r0,[r7,#0x1fc]
+             //  ldr r0,[r1]
+               cmp r0,#0
+               bne p297
+
+                     // for 12 bit pwm shift and unsign
+ldr r8,[r7,#0x1b0]
+asr r8,#18
+add r8,#2048
+str r8,[r7,#0x1b0]
+ldr r8,[r7,#0x1ac]
+asr r8,#18
+add r8,#2048
+str r8,[r7,#0x1ac]
+
+
                ldmfd r13!,{r0-r12}
 
                end;
+
+
+
+// i:=i-1;
+// if i<>0 then goto p297;
+//      asm
+//      mov r1,#0x60000000
+//      ldr r0,[r1]
+//      sub r0,#1
+//      str r0,[r1]
+//      cmp r0,#0
+//      bne p297
+
+//p299:
+//       end;
 
 //sidclock+=2000;//1000;
 //until sidclock>=20000;//20526;
 //sidtime:=clockgettotal-ttt;
 //sidclock-=20000;//20526;
-sid[0]:= 2048+ (siddata[$6c] div (16*16384));//16384;//32768;
-sid[1]:=2048+ (siddata[$6b] div (16*16384));//16384;//32768;
+sid[0]:= siddata[$6c]; //  2048+ (siddata[$6c] div (16*16384));//16384;//32768;
+sid[1]:= siddata[$6b];//2048+ (siddata[$6b] div (16*16384));//16384;//32768;
+
 oldsc:=sc;
-sc:=(siddata[$6c]+siddata[$6B]) div 16384;
-scope[scj div 1]:=sc; inc(scj); if scj>1*959 then if (oldsc<0) and (sc>0) then scj:=0 else scj:=1*959;
+sc:=(siddata[$6c]+siddata[$6B]) -4096 ;//div 16384;
+scope[scj]:=sc;
+inc(scj);
+if scj>959 then if (oldsc<0) and (sc>0) then scj:=0 else scj:=959;
+
 //sid[0]:=sid1;
 //sid[1]:=sid1l;
 end;
@@ -2017,6 +2160,8 @@ end;
 }
 procedure AudioCallback(b:integer);
 
+label p999;
+
 var audio2:pcardinal;
     s:tsample;
     ttt:int64;
@@ -2027,7 +2172,7 @@ var audio2:pcardinal;
 begin
 audio2:=pcardinal(b);
 ttt:=clockgettotal;
-
+if pause1=true then goto p999;
 for k:=0 to 7 do
   begin
   aa+=2500;
@@ -2063,38 +2208,41 @@ for k:=0 to 7 do
       else
         begin
 
-        for i:=0 to 15 do times6502[i]:=times6502[i+1];
-        t6:=clockgettotal;
-        jsr6502(256, play);
+      for i:=0 to 15 do times6502[i]:=times6502[i+1];
+       t6:=clockgettotal;
+        jsr6502(256,play);
         times6502[15]:=clockgettotal-t6;
         t6:=0; for i:=0 to 15 do t6+=times6502[i];
         time6502:=t6-15;
 
-        for i:=0 to 25 do buf[i]:= read6502($D400+i);
-        for i:=0 to 25 do poke($200d400+i,buf[i]);
+//      for i:=0 to 25 do buf[i]:= read6502($D400+i);
 
+//       for i:=0 to 25 do poke($200d400+i,buf[i]);
+        CleanDataCacheRange($200d400,32);
         timer1+=siddelay;
         songtime+=siddelay;
         end;
       end;
     end;
 
-
+//  ttt:=clockgettotal;
   s:=sid(1);
   audio2[240*k]:=s[0];
   audio2[240*k+1]:=s[1];
- // ttt:=clockgettotal;
+
   for i:=120*k+1 to 120*k+119 do
     begin
     s:=sid(0);
     audio2[2*i]:=s[0];
     audio2[2*i+1]:=s[1];
     end;
- // sidtime:=clockgettotal-ttt;
+//  sidtime:=clockgettotal-ttt;
   end;
 inc(sidcount);
 //sidtime+=gettime-t;
+p999:
 sidtime:=clockgettotal-ttt;
+
 end;
 
 
@@ -2151,7 +2299,9 @@ end;
 procedure sdl_pauseaudio(mode:integer);
 
 begin
-
+if mode=1 then pause1:=true else pause1:=false;
+for i:=$205a000 to $205dfff do poke(i,2048);
+CleanDataCacheRange($205a000,16384);
 end;
 
 

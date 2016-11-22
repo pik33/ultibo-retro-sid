@@ -474,8 +474,8 @@ var depth:integer;
 
 begin
 inc(jsrcnt) ;
-//box(100,100,500,20,33);
-//outtextxy(100,100,'entered jsr at '+inttohex(addr,4),44);
+box(100,100,500,20,33);
+outtextxy(100,100,'entered jsr at '+inttohex(addr,4),44);
 pc:=addr;
 sp := $FD;
 depth:=0;
@@ -492,8 +492,8 @@ repeat
     instructions+=1;
     end;
   until (depth<0) or (instructions>3000);
-//  box(100,200,500,20,33);
-//outtextxy(100,200,'exited jsr after '+inttostr(instructions)+' jsr count '+inttostr(jsrcnt),44);
+  box(100,200,500,20,33);
+outtextxy(100,200,'exited jsr after '+inttostr(instructions)+' jsr count '+inttostr(jsrcnt),44);
 
 end;
 

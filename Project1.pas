@@ -40,7 +40,7 @@ var s,currentdir,currentdir2:string;
     init:word;
     atitle,author,copyright:string[32];
     workdir:string;
-    pause:boolean=true;
+    pause1:boolean=true;
 
 // ---- procedures
 
@@ -93,7 +93,7 @@ outtextxyz(18,484,'copyright: '+copyright,188,2,2);
 outtextxyz(18,516,'flags: '+inttohex(flags,4),188,2,2);
 song:=startsong-1;
 
-reset6502;
+//reset6502;
 for i:=0 to 65535 do write6502(i,0);
 repeat
   il:=fileread(fh,b,1);
@@ -101,6 +101,9 @@ repeat
   load+=1;
 until il<>1;
 fileseek(fh,0,fsfrombeginning);
+CleanDataCacheRange($2000000,65536);
+i:=lpeek($2060000);
+repeat until lpeek($2060000)>(i+4);
 jsr6502(song,init);
 cia:=read6502($dc04)+256*read6502($dc05);
 outtextxyz(18,578,'cia: '+inttohex(read6502($dc04)+256*read6502($dc05),4),188,2,2);
@@ -207,15 +210,15 @@ while not DirectoryExists('C:\') do
   Sleep(100);
   end;
 
-//DeleteFile('C:\kernel7.img');
-//RenameFile('C:\kernel7_l.img','C:\kernel7.img');
+DeleteFile('C:\kernel7.img');
+RenameFile('C:\kernel7_l.img','C:\kernel7.img');
 
 sleep(100);
 
 fs:=1;
 workdir:='C:\';
 songtime:=0;
-pause:=true;
+pause1:=true;
 siddelay:=20000;
 setcurrentdir(workdir);
 initmachine;
@@ -230,19 +233,23 @@ poke($2070003,1);
 poke($2070004,1);
 poke($2070005,1);
 pwmbeep;
+ThreadSetPriority(ThreadGetCurrent,6);
+threadsleep(1);
+ThreadSetCPU(ThreadGetCurrent,CPU_ID_0);
+threadsleep(1);
 repeat
   main2;
+  getkey;
 
 
-
-  if pause then begin for i:=$200d400 to $200d400+25 do poke(i,0); end;
+  if pause1 then begin for i:=$200d400 to $200d400+25 do poke(i,0); end;
 
   if peek($2060028)=ord('5') then begin dpoke ($2060028,0); siddelay:=20000; songfreq:=50; skip:=0; end;
   if peek($2060028)=ord('1') then begin dpoke ($2060028,0); siddelay:=10000; songfreq:=100; skip:=0; end;
   if peek($2060028)=ord('2') then begin dpoke ($2060028,0); siddelay:=5000; songfreq:=200; skip:=0;end;
   if peek($2060028)=ord('3') then begin dpoke ($2060028,0); siddelay:=6666; songfreq:=150; skip:=0; end;
   if peek($2060028)=ord('4') then begin dpoke ($2060028,0); siddelay:=2500; songfreq:=400; skip:=0; end;
-  if peek($2060028)=ord('p') then begin dpoke ($2060028,0); pause:=not pause; if pause then sdl_pauseaudio(1) else sdl_pauseaudio(0); end;
+  if peek($2060028)=ord('p') then begin dpoke ($2060028,0); pause1:=not pause1; if pause1 then sdl_pauseaudio(1) else sdl_pauseaudio(0); end;
   if peek($2060028)=1 then begin dpoke($2060028,0); if peek($2070003)=0 then poke ($2070003,1) else poke ($2070003,0); end;
   if peek($2060028)=2 then begin dpoke($2060028,0); if peek($2070004)=0 then poke ($2070004,1) else poke ($2070004,0); end;
   if peek($2060028)=3 then begin dpoke($2060028,0); if peek($2070005)=0 then poke ($2070005,1) else poke ($2070005,0); end;
@@ -333,7 +340,7 @@ repeat
         if song<songs then
           begin
           sdl_pauseaudio(1);
-          for i:=1 to 20000000 do;
+          for i:=1 to 200000 do;
           song+=1;
           jsr6502(song,init);
           sdl_pauseaudio(0);
@@ -349,7 +356,7 @@ repeat
         if song>0 then
           begin
           sdl_pauseaudio(1);
-          for i:=1 to 20000000 do;
+          for i:=1 to 200000 do;
           song-=1;
           jsr6502(song,init);
           sdl_pauseaudio(0);
@@ -367,22 +374,30 @@ repeat
 
       else
 
-        begin if not pause then
+        begin
+
+        for i:=$200d400 to $200d420 do poke(i,0);
+        i:=lpeek($2060000);
+        repeat until lpeek($2060000)>(i+4);
+        if sfh>=0 then fileclose(sfh);
+        sfh:=-1;
+      //  if not pause1 then
           begin
-          pause:=true;
+          pause1:=true;
           sdl_pauseaudio(1);
           end;
-//        for i:=0 to 20000000 do begin end;
+        i:=lpeek($2060000);
+        repeat until lpeek($2060000)>i+4;
+
         for i:=0 to $2F do siddata[i]:=0;
         for i:=$50 to $7F do siddata[i]:=0;
         siddata[$0e]:=$7FFFF8;
         siddata[$1e]:=$7FFFF8;
         siddata[$2e]:=$7FFFF8;
-        if sfh>=0 then fileclose(sfh);
-        sfh:=-1;
+
         songtime:=0;
 
-        for i:=0 to 6 do lpoke($200d400+4*i,0);
+ //       for i:=0 to 6 do lpoke($200d400+4*i,0);
         fn:= currentdir2+filenames[sel+selstart,0];
         sfh:=fileopen(fn,$40);
         s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4);
@@ -409,16 +424,20 @@ repeat
           begin
           reset6502;
           sidopen(sfh);
+          i:=lpeek($2060000);
+          repeat until lpeek($2060000)>(i+4);
           if cia>0 then siddelay:={985248}1000000 div (50*round(19652/cia));
           filetype:=1;
           box(18,912,800,32,244);
           outtextxyz(18,912,'PSID file, '+inttostr(1000000 div siddelay)+' Hz',250,2,2);
+          fileclose(sfh);
           end
         else if (buf[0]=ord('R')) and (buf[1]=ord('S')) and (buf[2]=ord('I')) and (buf[3]=ord('D')) then
           begin
           filetype:=2;
           box(18,132,800,600,178);
           outtextxyz(18,132,'type: RSID, not yet supported',44,2,2);
+          fileclose(sfh);
           end
         else
           begin
@@ -431,7 +450,7 @@ repeat
         songname:=s;
         songtime:=0;
         timer1:=-1;
-        if filetype<>2 then begin pause:=false; sdl_pauseaudio(0); end;
+        if filetype<>2 then begin pause1:=false; sdl_pauseaudio(0); end;
         end;
     end;
   until (peek($2060028)=27) ;
