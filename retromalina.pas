@@ -232,7 +232,7 @@ procedure Tkbd.Execute;
      var a,key:integer;
           q:cardinal;
 begin
-ThreadSetPriority(ThreadGetCurrent,6);
+//ThreadSetPriority(ThreadGetCurrent,5);
 threadsleep(1);
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_2);
 threadsleep(1);
@@ -287,14 +287,15 @@ procedure getkey;
 begin
 
 
-   a:=KeyboardReadex(@kbd[0], 1*sizeof(tkeyboarddata),1,q);
+   a:=KeyboardReadex(@kbd[0], 4*sizeof(tkeyboarddata),1,q);
    if (a=0) and (q>0) then  // for i:=1 to q do
      begin
 
 
      key:=ord(kbd[0].charcode);
- //    box(100,100,200,200,17);
- //    outtextxy(200,200,inttostr(kbd[0].modifiers),40);
+
+
+
      if kbd[0].modifiers and (16384+32768) <>0 then
        begin
        poke($206002b,1);
@@ -331,7 +332,7 @@ procedure Taudio.Execute;
      var a,key:integer;
           q:cardinal;
 begin
-ThreadSetPriority(ThreadGetCurrent,6);
+//ThreadSetPriority(ThreadGetCurrent,5);
 //threadsleep(1);
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_1);
 threadsleep(1);
@@ -378,7 +379,7 @@ running:=1;
 id:=getcurrentthreadid  ;
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_3);
 //ThreadSetAffinity(ThreadGetCurrent,CPU_AFFINITY_3);
-ThreadSetPriority(ThreadGetCurrent,6);
+//ThreadSetPriority(ThreadGetCurrent,6);
 //SchedulerAllocationDisable(CPU_ID_3);
 Sleep(1);
 repeat

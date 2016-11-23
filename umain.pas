@@ -207,7 +207,9 @@ a:= TemperatureGetCurrent(0) div 1000;
 if a<75 then ii:=184
 else if a<80 then ii:=232
 else ii:=40;
-outtextxyz(1466,1070,inttostr(a)+' C',ii,2,2);
+outtextxyz(1434,1070,inttostr(a),ii,2,2);
+outtextxyz(1474,1070,'C',ii,2,2);
+outtextxyz(1462,1050,'.',ii,2,2);
 
 for i:=64 to 88 do lpoke($2010000+4*i,lpeek($2010000+2048+4*((c div 2) mod 256)+4*i));
 if (c mod 32)=0 then lpoke($2010000+4*89,lpeek($2010000+2048+(4*(c div 64) mod 256)))   ;

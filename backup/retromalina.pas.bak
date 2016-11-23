@@ -287,14 +287,15 @@ procedure getkey;
 begin
 
 
-   a:=KeyboardReadex(@kbd[0], 1*sizeof(tkeyboarddata),1,q);
+   a:=KeyboardReadex(@kbd[0], 4*sizeof(tkeyboarddata),1,q);
    if (a=0) and (q>0) then  // for i:=1 to q do
      begin
 
 
      key:=ord(kbd[0].charcode);
- //    box(100,100,200,200,17);
- //    outtextxy(200,200,inttostr(kbd[0].modifiers),40);
+
+
+
      if kbd[0].modifiers and (16384+32768) <>0 then
        begin
        poke($206002b,1);
@@ -473,7 +474,7 @@ siddata[$0e]:=$7FFFF8;
 siddata[$1e]:=$7FFFF8;
 siddata[$2e]:=$7FFFF8;
 p:=@tabl[0];
-
+reset6502;
 //if mode=0 then
  // begin
 //  fullscreen:=0;

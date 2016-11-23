@@ -1145,18 +1145,18 @@ UMAIN_$$_MAIN1:
 	.balign 4
 .globl	UMAIN_$$_MAIN2
 UMAIN_$$_MAIN2:
-# Temps allocated between r11-252 and r11-92
+# Temps allocated between r11-248 and r11-92
 # [166] begin
 	mov	r12,r13
 	stmfd	r13!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,r14,r15}
 	sub	r11,r12,#4
-	sub	r13,r13,#276
-# Var a located in register r4
+	sub	r13,r13,#272
+# Var a located in register r0
 # Var c1 located in register r10
-# Var ii located in register r6
+# Var ii located in register r5
 # Var iii located in register r0
 # Var il located in register r0
-# Var i located in register r5
+# Var i located in register r4
 # Var cc located in register r4
 # Var qqq located in register r0:r0
 # Var mm located in register r6:r5
@@ -1176,8 +1176,6 @@ UMAIN_$$_MAIN2:
 	str	r0,[r11, #-84]
 # Peephole MovStrMov done
 	str	r0,[r11, #-92]
-# Peephole MovStrMov done
-	str	r0,[r11, #-252]
 # Peephole MovStrMov done
 	str	r0,[r11, #-248]
 # Peephole MovStrMov done
@@ -1220,7 +1218,7 @@ UMAIN_$$_MAIN2:
 # Rescheduled
 	ldr	r2,[r2]
 	mov	r1,#0
-# [238] end;
+# [240] end;
 	cmp	r1,r2,asr #31
 	cmpeq	r0,r2
 	beq	.Lj150
@@ -1268,13 +1266,13 @@ UMAIN_$$_MAIN2:
 	ldr	r1,.Lj165
 	ldr	r0,[r0]
 	ldr	r1,[r1]
-	adds	r2,r0,#1
+	adds	r3,r0,#1
 # Rescheduled
-	ldr	r3,.Lj164
+	ldr	r2,.Lj164
 	adc	r0,r1,#0
 # Rescheduled
 	ldr	r1,.Lj165
-	str	r2,[r3]
+	str	r3,[r2]
 	str	r0,[r1]
 .Lj163:
 # [174] ss:=(songtime div 1000000) mod 60;
@@ -1295,12 +1293,12 @@ UMAIN_$$_MAIN2:
 	mov	r9,r0
 # Rescheduled
 # [175] mm:=(songtime div 60000000) mod 60;
-	ldr	r0,.Lj168
+	ldr	r2,.Lj168
 	mov	r4,r1
 # Rescheduled
-	ldr	r1,.Lj169
-	ldr	r3,[r0]
-	ldr	r2,[r1]
+	ldr	r0,.Lj169
+	ldr	r3,[r2]
+	ldr	r2,[r0]
 # Rescheduled
 	ldr	r0,.Lj172
 	mov	r1,#0
@@ -1372,12 +1370,12 @@ UMAIN_$$_MAIN2:
 	mov	r1,r7
 	sub	r0,r11,#80
 	bl	SYSUTILS_$$_INTTOSTR$INT64$$ANSISTRING
-	mov	r1,#10
-	mov	r0,#0
-	cmp	r8,r0
+	mov	r0,#10
+	mov	r1,#0
+	cmp	r8,r1
 	blt	.Lj182
 	bgt	.Lj183
-	cmp	r7,r1
+	cmp	r7,r0
 	bcs	.Lj183
 .Lj182:
 	ldr	r2,[r11, #-80]
@@ -1501,23 +1499,23 @@ UMAIN_$$_MAIN2:
 	str	r0,[r1, r10, lsl #2]
 # Rescheduled
 # [189] avsct:=0; for i:=0 to 59 do avsct+=avsct1[i]; avsct:=round(avsct/60);
-	ldr	r1,.Lj200
-	mov	r0,#0
-	str	r0,[r1]
+	ldr	r0,.Lj200
+	mov	r1,#0
+	str	r1,[r0]
 # Rescheduled
 	ldr	r1,.Lj201
 	mov	r0,#0
 	str	r0,[r1]
-	mov	r5,#0
-	sub	r5,r5,#1
+	mov	r4,#0
+	sub	r4,r4,#1
 	.balign 4
 .Lj204:
 # Rescheduled
 # Peephole FoldShiftLdrStr done
 # Rescheduled
 	ldr	r0,.Lj193
-	add	r5,r5,#1
-	ldr	r2,[r0, r5, lsl #2]
+	add	r4,r4,#1
+	ldr	r2,[r0, r4, lsl #2]
 # Rescheduled
 	ldr	r0,.Lj200
 	mov	r12,r2,asr #31
@@ -1533,7 +1531,7 @@ UMAIN_$$_MAIN2:
 	ldr	r1,.Lj201
 	str	r2,[r3]
 	str	r0,[r1]
-	cmp	r5,#59
+	cmp	r4,#59
 	blt	.Lj204
 	ldr	r0,.Lj201
 # Rescheduled
@@ -1551,7 +1549,7 @@ UMAIN_$$_MAIN2:
 # Rescheduled
 	ldr	r2,.Lj201
 	str	r0,[r3]
-	b	.Lj375
+	b	.Lj376
 .Lj149:
 	.long	U_$RETROMALINA_$$_K
 .Lj154:
@@ -1609,27 +1607,27 @@ UMAIN_$$_MAIN2:
 .Lj212:
 # value: 0d+1.6666666666666666E-002
 	.byte	17,17,17,17,17,17,145,63
-.Lj375:
+.Lj376:
 	str	r1,[r2]
 # Rescheduled
 # [190] avspt:=0; for i:=0 to 59 do avspt+=avspt1[i]; avspt:=round(avspt/60);
-	ldr	r1,.Lj215
-	mov	r0,#0
-	str	r0,[r1]
+	ldr	r0,.Lj215
+	mov	r1,#0
+	str	r1,[r0]
 # Rescheduled
 	ldr	r1,.Lj216
 	mov	r0,#0
 	str	r0,[r1]
-	mov	r5,#0
-	sub	r5,r5,#1
+	mov	r4,#0
+	sub	r4,r4,#1
 	.balign 4
 .Lj219:
 # Rescheduled
 # Peephole FoldShiftLdrStr done
 # Rescheduled
-	ldr	r0,.Lj220
-	add	r5,r5,#1
-	ldr	r2,[r0, r5, lsl #2]
+	ldr	r1,.Lj220
+	add	r4,r4,#1
+	ldr	r2,[r1, r4, lsl #2]
 # Rescheduled
 	ldr	r0,.Lj215
 	mov	r12,r2,asr #31
@@ -1637,15 +1635,15 @@ UMAIN_$$_MAIN2:
 	ldr	r1,.Lj216
 	ldr	r0,[r0]
 	ldr	r1,[r1]
-	adds	r3,r0,r2
+	adds	r2,r0,r2
 # Rescheduled
-	ldr	r2,.Lj215
+	ldr	r3,.Lj215
 	adc	r1,r1,r12
 # Rescheduled
 	ldr	r0,.Lj216
-	str	r3,[r2]
+	str	r2,[r3]
 	str	r1,[r0]
-	cmp	r5,#59
+	cmp	r4,#59
 	blt	.Lj219
 	ldr	r0,.Lj216
 # Rescheduled
@@ -1670,19 +1668,19 @@ UMAIN_$$_MAIN2:
 	mov	r1,#0
 	str	r1,[r0]
 # Rescheduled
-	ldr	r1,.Lj231
-	mov	r0,#0
-	str	r0,[r1]
-	mov	r5,#0
-	sub	r5,r5,#1
+	ldr	r0,.Lj231
+	mov	r1,#0
+	str	r1,[r0]
+	mov	r4,#0
+	sub	r4,r4,#1
 	.balign 4
 .Lj234:
 # Rescheduled
 # Peephole FoldShiftLdrStr done
 # Rescheduled
 	ldr	r0,.Lj235
-	add	r5,r5,#1
-	ldr	r2,[r0, r5, lsl #2]
+	add	r4,r4,#1
+	ldr	r2,[r0, r4, lsl #2]
 # Rescheduled
 	ldr	r0,.Lj230
 	mov	r12,r2,asr #31
@@ -1690,15 +1688,15 @@ UMAIN_$$_MAIN2:
 	ldr	r1,.Lj231
 	ldr	r0,[r0]
 	ldr	r1,[r1]
-	adds	r2,r0,r2
+	adds	r3,r0,r2
 # Rescheduled
-	ldr	r3,.Lj230
+	ldr	r2,.Lj230
 	adc	r0,r1,r12
 # Rescheduled
 	ldr	r1,.Lj231
-	str	r2,[r3]
+	str	r3,[r2]
 	str	r0,[r1]
-	cmp	r5,#59
+	cmp	r4,#59
 	blt	.Lj234
 	ldr	r0,.Lj231
 # Rescheduled
@@ -1719,23 +1717,23 @@ UMAIN_$$_MAIN2:
 	str	r1,[r2]
 # Rescheduled
 # [192] av6502:=0; for i:=0 to 59 do av6502+=av65021[i]; av6502:=round(av6502/60);
-	ldr	r0,.Lj245
-	mov	r1,#0
-	str	r1,[r0]
+	ldr	r1,.Lj245
+	mov	r0,#0
+	str	r0,[r1]
 # Rescheduled
-	ldr	r0,.Lj246
-	mov	r1,#0
-	str	r1,[r0]
-	mov	r5,#0
-	sub	r5,r5,#1
+	ldr	r1,.Lj246
+	mov	r0,#0
+	str	r0,[r1]
+	mov	r4,#0
+	sub	r4,r4,#1
 	.balign 4
 .Lj249:
 # Rescheduled
 # Peephole FoldShiftLdrStr done
 # Rescheduled
-	ldr	r0,.Lj250
-	add	r5,r5,#1
-	ldr	r2,[r0, r5, lsl #2]
+	ldr	r1,.Lj250
+	add	r4,r4,#1
+	ldr	r2,[r1, r4, lsl #2]
 # Rescheduled
 	ldr	r0,.Lj245
 	mov	r12,r2,asr #31
@@ -1751,7 +1749,7 @@ UMAIN_$$_MAIN2:
 	ldr	r1,.Lj246
 	str	r3,[r2]
 	str	r0,[r1]
-	cmp	r5,#59
+	cmp	r4,#59
 	blt	.Lj249
 	ldr	r0,.Lj246
 # Rescheduled
@@ -1928,7 +1926,7 @@ UMAIN_$$_MAIN2:
 	sub	r1,r11,#236
 	mov	r3,#0
 	mov	r2,#2
-	b	.Lj376
+	b	.Lj377
 .Lj215:
 	.long	TC_$UMAIN_$$_AVSPT
 .Lj216:
@@ -1977,7 +1975,7 @@ UMAIN_$$_MAIN2:
 .Lj279:
 # value: 0d+6.2500000000000000E-002
 	.byte	0,0,0,0,0,0,176,63
-.Lj376:
+.Lj377:
 	sub	r0,r11,#224
 	bl	fpc_ansistr_concat_multi
 	ldr	r2,[r11, #-224]
@@ -2008,11 +2006,11 @@ UMAIN_$$_MAIN2:
 	bne	.Lj283
 	mov	r0,#2
 	str	r0,[r13, #4]
-	mov	r1,#2
+# Peephole MovStrMov done
 # Rescheduled
-	ldr	r0,.Lj284
-	str	r1,[r13]
-	ldrb	r0,[r0]
+	ldr	r1,.Lj284
+	str	r0,[r13]
+	ldrb	r0,[r1]
 	mov	r1,r0,lsr #4
 	mov	r2,#0
 	sub	r0,r11,#224
@@ -2056,11 +2054,11 @@ UMAIN_$$_MAIN2:
 	bne	.Lj291
 	mov	r0,#2
 	str	r0,[r13, #4]
-# Peephole MovStrMov done
+	mov	r1,#2
 # Rescheduled
-	ldr	r1,.Lj292
-	str	r0,[r13]
-	ldrb	r0,[r1]
+	ldr	r0,.Lj292
+	str	r1,[r13]
+	ldrb	r0,[r0]
 	mov	r1,r0,lsr #4
 	mov	r2,#0
 	sub	r0,r11,#224
@@ -2108,74 +2106,91 @@ UMAIN_$$_MAIN2:
 # Rescheduled
 	ldr	r1,.Lj299
 	umull	r1,r0,r0,r1
-	mov	r4,r0,lsr #6
-# Peephole MovMov2Mov removed superfluous mov
+	mov	r0,r0,lsr #6
 # [207] if a<75 then ii:=184
-	cmp	r4,#75
-	movlt	r6,#184
+	cmp	r0,#75
+	movlt	r5,#184
 	blt	.Lj302
 # [208] else if a<80 then ii:=232
-	cmp	r4,#80
-	movlt	r6,#232
+	cmp	r0,#80
+	movlt	r5,#232
 # [209] else ii:=40;
-	movge	r6,#40
+	movge	r5,#40
 .Lj302:
-# [210] outtextxyz(1466,1070,inttostr(a)+' C',ii,2,2);
+# [210] outtextxyz(1434,1070,inttostr(a),ii,2,2);
+	mov	r1,#2
+	str	r1,[r13, #4]
+# Peephole MovStrMov done
+	str	r1,[r13]
+	mov	r1,r0
+	sub	r0,r11,#224
+	bl	SYSUTILS_$$_INTTOSTR$LONGINT$$ANSISTRING
+	ldr	r2,[r11, #-224]
+	mov	r3,r5
+	mov	r1,#46
+	orr	r1,r1,#1024
+	mov	r0,#154
+	orr	r0,r0,#1280
+	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
+# [211] outtextxyz(1474,1070,'C',ii,2,2);
 	mov	r0,#2
 	str	r0,[r13, #4]
 # Peephole MovStrMov done
 	str	r0,[r13]
-	sub	r0,r11,#224
-	bl	fpc_ansistr_decr_ref
-	mov	r1,r4
-	sub	r0,r11,#252
-	bl	SYSUTILS_$$_INTTOSTR$LONGINT$$ANSISTRING
-	ldr	r1,[r11, #-252]
-# Rescheduled
-	ldr	r2,.Lj306
-	mov	r3,#0
-	sub	r0,r11,#224
-	bl	fpc_ansistr_concat
-	ldr	r2,[r11, #-224]
-	mov	r3,r6
+	mov	r3,r5
 	mov	r1,#46
 	orr	r1,r1,#1024
-	mov	r0,#186
+	mov	r0,#194
+# Rescheduled
+	ldr	r2,.Lj306
 	orr	r0,r0,#1280
 	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
-# [212] for i:=64 to 88 do lpoke($2010000+4*i,lpeek($2010000+2048+4*((c div 2) mod 256)+4*i));
-	mov	r5,#64
-	sub	r5,r5,#1
+# [212] outtextxyz(1462,1050,'.',ii,2,2);
+	mov	r0,#2
+	str	r0,[r13, #4]
+# Peephole MovStrMov done
+	str	r0,[r13]
+	mov	r3,r5
+	mov	r1,#26
+	orr	r1,r1,#1024
+	mov	r0,#182
+# Rescheduled
+	ldr	r2,.Lj307
+	orr	r0,r0,#1280
+	bl	RETROMALINA_$$_OUTTEXTXYZ$LONGINT$LONGINT$ANSISTRING$LONGINT$LONGINT$LONGINT
+# [214] for i:=64 to 88 do lpoke($2010000+4*i,lpeek($2010000+2048+4*((c div 2) mod 256)+4*i));
+	mov	r4,#64
+	sub	r4,r4,#1
 	.balign 4
-.Lj309:
+.Lj310:
 # Rescheduled
-	ldr	r0,.Lj310
-	add	r5,r5,#1
+	ldr	r0,.Lj311
+	add	r4,r4,#1
 # Rescheduled
-	ldr	r1,.Lj311
+	ldr	r1,.Lj312
 	ldr	r6,[r0]
-	ldr	r4,[r1]
+	ldr	r5,[r1]
 	mov	r2,#63
-	mov	r1,r4
+	mov	r1,r5
 	mov	r0,r6
 	bl	fpc_sarint64
 	and	r0,r0,#1
 	mov	r1,#0
 	adds	r0,r0,r6
-	adc	r1,r1,r4
+	adc	r1,r1,r5
 	mov	r2,#1
 	bl	fpc_sarint64
-	mov	r4,r0
+	mov	r5,r0
 	mov	r6,r1
 	mov	r2,#63
 	mov	r1,r6
-	mov	r0,r4
+	mov	r0,r5
 	bl	fpc_sarint64
-	eor	r2,r0,r4
-	eor	r3,r1,r6
-	subs	r12,r2,r0
-	sbc	r2,r3,r1
-	and	r2,r12,#255
+	eor	r2,r0,r5
+	eor	r12,r1,r6
+	subs	r3,r2,r0
+	sbc	r2,r12,r1
+	and	r2,r3,#255
 	mov	r3,#0
 	eor	r2,r2,r0
 	eor	r3,r3,r1
@@ -2188,25 +2203,25 @@ UMAIN_$$_MAIN2:
 	orr	r2,r2,r0,lsr #30
 	mov	r0,#33554432
 	orr	r0,r0,#67584
-	adds	r3,r1,r0
-	adc	r2,r2,#0
-	mov	r0,r5,lsl #2
-	mov	r1,r0,asr #31
-	adds	r0,r0,r3
-	adc	r1,r1,r2
+	adds	r1,r1,r0
+	adc	r3,r2,#0
+	mov	r0,r4,lsl #2
+	mov	r2,r0,asr #31
+	adds	r0,r0,r1
+	adc	r1,r2,r3
 	bic	r0,r0,#3
 	ldr	r0,[r0]
-	mov	r1,r5,lsl #2
+	mov	r1,r4,lsl #2
 	add	r1,r1,#33554432
 	add	r1,r1,#65536
 	bic	r1,r1,#3
 	str	r0,[r1]
-	cmp	r5,#88
-	blt	.Lj309
-# [213] if (c mod 32)=0 then lpoke($2010000+4*89,lpeek($2010000+2048+(4*(c div 64) mod 256)))   ;
-	ldr	r0,.Lj310
+	cmp	r4,#88
+	blt	.Lj310
+# [215] if (c mod 32)=0 then lpoke($2010000+4*89,lpeek($2010000+2048+(4*(c div 64) mod 256)))   ;
+	ldr	r0,.Lj311
 # Rescheduled
-	ldr	r1,.Lj311
+	ldr	r1,.Lj312
 	ldr	r5,[r0]
 	ldr	r4,[r1]
 	mov	r2,#63
@@ -2226,10 +2241,10 @@ UMAIN_$$_MAIN2:
 # Peephole DataMov2Data removed superfluous mov
 # Peephole DataMov2Data removed superfluous mov
 	orrs	r0,r0,r1
-	bne	.Lj315
-	ldr	r0,.Lj310
+	bne	.Lj316
+	ldr	r0,.Lj311
 # Rescheduled
-	ldr	r1,.Lj311
+	ldr	r1,.Lj312
 	ldr	r5,[r0]
 	ldr	r4,[r1]
 	mov	r2,#63
@@ -2250,10 +2265,10 @@ UMAIN_$$_MAIN2:
 	mov	r0,r4
 	bl	fpc_sarint64
 	eor	r2,r0,r4
-	eor	r12,r1,r5
-	subs	r3,r2,r0
-	sbc	r2,r12,r1
-	and	r2,r3,#255
+	eor	r3,r1,r5
+	subs	r12,r2,r0
+	sbc	r2,r3,r1
+	and	r2,r12,#255
 	mov	r3,#0
 	eor	r2,r2,r0
 	eor	r3,r3,r1
@@ -2268,15 +2283,15 @@ UMAIN_$$_MAIN2:
 	bic	r0,r0,#3
 # Rescheduled
 # Rescheduled
-	ldr	r1,.Lj318
+	ldr	r1,.Lj319
 	ldr	r0,[r0]
 	bic	r1,r1,#3
 	str	r0,[r1]
-.Lj315:
-# [214] cc:=(2*c) mod 3544 ;
-	ldr	r0,.Lj310
+.Lj316:
+# [216] cc:=(2*c) mod 3544 ;
+	ldr	r0,.Lj311
 # Rescheduled
-	ldr	r1,.Lj311
+	ldr	r1,.Lj312
 	ldr	r0,[r0]
 	ldr	r1,[r1]
 	adds	r2,r0,r0
@@ -2286,11 +2301,11 @@ UMAIN_$$_MAIN2:
 	orr	r0,r0,#3328
 	bl	fpc_mod_int64
 	mov	r4,r0
-# [215] if cc<1772 then blit($3800000,10+(cc),1011,$3000000,12,1011,1771-(cc),48,1792,1792);
+# [217] if cc<1772 then blit($3800000,10+(cc),1011,$3000000,12,1011,1771-(cc),48,1792,1792);
 	mov	r0,#236
 	orr	r0,r0,#1536
 	cmp	r4,r0
-	bge	.Lj322
+	bge	.Lj323
 	mov	r0,#1792
 	str	r0,[r13, #20]
 # Peephole MovStrMov done
@@ -2312,12 +2327,12 @@ UMAIN_$$_MAIN2:
 	mov	r3,#50331648
 	mov	r0,#58720256
 	bl	RETROMALINA_$$_BLIT$crc5A667533
-.Lj322:
-# [216] if cc<1772 then blit($3800000,10,1059,$3000000,11+1771-(cc),1011,(cc),48,1792,1792);
+.Lj323:
+# [218] if cc<1772 then blit($3800000,10,1059,$3000000,11+1771-(cc),1011,(cc),48,1792,1792);
 	mov	r0,#236
 	orr	r0,r0,#1536
 	cmp	r4,r0
-	bge	.Lj324
+	bge	.Lj325
 	mov	r0,#1792
 	str	r0,[r13, #20]
 # Peephole MovStrMov done
@@ -2338,12 +2353,12 @@ UMAIN_$$_MAIN2:
 	mov	r1,#10
 	mov	r0,#58720256
 	bl	RETROMALINA_$$_BLIT$crc5A667533
-.Lj324:
-# [217] if cc>=1772 then blit ($3800000,10,1011,$3000000,11+3543-(cc),1011,(cc-1772),48,1792,1792);
+.Lj325:
+# [219] if cc>=1772 then blit ($3800000,10,1011,$3000000,11+3543-(cc),1011,(cc-1772),48,1792,1792);
 	mov	r0,#236
 	orr	r0,r0,#1536
 	cmp	r4,r0
-	blt	.Lj326
+	blt	.Lj327
 	mov	r0,#1792
 	str	r0,[r13, #20]
 # Peephole MovStrMov done
@@ -2366,12 +2381,12 @@ UMAIN_$$_MAIN2:
 	mov	r1,#10
 	mov	r0,#58720256
 	bl	RETROMALINA_$$_BLIT$crc5A667533
-.Lj326:
-# [218] if cc>=1772 then blit($3800000,10+(cc-1772),1059,$3000000,12,1011,1771-(cc-1772),48,1792,1792);
+.Lj327:
+# [220] if cc>=1772 then blit($3800000,10+(cc-1772),1059,$3000000,12,1011,1771-(cc-1772),48,1792,1792);
 	mov	r0,#236
 	orr	r0,r0,#1536
 	cmp	r4,r0
-	blt	.Lj328
+	blt	.Lj329
 	mov	r0,#1792
 	str	r0,[r13, #20]
 # Peephole MovStrMov done
@@ -2380,11 +2395,11 @@ UMAIN_$$_MAIN2:
 	str	r0,[r13, #12]
 	mov	r0,#12
 	str	r0,[r13]
-	sub	r1,r4,#236
-	sub	r1,r1,#1536
-	mov	r0,#235
-	orr	r0,r0,#1536
-	sub	r0,r0,r1
+	sub	r0,r4,#236
+	sub	r0,r0,#1536
+	mov	r1,#235
+	orr	r1,r1,#1536
+	sub	r0,r1,r0
 	str	r0,[r13, #8]
 	mov	r0,#243
 	orr	r0,r0,#768
@@ -2397,8 +2412,8 @@ UMAIN_$$_MAIN2:
 	mov	r3,#50331648
 	mov	r0,#58720256
 	bl	RETROMALINA_$$_BLIT$crc5A667533
-.Lj328:
-# [219] box2(10,610,894,797,178);
+.Lj329:
+# [221] box2(10,610,894,797,178);
 	mov	r0,#178
 	str	r0,[r13]
 	mov	r3,#29
@@ -2409,7 +2424,7 @@ UMAIN_$$_MAIN2:
 	orr	r1,r1,#512
 	mov	r0,#10
 	bl	RETROMALINA_$$_BOX2$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
-# [220] box2(10,700,894,701,140);
+# [222] box2(10,700,894,701,140);
 	mov	r0,#140
 	str	r0,[r13]
 	mov	r3,#189
@@ -2419,7 +2434,7 @@ UMAIN_$$_MAIN2:
 	mov	r1,#700
 	mov	r0,#10
 	bl	RETROMALINA_$$_BOX2$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
-# [221] box2(10,636,894,637,140);
+# [223] box2(10,636,894,637,140);
 	mov	r0,#140
 	str	r0,[r13]
 	mov	r3,#125
@@ -2429,7 +2444,7 @@ UMAIN_$$_MAIN2:
 	mov	r1,#636
 	mov	r0,#10
 	bl	RETROMALINA_$$_BOX2$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
-# [222] box2(10,764,894,765,140);
+# [224] box2(10,764,894,765,140);
 	mov	r0,#140
 	str	r0,[r13]
 	mov	r3,#253
@@ -2440,73 +2455,73 @@ UMAIN_$$_MAIN2:
 	mov	r0,#10
 	bl	RETROMALINA_$$_BOX2$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
 # Rescheduled
-# [223] for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 48,2,2,190);
-	ldr	r1,.Lj332
-	mov	r0,#20
+# [225] for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 48,2,2,190);
+	ldr	r0,.Lj333
+	mov	r1,#20
 # Rescheduled
-	ldr	r2,.Lj332
-	str	r0,[r1]
+	ldr	r2,.Lj333
+	str	r1,[r0]
 	ldr	r0,[r2]
 	sub	r0,r0,#1
 	str	r0,[r2]
 	.balign 4
-.Lj331:
-	ldr	r2,.Lj332
+.Lj332:
+	ldr	r2,.Lj333
 	ldr	r0,[r2]
 	add	r0,r0,#1
 # Rescheduled
-	ldr	r1,.Lj332
+	ldr	r1,.Lj333
 	str	r0,[r2]
 	ldr	r0,[r1]
 # Rescheduled
-	ldr	r1,.Lj336
+	ldr	r1,.Lj337
 # Peephole FoldShiftLdrStr done
 	ldr	r0,[r1, r0, lsl #2]
-	movs	r1,r0
-	rsbmi	r1,r1,#0
-	mov	r0,#176
-	orr	r0,r0,#45824
-	cmp	r1,r0
-	bge	.Lj338
-	mov	r1,#190
+	movs	r0,r0
+	rsbmi	r0,r0,#0
+	mov	r1,#176
+	orr	r1,r1,#45824
+	cmp	r0,r1
+	bge	.Lj339
+	mov	r0,#190
 # Rescheduled
-	ldr	r0,.Lj332
-	str	r1,[r13]
-	ldr	r0,[r0]
+	ldr	r1,.Lj333
+	str	r0,[r13]
+	ldr	r0,[r1]
 # Rescheduled
-	ldr	r1,.Lj336
+	ldr	r1,.Lj337
 # tcgarm.a_mul_reg_reg_pair called
 # Rescheduled
 # Peephole FoldShiftLdrStr done
 # Rescheduled
-	ldr	r0,[r1, r0, lsl #2]
-	ldr	r3,.Lj341
-	smull	r1,r2,r0,r3
+	ldr	r1,[r1, r0, lsl #2]
+	ldr	r3,.Lj342
+	smull	r0,r2,r1,r3
 # Peephole FoldShiftProcess done
-	mov	r3,r0,lsr #31
+	mov	r3,r1,lsr #31
 	add	r2,r3,r2,asr #3
 	mov	r0,#700
 	sub	r1,r0,r2
 # Rescheduled
-	ldr	r0,.Lj332
+	ldr	r0,.Lj333
 	ldr	r0,[r0]
 	add	r0,r0,#20
 	mov	r3,#2
 	mov	r2,#2
 	bl	RETROMALINA_$$_BOX$LONGINT$LONGINT$LONGINT$LONGINT$LONGINT
-.Lj338:
-	ldr	r0,.Lj332
+.Lj339:
+	ldr	r0,.Lj333
 	ldr	r0,[r0]
 	cmp	r0,#840
-	blt	.Lj331
-# [224] sprx:=round(dpeek($200d400)/40+74);
+	blt	.Lj332
+# [226] sprx:=round(dpeek($200d400)/40+74);
 	mov	r0,#33554432
 	orr	r0,r0,#54272
 	bic	r0,r0,#1
 	ldrh	r0,[r0]
 	vmov	s0,r0
 	vcvt.f64.u32	d0,s0
-	b	.Lj377
+	b	.Lj378
 .Lj281:
 	.long	34013187
 .Lj284:
@@ -2527,171 +2542,171 @@ UMAIN_$$_MAIN2:
 	.long	274877907
 .Lj306:
 	.long	.Ld16
-.Lj310:
-	.long	TC_$UMAIN_$$_C
+.Lj307:
+	.long	.Ld17
 .Lj311:
+	.long	TC_$UMAIN_$$_C
+.Lj312:
 	.long	TC_$UMAIN_$$_C+4
-.Lj318:
+.Lj319:
 	.long	33620324
-.Lj332:
+.Lj333:
 	.long	U_$RETROMALINA_$$_J
-.Lj336:
+.Lj337:
 	.long	U_$RETROMALINA_$$_SCOPE
-.Lj341:
+.Lj342:
 	.long	715827883
-.Lj377:
-	vldr	d1,.Lj344
-	vmul.f64	d0,d0,d1
+.Lj378:
 	vldr	d1,.Lj345
+	vmul.f64	d0,d0,d1
+	vldr	d1,.Lj346
 	vadd.f64	d0,d0,d1
 	vmov	r0,r1,d0
 	bl	fpc_round_real
 # Rescheduled
-	ldr	r2,.Lj346
+	ldr	r2,.Lj347
 # Rescheduled
-# [225] spry:=920-3*(peek($200d406) and $F0);
-	ldr	r1,.Lj347
+# [227] spry:=920-3*(peek($200d406) and $F0);
+	ldr	r1,.Lj348
 	str	r0,[r2]
 	ldrb	r0,[r1]
 	and	r0,r0,#240
 	add	r0,r0,r0,lsl #1
 	mov	r1,#920
 # Rescheduled
-	ldr	r2,.Lj348
+	ldr	r2,.Lj349
 	sub	r1,r1,r0
 # Rescheduled
-# [226] lpoke($2060040,(spry shl 16)+sprx+2048*(1-peek($2070003)));
-	ldr	r0,.Lj349
+# [228] lpoke($2060040,(spry shl 16)+sprx+2048*(1-peek($2070003)));
+	ldr	r0,.Lj350
 	str	r1,[r2]
 	ldrb	r0,[r0]
 	mov	r1,#1
 	sub	r0,r1,r0
 # Rescheduled
-	ldr	r1,.Lj348
+	ldr	r1,.Lj349
 	mov	r3,r0,lsl #11
 	ldr	r0,[r1]
 # Rescheduled
-	ldr	r2,.Lj346
+	ldr	r2,.Lj347
 	mov	r1,r0,lsl #16
 	ldr	r0,[r2]
 	add	r0,r0,r1
 # Rescheduled
 # Rescheduled
-	ldr	r1,.Lj352
+	ldr	r1,.Lj353
 	add	r0,r0,r3
 	bic	r2,r1,#3
 # Rescheduled
-# [227] spr2x:=round(dpeek($200d407)/40+74);
-	ldr	r1,.Lj353
+# [229] spr2x:=round(dpeek($200d407)/40+74);
+	ldr	r1,.Lj354
 	str	r0,[r2]
 	bic	r0,r1,#1
 	ldrh	r0,[r0]
 	vmov	s0,r0
 	vcvt.f64.u32	d0,s0
-	vldr	d1,.Lj354
-	vmul.f64	d0,d0,d1
 	vldr	d1,.Lj355
+	vmul.f64	d0,d0,d1
+	vldr	d1,.Lj356
 	vadd.f64	d0,d0,d1
 	vmov	r0,r1,d0
 	bl	fpc_round_real
 # Rescheduled
-	ldr	r2,.Lj356
+	ldr	r2,.Lj357
 # Rescheduled
-# [228] spr2y:=920-3*(peek($200d40d) and $F0);
-	ldr	r1,.Lj357
+# [230] spr2y:=920-3*(peek($200d40d) and $F0);
+	ldr	r1,.Lj358
 	str	r0,[r2]
 	ldrb	r0,[r1]
 	and	r0,r0,#240
 	add	r0,r0,r0,lsl #1
 	mov	r1,#920
 # Rescheduled
-	ldr	r2,.Lj358
-	sub	r1,r1,r0
+	ldr	r2,.Lj359
+	sub	r0,r1,r0
 # Rescheduled
-# [229] lpoke($2060048,(spr2y shl 16)+spr2x+2048*(1-peek($2070004)));
-	ldr	r0,.Lj359
-	str	r1,[r2]
-	ldrb	r0,[r0]
+# [231] lpoke($2060048,(spr2y shl 16)+spr2x+2048*(1-peek($2070004)));
+	ldr	r1,.Lj360
+	str	r0,[r2]
+	ldrb	r0,[r1]
 	mov	r1,#1
 	sub	r0,r1,r0
 # Rescheduled
-	ldr	r1,.Lj358
+	ldr	r1,.Lj359
 	mov	r3,r0,lsl #11
 	ldr	r0,[r1]
 # Rescheduled
-	ldr	r1,.Lj356
+	ldr	r1,.Lj357
 	mov	r2,r0,lsl #16
 	ldr	r0,[r1]
 	add	r0,r0,r2
 # Rescheduled
 # Rescheduled
-	ldr	r1,.Lj362
+	ldr	r1,.Lj363
 	add	r0,r0,r3
 	bic	r1,r1,#3
 # Rescheduled
-# [230] spr3x:=round(dpeek($200d40e)/40+74);
-	ldr	r2,.Lj363
+# [232] spr3x:=round(dpeek($200d40e)/40+74);
+	ldr	r2,.Lj364
 	str	r0,[r1]
 	bic	r0,r2,#1
 	ldrh	r0,[r0]
 	vmov	s0,r0
 	vcvt.f64.u32	d1,s0
-	vldr	d0,.Lj364
-	vmul.f64	d1,d1,d0
 	vldr	d0,.Lj365
+	vmul.f64	d1,d1,d0
+	vldr	d0,.Lj366
 	vadd.f64	d0,d1,d0
 	vmov	r0,r1,d0
 	bl	fpc_round_real
 # Rescheduled
-	ldr	r2,.Lj366
+	ldr	r2,.Lj367
 # Rescheduled
-# [231] spr3y:=920-3*(peek($200d414) and $F0);
-	ldr	r1,.Lj367
+# [233] spr3y:=920-3*(peek($200d414) and $F0);
+	ldr	r1,.Lj368
 	str	r0,[r2]
 	ldrb	r0,[r1]
 	and	r0,r0,#240
 	add	r0,r0,r0,lsl #1
 	mov	r1,#920
 # Rescheduled
-	ldr	r2,.Lj368
+	ldr	r2,.Lj369
 	sub	r0,r1,r0
 # Rescheduled
-# [232] lpoke($2060050,(spr3y shl 16)+spr3x+2048*(1-peek($2070005)));
-	ldr	r1,.Lj369
+# [234] lpoke($2060050,(spr3y shl 16)+spr3x+2048*(1-peek($2070005)));
+	ldr	r1,.Lj370
 	str	r0,[r2]
 	ldrb	r0,[r1]
 	mov	r1,#1
 	sub	r0,r1,r0
 # Rescheduled
-	ldr	r1,.Lj368
+	ldr	r1,.Lj369
 	mov	r3,r0,lsl #11
 	ldr	r0,[r1]
 # Rescheduled
-	ldr	r2,.Lj366
+	ldr	r2,.Lj367
 	mov	r1,r0,lsl #16
 	ldr	r0,[r2]
 	add	r0,r0,r1
 # Rescheduled
 # Rescheduled
-	ldr	r1,.Lj372
+	ldr	r1,.Lj373
 	add	r0,r0,r3
 	bic	r1,r1,#3
 # Rescheduled
-# [233] lpoke($2060078,lpeek($206002c) shl 1);
-	ldr	r2,.Lj373
+# [235] lpoke($2060078,lpeek($206002c) shl 1);
+	ldr	r2,.Lj374
 	str	r0,[r1]
 	bic	r0,r2,#3
 	ldr	r0,[r0]
 # Rescheduled
 # Rescheduled
-	ldr	r1,.Lj374
+	ldr	r1,.Lj375
 	mov	r0,r0,lsl #1
 	bic	r1,r1,#3
 	str	r0,[r1]
 .Lj147:
 	bl	fpc_popaddrstack
-	sub	r0,r11,#252
-	bl	fpc_ansistr_decr_ref
 	sub	r0,r11,#248
 	bl	fpc_ansistr_decr_ref
 	sub	r0,r11,#224
@@ -2708,61 +2723,61 @@ UMAIN_$$_MAIN2:
 	cmp	r0,#0
 	blne	fpc_reraise
 	ldmea	r11,{r4,r5,r6,r7,r8,r9,r10,r11,r13,r15}
-.Lj344:
-# value: 0d+2.5000000000000001E-002
-	.byte	154,153,153,153,153,153,153,63
 .Lj345:
-# value: 0d+7.4000000000000000E+001
-	.byte	0,0,0,0,0,128,82,64
+# value: 0d+2.5000000000000001E-002
+	.byte	154,153,153,153,153,153,153,63
 .Lj346:
-	.long	U_$UMAIN_$$_SPRX
+# value: 0d+7.4000000000000000E+001
+	.byte	0,0,0,0,0,128,82,64
 .Lj347:
-	.long	33608710
+	.long	U_$UMAIN_$$_SPRX
 .Lj348:
-	.long	U_$UMAIN_$$_SPRY
+	.long	33608710
 .Lj349:
+	.long	U_$UMAIN_$$_SPRY
+.Lj350:
 	.long	34013187
-.Lj352:
-	.long	33947712
 .Lj353:
-	.long	33608711
+	.long	33947712
 .Lj354:
-# value: 0d+2.5000000000000001E-002
-	.byte	154,153,153,153,153,153,153,63
+	.long	33608711
 .Lj355:
-# value: 0d+7.4000000000000000E+001
-	.byte	0,0,0,0,0,128,82,64
-.Lj356:
-	.long	U_$UMAIN_$$_SPR2X
-.Lj357:
-	.long	33608717
-.Lj358:
-	.long	U_$UMAIN_$$_SPR2Y
-.Lj359:
-	.long	34013188
-.Lj362:
-	.long	33947720
-.Lj363:
-	.long	33608718
-.Lj364:
 # value: 0d+2.5000000000000001E-002
 	.byte	154,153,153,153,153,153,153,63
-.Lj365:
+.Lj356:
 # value: 0d+7.4000000000000000E+001
 	.byte	0,0,0,0,0,128,82,64
+.Lj357:
+	.long	U_$UMAIN_$$_SPR2X
+.Lj358:
+	.long	33608717
+.Lj359:
+	.long	U_$UMAIN_$$_SPR2Y
+.Lj360:
+	.long	34013188
+.Lj363:
+	.long	33947720
+.Lj364:
+	.long	33608718
+.Lj365:
+# value: 0d+2.5000000000000001E-002
+	.byte	154,153,153,153,153,153,153,63
 .Lj366:
-	.long	U_$UMAIN_$$_SPR3X
+# value: 0d+7.4000000000000000E+001
+	.byte	0,0,0,0,0,128,82,64
 .Lj367:
-	.long	33608724
+	.long	U_$UMAIN_$$_SPR3X
 .Lj368:
-	.long	U_$UMAIN_$$_SPR3Y
+	.long	33608724
 .Lj369:
+	.long	U_$UMAIN_$$_SPR3Y
+.Lj370:
 	.long	34013189
-.Lj372:
-	.long	33947728
 .Lj373:
-	.long	33947692
+	.long	33947728
 .Lj374:
+	.long	33947692
+.Lj375:
 	.long	33947768
 .Le2:
 	.size	UMAIN_$$_MAIN2, .Le2 - UMAIN_$$_MAIN2
@@ -2785,10 +2800,10 @@ FINALIZE$_$UMAIN:
 .globl	UMAIN_$$_finalize_implicit
 UMAIN_$$_finalize_implicit:
 	stmfd	r13!,{r14}
-	ldr	r0,.Lj382
+	ldr	r0,.Lj383
 	bl	fpc_ansistr_decr_ref
 	ldmfd	r13!,{r15}
-.Lj382:
+.Lj383:
 	.long	U_$UMAIN_$$_SONGNAME
 .Le4:
 	.size	UMAIN_$$_finalize_implicit, .Le4 - UMAIN_$$_finalize_implicit
@@ -3196,11 +3211,21 @@ TC_$UMAIN_$$_AV6502:
 	.balign 4
 .Ld16$strlab:
 	.short	0,1
-	.long	-1,2
+	.long	-1,1
 .Ld16:
-	.ascii	" C\000"
+	.ascii	"C\000"
 .Le28:
 	.size	.Ld16$strlab, .Le28 - .Ld16$strlab
+
+.section .rodata.n_.Ld17
+	.balign 4
+.Ld17$strlab:
+	.short	0,1
+	.long	-1,1
+.Ld17:
+	.ascii	".\000"
+.Le29:
+	.size	.Ld17$strlab, .Le29 - .Ld17$strlab
 # End asmlist al_typedconsts
 # Begin asmlist al_rtti
 
@@ -3213,9 +3238,9 @@ RTTI_$UMAIN_$$_def00000006:
 	.long	RTTI_$SYSTEM_$$_RAWBYTESTRING
 	.byte	1,0,0,0
 	.long	RTTI_$SYSTEM_$$_LONGINT
-# [243] 
-.Le29:
-	.size	RTTI_$UMAIN_$$_def00000006, .Le29 - RTTI_$UMAIN_$$_def00000006
+# [245] 
+.Le30:
+	.size	RTTI_$UMAIN_$$_def00000006, .Le30 - RTTI_$UMAIN_$$_def00000006
 
 .section .rodata.n_RTTI_$UMAIN_$$_def00000007
 	.balign 4
@@ -3226,8 +3251,8 @@ RTTI_$UMAIN_$$_def00000007:
 	.long	RTTI_$SYSTEM_$$_RAWBYTESTRING
 	.byte	1,0,0,0
 	.long	RTTI_$SYSTEM_$$_LONGINT
-.Le30:
-	.size	RTTI_$UMAIN_$$_def00000007, .Le30 - RTTI_$UMAIN_$$_def00000007
+.Le31:
+	.size	RTTI_$UMAIN_$$_def00000007, .Le31 - RTTI_$UMAIN_$$_def00000007
 
 .section .rodata.n_RTTI_$UMAIN_$$_def00000008
 	.balign 4
@@ -3238,8 +3263,8 @@ RTTI_$UMAIN_$$_def00000008:
 	.long	RTTI_$SYSTEM_$$_RAWBYTESTRING
 	.byte	1,0,0,0
 	.long	RTTI_$SYSTEM_$$_LONGINT
-.Le31:
-	.size	RTTI_$UMAIN_$$_def00000008, .Le31 - RTTI_$UMAIN_$$_def00000008
+.Le32:
+	.size	RTTI_$UMAIN_$$_def00000008, .Le32 - RTTI_$UMAIN_$$_def00000008
 
 .section .rodata.n_RTTI_$UMAIN_$$_def00000009
 	.balign 4
@@ -3250,8 +3275,8 @@ RTTI_$UMAIN_$$_def00000009:
 	.long	RTTI_$SYSTEM_$$_RAWBYTESTRING
 	.byte	1,0,0,0
 	.long	RTTI_$SYSTEM_$$_LONGINT
-.Le32:
-	.size	RTTI_$UMAIN_$$_def00000009, .Le32 - RTTI_$UMAIN_$$_def00000009
+.Le33:
+	.size	RTTI_$UMAIN_$$_def00000009, .Le33 - RTTI_$UMAIN_$$_def00000009
 
 .section .rodata.n_RTTI_$UMAIN_$$_def0000000A
 	.balign 4
@@ -3262,7 +3287,7 @@ RTTI_$UMAIN_$$_def0000000A:
 	.long	RTTI_$SYSTEM_$$_RAWBYTESTRING
 	.byte	1,0,0,0
 	.long	RTTI_$SYSTEM_$$_LONGINT
-.Le33:
-	.size	RTTI_$UMAIN_$$_def0000000A, .Le33 - RTTI_$UMAIN_$$_def0000000A
+.Le34:
+	.size	RTTI_$UMAIN_$$_def0000000A, .Le34 - RTTI_$UMAIN_$$_def0000000A
 # End asmlist al_rtti
 

@@ -41,6 +41,10 @@ var s,currentdir,currentdir2:string;
     atitle,author,copyright:string[32];
     workdir:string;
     pause1:boolean=true;
+    ch:tkeyboardreport;
+    keyboardstatus:array[0..255]of byte;
+    activekey:byte=0;
+    rptcnt:byte=0;
 
 // ---- procedures
 
@@ -210,8 +214,8 @@ while not DirectoryExists('C:\') do
   Sleep(100);
   end;
 
-DeleteFile('C:\kernel7.img');
-RenameFile('C:\kernel7_l.img','C:\kernel7.img');
+//DeleteFile('C:\kernel7.img');
+//RenameFile('C:\kernel7_l.img','C:\kernel7.img');
 
 sleep(100);
 
@@ -233,14 +237,26 @@ poke($2070003,1);
 poke($2070004,1);
 poke($2070005,1);
 pwmbeep;
-ThreadSetPriority(ThreadGetCurrent,6);
+//ThreadSetPriority(ThreadGetCurrent,6);
 threadsleep(1);
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_0);
 threadsleep(1);
+for i:=0 to 255 do keyboardstatus[i]:=0;
+startreportbuffer;
 repeat
   main2;
-  getkey;
-
+ // getkey;
+//box(200,200,400,100,33);
+ // poke($200d508,peek($200d508)+1);
+ ch:=getkeyboardreport;
+ if (ch[2]<>0) and (ch[2]<>255) then activekey:=ch[2];
+ if (ch[2]<>0) and (activekey>0) then inc(rptcnt);
+ if ch[2]=0 then begin rptcnt:=0; activekey:=0; end;
+ if rptcnt>26 then rptcnt:=24 ;
+ if (rptcnt=1) or (rptcnt=24) then poke($2060028,byte(translatescantochar(activekey,0)));
+// for i:=0 to 7 do outtextxy(200+40*i,200,inttostr(ch[i]),40);
+// outtextxy(200,230,inttostr(activekey),44);
+// outtextxy(200,260,inttostr(rptcnt),44);
 
   if pause1 then begin for i:=$200d400 to $200d400+25 do poke(i,0); end;
 
