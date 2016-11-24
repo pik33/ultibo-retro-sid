@@ -48,9 +48,9 @@
 //                           1_AAAAAAA - set display address to AAAAAAA
 //                           F_AAAAAAA - goto address AAAAAAA
 // TODO 206001C - horizontal scroll right register
-// TODO 2060020 - x res
-// TODO 2060024 - y res
-// 2060028 - KBD. 28 - ASCII/scan. 29,2A modifiers, 2B 1 if key pressed 2 if special
+// 2060020 - x res
+// 2060024 - y res
+// TODO 2060028 - KBD. 28 - ASCII/scan. 29,2A modifiers, 2B 1 if key pressed 2 if special
 // TODO 206002C - mouse. 6002c,d x 6002e,f y
 // TODO 2060030   keys,
 // TODO 2060034 - current dl position
@@ -68,10 +68,6 @@
 
 // ----------------------------   This is still alpha quality code
 
-// This is the code in transition from Linux framebufer/SDL to Ultibo
-// and contains a lot of unneeded variables etc...
-
-
 unit retromalina;
 
 {$mode objfpc}{$H+}
@@ -81,28 +77,18 @@ interface
 uses sysutils,classes,unit6502,Platform,Framebuffer,keyboard,mouse,threads,GlobalConst,ultibo;
 
 type Tsrcconvert=procedure(screen:pointer);
-     Ttfb=array[0..63] of integer;
-     Ptfb=^Ttfb;
-     Pint=^integer;
-     tram=array [0..134217728] of integer;
-     tramw=array [0..268435456] of word;
-     tramb=array [0..536870911] of byte;
+
+     // Retromachine main thread
 
      TRetro = class(TThread)
      private
      protected
        procedure Execute; override;
      public
-      Constructor Create(CreateSuspended : boolean);
+       Constructor Create(CreateSuspended : boolean);
      end;
 
-     Tkbd = class(TThread)
-     private
-     protected
-       procedure Execute; override;
-     public
-      Constructor Create(CreateSuspended : boolean);
-     end;
+     // Audio thread
 
      TAudio= class(TThread)
      private
@@ -112,8 +98,7 @@ type Tsrcconvert=procedure(screen:pointer);
       Constructor Create(CreateSuspended : boolean);
      end;
 
-     tsample=array[0..1] of smallint;
-     TFiltertable=array[0..13] of double;
+     TSample=array[0..1] of smallint;
 
 var fh,filetype:integer;                // this needs cleaning...
     sfh:integer;                        // SID file handler
@@ -123,7 +108,6 @@ var fh,filetype:integer;                // this needs cleaning...
     vblank1:byte;
     combined:array[0..1023] of byte;
     scope:array[0..959] of integer;
- //   desired,obtained:TSDL_AudioSpec;
     db:boolean=false;
     debug:integer;
     sidtime:int64=0;
@@ -133,13 +117,8 @@ var fh,filetype:integer;                // this needs cleaning...
     skip:integer;
     scj:integer=0;
     thread:TRetro;
-    thread2:TKbd;
     thread3:TAudio;
     times6502:array[0..15] of integer;
-    r1:pointer;
-    raml:^tram absolute r1;
-    ramw:^tramw absolute r1;
-    ramb:^tramb absolute r1;
     attacktable:array[0..15] of double=(5.208e-4,1.302e-4,6.51e-5,4.34e-5,2.74e-5,1.86e-5,1.53e-5,1.3e-5,1.04e-5,4.17e-6,2.08e-6,1.302e-6,1.04e-6,3.47e-7,2.08e-7,1.3e-7);
     attacktablei:array[0..15] of int64;
     srtablei:array[0..15] of int64;
@@ -147,27 +126,23 @@ var fh,filetype:integer;                // this needs cleaning...
     sampleclock:integer=0;
     sidclock:integer=0;
     siddata:array[0..1151] of integer;
-    fullscreen:integer=0;
     i,j,k,l,fh2,lines:integer;
     p,p3:pointer;
     b:byte;
     scrfh:integer;
     running:integer=0;
-    tabl,tabl2:Ttfb;
- //   scr: PSDL_Surface;
     p4:^integer;
     scrconvert:Tsrcconvert;
     fb:pframebufferdevice;
-     FramebufferProperties:TFramebufferProperties;
-     kbd:array[0..15] of TKeyboarddata;
-     m:array[0..128] of Tmousedata;
-       dummy:pointer;
-       pause1:boolean=false;
+    FramebufferProperties:TFramebufferProperties;
+    kbd:array[0..15] of TKeyboarddata;
+    m:array[0..128] of Tmousedata;
+    pause1:boolean=false;
+
 // prototypes
 
 procedure initmachine;
 procedure stopmachine;
-//procedure scrconvert16(screen:pointer);
 procedure scrconvert16f(screen:pointer);
 procedure setataripallette(bank:integer);
 procedure cls(c:integer);
@@ -191,165 +166,48 @@ procedure putcharz(x,y:integer;ch:char;col,xz,yz:integer);
 procedure outtextxyz(x,y:integer; t:string;c,xz,yz:integer);
 procedure scrollup;
 function sid(mode:integer):tsample;
-//procedure sdlevents;
 procedure pwmbeep;
 procedure sdl_pauseaudio(mode:integer);   // instead of the real one
-//function sdl_sound_init:integer;
 procedure AudioCallback(b:integer);
-procedure getkey;
-
-
-const kdgraphics=1;
-      kdtest=0;
 
 
 implementation
 
-
-
 // ---- prototypes
 
-//procedure sprite(screen:pointer); forward;
 procedure spritef(screen:pointer); forward;
-//procedure AudioCallback(userdata:pointer; audio:Pbyte; length:integer); cdecl;    forward;
-function antialias6(input:double;var ft:Tfiltertable):double; forward;
 
+// ---- TAudio thread methods --------------------------------------------------
 
-constructor Tkbd.Create(CreateSuspended : boolean);
-
-begin
-  FreeOnTerminate := True;
-  inherited Create(CreateSuspended);
-end;
-constructor Taudio.Create(CreateSuspended : boolean);
+constructor TAudio.Create(CreateSuspended : boolean);
 
 begin
-  FreeOnTerminate := True;
-  inherited Create(CreateSuspended);
-end;
-
-procedure Tkbd.Execute;
-     var a,key:integer;
-          q:cardinal;
-begin
-//ThreadSetPriority(ThreadGetCurrent,5);
-threadsleep(1);
-ThreadSetCPU(ThreadGetCurrent,CPU_ID_2);
-threadsleep(1);
- repeat
-   a:=KeyboardReadex(@kbd[0], 1*sizeof(tkeyboarddata),1,q);
-   if (a=0) and (q>0) then  for i:=1 to q do
-     begin
-     //debug
- //    box(300,300,200,200,18);
- //    outtextxy(300,300,inttostr(q),44);
- //    outtextxy(300,320,inttostr(ord(kbd[0].charcode)),44);
- //    outtextxy(300,340,inttostr(kbd[0].modifiers),44);
- //    outtextxy(300,360,inttostr(kbd[0].scancode),44);
- //    outtextxy(300,380,inttostr(kbd[0].keycode),44);
- //    outtextxy(300,400,inttostr(cardinal(kbd[0].charunicode)),44);
-
-     key:=ord(kbd[0].charcode);
-     if kbd[0].modifiers and (16384+32768) <>0 then
-       begin
-       poke($206002b,1);
-       if key<>0 then poke($2060028,key) else poke($2060028,kbd[0].KeyCode and 255);
-       poke($2060029,kbd[0].modifiers and 255);
-       poke($206002a,(kbd[0].modifiers shr 8) and 255);
-       if key=0 then poke($206002b,peek($206002b) or $2);
-       CleanDataCacheRange($2060000,4096);
-       end;
-     end;
-
-
- //   a:=mouseReadex(@m[0], 128*sizeof(tkeyboarddata),1,q);
-//   if (a=0) and (q>0) then
-//     begin
-//     key:=ord(kbd[0].charcode);
-//     if key<>0 then poke($60028,key) else poke($60028,kbd[0].KeyCode and 255);
-//     poke($60029,kbd[0].modifiers and 255);
-//     poke($6002a,(kbd[0].modifiers shr 8) and 255);
-//     if key=0 then poke($6002a,peek($6002a) or $20);
-//     if kbd[0].modifiers and 16384 <>0 then poke($6002b,1);
-//     CleanDataCacheRange($4060000,4096);
-//     end;
-
-
-
-  threadsleep(10);
- until terminated;
-
-end;
-
-procedure getkey;
-     var a,key:integer;
-          q:cardinal;
-begin
-
-
-   a:=KeyboardReadex(@kbd[0], 4*sizeof(tkeyboarddata),1,q);
-   if (a=0) and (q>0) then  // for i:=1 to q do
-     begin
-
-
-     key:=ord(kbd[0].charcode);
-
-
-
-     if kbd[0].modifiers and (16384+32768) <>0 then
-       begin
-       poke($206002b,1);
-       if key<>0 then poke($2060028,key) else poke($2060028,kbd[0].KeyCode and 255);
-       poke($2060029,kbd[0].modifiers and 255);
-       poke($206002a,(kbd[0].modifiers shr 8) and 255);
-       if key=0 then poke($206002b,peek($206002b) or $2);
-       CleanDataCacheRange($2060000,4096);
-       end;
-     end;
-
-
- //   a:=mouseReadex(@m[0], 128*sizeof(tkeyboarddata),1,q);
-//   if (a=0) and (q>0) then
-//     begin
-//     key:=ord(kbd[0].charcode);
-//     if key<>0 then poke($60028,key) else poke($60028,kbd[0].KeyCode and 255);
-//     poke($60029,kbd[0].modifiers and 255);
-//     poke($6002a,(kbd[0].modifiers shr 8) and 255);
-//     if key=0 then poke($6002a,peek($6002a) or $20);
-//     if kbd[0].modifiers and 16384 <>0 then poke($6002b,1);
-//     CleanDataCacheRange($4060000,4096);
-//     end;
-
-
-
-
-
-
+FreeOnTerminate := True;
+inherited Create(CreateSuspended);
 end;
 
 
-procedure Taudio.Execute;
-     var a,key:integer;
-          q:cardinal;
+procedure TAudio.Execute;
+
+var a,key:integer;
+    q:cardinal;
+
 begin
-//ThreadSetPriority(ThreadGetCurrent,5);
-//threadsleep(1);
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_1);
 threadsleep(1);
- repeat
- repeat threadsleep(2); a:= lpeek($3F007800) until (a and 2) <>0 ;
- if (a and 2)<>0
-   then begin
-
-   if lpeek($3f00781c)=$c4000000 then audiocallback($0205a000)
-   else audiocallback($0205c000);
-   lpoke($3F007800,3);
-   CleanDataCacheRange($0205a000,$8000);
-   end;
- //  threadsleep(1);
- until terminated;
-
+  repeat
+  repeat threadsleep(2); a:= lpeek($3F007e00) until (a and 2) <>0 ;
+  if (a and 2)<>0 then
+    begin
+    if lpeek($3f007e1c)=$c4000000 then audiocallback($0205a000)
+                                  else audiocallback($0205c000);
+    lpoke($3F007e00,3);
+    CleanDataCacheRange($0205a000,$8000);
+    end;
+  until terminated;
 end;
+
+
 // ---- TRetro thread methods --------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -378,12 +236,10 @@ begin
 running:=1;
 id:=getcurrentthreadid  ;
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_3);
-//ThreadSetAffinity(ThreadGetCurrent,CPU_AFFINITY_3);
-//ThreadSetPriority(ThreadGetCurrent,6);
-//SchedulerAllocationDisable(CPU_ID_3);
-Sleep(1);
+sleep(1);
 repeat
   begin
+
   vblank1:=0;
   t:=clockgettotal;
   scrconvert16f(p2);
@@ -397,8 +253,6 @@ repeat
 
   FramebufferDeviceSetOffset(fb,0,0,True);
   FramebufferDeviceWaitSync(fb);
-  poke ($2070000,1);
-//  getkey;
 
   vblank1:=0;
   t:=clockgettotal;
@@ -411,11 +265,10 @@ repeat
   CleanDataCacheRange(integer(p2)+9216000,9216000);
   lpoke($2060000,lpeek($2060000)+1);
 
-
   FramebufferDeviceSetOffset(fb,0,1200,True);
   FramebufferDeviceWaitSync(fb);
-  poke ($2070000,1);
-//  getkey;
+
+
   end;
 until terminated;
 running:=0;
@@ -439,32 +292,28 @@ var a,i:integer;
 
 begin
 
-for i:=16 to 8191 do
+for i:=16 to 8191 do  // make the memory executable, shareable, rw, cacheable, writeback
   begin
   Entry:=PageTableGetEntry(i*4096);
-  Entry.Flags:=$3b2;         //3b2   orig 562
+  Entry.Flags:=$3b2;
   PageTableSetEntry(Entry);
   end;
-{PageTableSetEntry(Entry);
-Entry:=PageTableGetEntry(4096+cardinal(@sid) and $FFFFF000);
-Entry.Flags:=$372;
-PageTableSetEntry(Entry);
-Entry:=PageTableGetEntry(4096+cardinal(@sid) and $FFFFF000);
-Entry.Flags:=$372;
-PageTableSetEntry(Entry);
-Entry:=PageTableGetEntry(8192+cardinal(@sid) and $FFFFF000);
-Entry.Flags:=$372;
-PageTableSetEntry(Entry);
-Entry:=PageTableGetEntry(12288+cardinal(@sid) and $FFFFF000);
-Entry.Flags:=$372;
-PageTableSetEntry(Entry);
+for i:=$30000 to $30FFF do  // make the memory executable, shareable, rw, cacheable, writeback
+  begin
+  Entry:=PageTableGetEntry(i*4096);
+  Entry.Flags:=$3b2;
+  PageTableSetEntry(Entry);
+  end;
+for i:=$2000000 to $206FFFF do poke(i,0);
+lpoke($2060004,$30000000);
+lpoke($2060000,$00000000);
 
-   }
-
-//dummy:=getmem(600000000);
 fh2:=fileopen('C:\retro\combinedwaveforms.bin',$40);   // load combined waveforms for SID
 fileread(fh2,combined,1024);
 fileclose(fh2);
+
+// init sid variables
+
 for i:=0 to 127 do siddata[i]:=0;
 for i:=0 to 15 do siddata[$30+i]:=round(1073741824*(1-20*attacktable[i]));
 for i:=0 to 15 do siddata[$40+i]:=20*round(1073741824*attacktable[i]);
@@ -473,70 +322,27 @@ for i:=0 to 1023 do siddata[128+i]:=(siddata[128+i]-128) shl 16;
 siddata[$0e]:=$7FFFF8;
 siddata[$1e]:=$7FFFF8;
 siddata[$2e]:=$7FFFF8;
-p:=@tabl[0];
+
 reset6502;
-//if mode=0 then
- // begin
-//  fullscreen:=0;
-//  scrfh:=fileopen('/dev/fb0',fmopenreadwrite);
-//  tabl2:=tabl;
-//  p2:=nil;
-//  SDL_Init(SDL_INIT_everything);
-//  SDL_putenv('SDL_VIDEO_WINDOW_POS=center');
-//  scr:=SDL_SetVideoMode(960, 600, 32, SDL_SWSURFACE);
-//  SDL_WM_SetCaption('The Retromachine','The Retromachine');
-//  SDL_EnableKeyRepeat(200,50);
-//  sdl_sound_init;
-//  sdl_showcursor(0);
-//  scrconvert:=@scrconvert16;
-//  end
 
-//else
- // begin
- fullscreen:=1;
-//  scrfh:=fileopen('/dev/fb0',fmopenreadwrite);
-//  fpioctl(scrfh,getvinfo,p);
- // tabl2:=tabl;
-//  p2:=nil;                               //pointer to framebuffer memory init
-//  SDL_Init(SDL_INIT_everything);
-//  SDL_putenv('SDL_VIDEO_WINDOW_POS=center');
-//  scr:=SDL_SetVideoMode(tabl[0], tabl[1], 32, SDL_SWSURFACE or SDL_FULLSCREEN);
-//  SDL_EnableKeyRepeat(200,50);
-//  sdl_sound_init;
-//  sdl_showcursor(0);
-//  tabl[0]:=1920;
-//  tabl[1]:=1200;
-//  tabl[2]:=1920 ;
-//  tabl[3]:=2400 ;
-//  tabl[6]:=32;
+//init the framebuffer
+// TODO: if the screen is 1920x1080 init it to this resolution
 
-
-
-  fb:=FramebufferDevicegetdefault;
-  FramebufferDeviceRelease(fb);
-  Sleep(100);
-  FramebufferProperties.Depth:=32;
-  FramebufferProperties.PhysicalWidth:=1920;
-  FramebufferProperties.PhysicalHeight:=1200;
-  FramebufferProperties.VirtualWidth:=FramebufferProperties.PhysicalWidth;
-  FramebufferProperties.VirtualHeight:=FramebufferProperties.PhysicalHeight * 2;
-  FramebufferDeviceAllocate(fb,@FramebufferProperties);
-  sleep(100);
-  FramebufferDeviceGetProperties(fb,@FramebufferProperties);
-  p2:=Pointer(FramebufferProperties.Address);
-//   for i:=0 to 1920*1200-1 do (p2+i)^:=$00ff;
-//  scrconvert:=@scrconvert16f;
-
-
-//r1:=fpmmap (nil,33554432,prot_read or prot_write or prot_exec,map_shared or map_anonymous,-1,0);
-r1:=pointer($2000000);
-for i:=$2060000 to $2061000 do poke(i,0);
-lpoke($2060004,$1000000);
-lpoke($2060000,$0000000);
+fb:=FramebufferDevicegetdefault;
+FramebufferDeviceRelease(fb);
+Sleep(100);
+FramebufferProperties.Depth:=32;
+FramebufferProperties.PhysicalWidth:=1920;
+FramebufferProperties.PhysicalHeight:=1200;
+FramebufferProperties.VirtualWidth:=FramebufferProperties.PhysicalWidth;
+FramebufferProperties.VirtualHeight:=FramebufferProperties.PhysicalHeight * 2;
+FramebufferDeviceAllocate(fb,@FramebufferProperties);
+sleep(100);
+FramebufferDeviceGetProperties(fb,@FramebufferProperties);
+p2:=Pointer(FramebufferProperties.Address);
 fh2:=fileopen('C:\retro\st4font.def',$40);     // 8x16 font
 fileread(fh2,PInteger($2050000)^,2048);
 fileclose(fh2);
-
 fh2:=fileopen('C:\retro\mysz.def',$40);        // load mouse cursor definition at sprite 8
 for i:=0 to 1023 do
   begin
@@ -546,11 +352,10 @@ for i:=0 to 1023 do
   lpoke($2059000+4*i,a);
   end;
 fileclose(fh2);
-thread:=tretro.create(true);            // start frame refreshing thread
+thread:=tretro.create(true);                    // start frame refreshing thread
 thread.start;
-//thread2:=tkbd.Create(true);
-//thread2.start;
-thread3:=taudio.Create(true);
+sdl_pauseaudio(1);
+thread3:=taudio.Create(true);                   // start audio thread
 thread3.start;
 end;
 
@@ -559,28 +364,26 @@ end;
 //   procedure stopmachine
 //   destructor for the retromachine
 //   stop the process, free the RAM
-//   rev. 2016.06.03
+//   rev. 2016.11.24
 //  ---------------------------------------------------------------------
 
 procedure stopmachine;
 begin
 thread.terminate;
 repeat until running=0;
+thread3.terminate;
 end;
 
 function gettime:int64;
 
-//var tm:ttimeval;
-
 begin
-//fpgettimeofday(@tm,nil) ;
-//result:=int64(1000000)*tm.tv_sec+tm.tv_usec;
+result:=clockgettotal;
 end;
 
 //  ---------------------------------------------------------------------
 //   BASIC type poke/peek procedures
 //   works @ byte addresses
-//   rev. 2015.11.01
+//   rev. 2016.11.24
 // ----------------------------------------------------------------------
 
 procedure poke(addr:integer;b:byte); inline;
@@ -658,29 +461,25 @@ end;
 
 procedure scrconvert16f(screen:pointer);
 
-//convert retro fb to raspberry fb @1792x1120x256
-// todo: one screen convert procedure with display list
-
-var a:integer;
+var a,b:integer;
     e:integer;
-
 label p1,p0,p002,p10,p11,p12,p20,p21,p22,p100,p101,p102,p103,p104,p999;
 
 begin
-a:=$2000000; // TODO! a:=0! Get a screen pointer from sys var !
-e:=raml^[$18003];
-
+a:=lpeek($2060004); // TODO! a:=0! Get a screen pointer from sys var !
+e:=lpeek($206000c);
+b:=$2010000;
                 asm
                 stmfd r13!,{r0-r12}   //Push registers
                 ldr r1,a
-                add r1,#0x1000000
+               // add r1,#0x1000000
                 mov r6,r1
                 add r6,#1
                 ldr r2,screen
                 mov r12,r2
                 add r12,#4
-                ldr r3,a
-                add r3,#0x10000
+                ldr r3,b
+  //              add r3,#0x10000
                 mov r5,r2
                                     //upper border
                 add r5,#307200
@@ -760,25 +559,27 @@ p999:           ldmfd r13!,{r0-r12}
 end;
 
 
+
+
 procedure spritef(screen:pointer);
 
-// A real retromachine sprite procedure
+/// A real retromachine sprite procedure
 
 label p100,p101,p102,p103,p104,p999;
 var a:integer;
     spritebase:integer;
 
 begin
-a:=$2000000;
-spritebase:=$60040;
+//a:=$2000000;
+spritebase:=$2060040;
 
                asm
                stmfd r13!,{r0-r12}     //Push registers
                mov r12,#0
                                        //sprite
                ldr r0,spritebase
-               ldr r1,a
-               add r0,r1
+            //   ldr r1,a
+             //  add r0,r1
 p103:          ldr r1,[r0],#4
                mov r2,r1               // sprite 0 position
                mov r3,r1
@@ -803,8 +604,8 @@ p104:          ldr r4,p100+8
                add r3,r4      // pointer to upper left sprite pixel in r3
                ldr r4,p100+12
                add r4,r4,r12,lsl #12
-               ldr r5,a
-               add r4,r5      //pointer to sprite 0 data
+            //   ldr r5,a
+            //   add r4,r5      //pointer to sprite 0 data
 
                ldr r1,[r0],#4
                mov r2,r1
@@ -851,11 +652,12 @@ p102:          cmp r5,#0
 p100:          .long 0xFFFF
                .long 0xFFFF0000
                .long 7680
-               .long 0x52000
+               .long 0x2052000
 
 p999:          ldmfd r13!,{r0-r12}
                end;
 end;
+
 
 procedure setataripallette(bank:integer);
 
@@ -870,19 +672,21 @@ end;
 procedure sethidecolor(c,bank,mask:integer);
 
 begin
-raml^[$4000+256*bank+c]+=(mask shl 24);
+lpoke(($2010000+1024*bank+4*c),lpeek($2010000+1024*bank+4*c)+(mask shl 24));
 end;
 
 procedure cls(c:integer);
 
 var c2, i,l:integer;
     c3: cardinal;
+    screenstart:integer;
 
 begin
+screenstart:=lpeek($2060004);
 c:=c mod 256;
 l:=(lpeek($2060020)*lpeek($2060024)) div 4 ;
 c3:=c+(c shl 8) + (c shl 16) + (c shl 24);
-for i:=0 to l do lpoke($3000000+4*i,c3); // TODO Use screen pointer !!!!
+for i:=0 to l do lpoke(screenstart+4*i,c3);
 
 end;
 
@@ -897,7 +701,7 @@ procedure putpixel(x,y,color:integer);
 var adr:integer;
 
 begin
-adr:=$3000000+x+1792*y; if adr<$3FFFFFF then poke(adr,color);
+adr:=lpeek($2060004)+x+1792*y; if adr<lpeek($2060004)+$FFFFFF then poke(adr,color);
 end;
 
 
@@ -912,10 +716,11 @@ procedure box(x,y,l,h,c:integer);
 
 label p1;
 
-var adr,i,j:integer;
+var adr,i,j,screenptr:integer;
 
 begin
 
+screenptr:=lpeek($2060004);
 if x<0 then x:=0;
 if x>1792 then x:=1792;
 if y<0 then y:=0;
@@ -933,7 +738,8 @@ for j:=y to y+h-1 do begin
     mov r0,#1792
     ldr r1,j
     mul r0,r0,r1
-    add r0,#0x3000000      //Todo - screen pointer!
+    ldr r1,screenptr
+    add r0,r1       //Todo - screen pointer!
     ldr r1,c
     ldr r2,x
     add r0,r2
@@ -1031,12 +837,11 @@ for i:=0 to length(t)-1 do putcharz(x+8*xz*i,y,t[i+1],c,xz,yz);
 end;
 
 procedure scrollup;
-// TODO!
+
 var i:integer;
 
 begin
-//for i:=0 to 447 do raml^[$47a800+i]:=raml^[$400000+i];
-//for i:=0 to 501760 do raml^[$400000+i]:=raml^[$4001c0+i];
+
 end;
 
 
@@ -1064,8 +869,6 @@ const oldsc:integer=0;
       volume:integer=0;
       c3off:integer=0;
       fl:integer=0;
-
-
 
 // siddata table:
 
@@ -1098,23 +901,23 @@ const oldsc:integer=0;
 // 56,57,58: channel on/off
 // 59,5a,5b: filter select
 // 5c,5d,5e: channel value for filter
-//71,72,73 orig channel value for filter
+// 71,72,73 orig channel value for filter
 // 53..5F free
-// 71..7F free
+// 74..7F free
 
 
 var i,sid1,sid1l,ind:integer;
-     ttt:int64;
-         pp1,pp2,pp3:byte;
-         wv1ii,wv2ii,wv3ii:int64;
-         wv1iii,wv2iii,wv3iii:integer;
-         fii,fi2i,fi3i:integer;
-         fri,ffi:integer;
-               pa1i:integer;
-      pa2i:integer;
-      pa3i:integer;
-           vol, fll:integer;
-           sidptr:pointer;
+    ttt:int64;
+    pp1,pp2,pp3:byte;
+    wv1ii,wv2ii,wv3ii:int64;
+    wv1iii,wv2iii,wv3iii:integer;
+    fii,fi2i,fi3i:integer;
+    fri,ffi:integer;
+    pa1i:integer;
+    pa2i:integer;
+    pa3i:integer;
+    vol, fll:integer;
+    sidptr:pointer;
 
 
 begin
@@ -1122,29 +925,22 @@ sidptr:=@siddata;
 if mode=1 then  // get regs
 
   begin
-
-
-
-
-
-//  ttt:=clockgettotal;
   siddata[$56]:=peek($2070003);
   siddata[$57]:=peek($2070004);
   siddata[$58]:=peek($2070005);
   siddata[0]:=round(1.0263*(16*peek($200D400)+4096*peek($200d401))); //freq1
   siddata[$10]:=round(1.0263*(16*peek($200d407)+4096*peek($200d408)));
   siddata[$20]:=round(1.0263*(16*peek($200d40e)+4096*peek($200d40f)));
-
-  siddata[1]:=peek($200d404) and 1;   // gate1
-  siddata[2]:=peek($200d404) and 4;  //ring1
+  siddata[1]:=peek($200d404) and 1;  // gate1
+  siddata[2]:=peek($200d404) and 4;  // ring1
   siddata[3]:=peek($200d404) and 8;  // test1
   siddata[4]:=((peek($200d404) and 2) shr 1)-1; //sync1
 
-  siddata[5]:=peek($200d405) and  $F;   //sd1, 5
-  siddata[6]:=peek($200d405) shr 4;     ///sa1, 6
-  siddata[7]:=peek($200d406)and $F;     //sr1 //7
+  siddata[5]:=peek($200d405) and $F;   //sd1,
+  siddata[6]:=peek($200d405) shr 4;    //sa1,
+  siddata[7]:=peek($200d406) and $F;    //sr1
   siddata[$0d]:=(peek($200d406) and $F0) shl 22;      //0d,sussvol1
-  siddata[$53]:=((peek($200d402)+256*peek($200d403)) and $FFF);//
+  siddata[$53]:=((peek($200d402)+256*peek($200d403)) and $FFF);
 
   siddata[$11]:=peek($200d40b) and 1;
   siddata[$12]:=peek($200d40b) and 4;
@@ -1185,13 +981,12 @@ if mode=1 then  // get regs
 
   siddata[$50]:=peek($200d404) shr 4;
   siddata[$51]:=peek($200d40b) shr 4;
-  siddata[$52]:=peek($200d412) shr 4; //waveforms
-//    sidtime:=clockgettotal-ttt;
-
+  siddata[$52]:=peek($200d412) shr 4;     //waveforms
   end;
 
-        asm
-               // adsr module
+               asm
+
+// adsr module
 
                stmfd r13!,{r0-r12}
 
@@ -1409,26 +1204,13 @@ p125:          cmp   r0,#4
 p126:          mov   r0,#0
                str   r0,[r7,#0xb0]
 
-p123:           //mov r1,[r7,##0x7000000
-             mov r0,#10
-          str r0,[r7,#0x1fc]
-
-      //  ldmfd r13!,{r0-r7}
-               end;
-               // end of adsr module
-
-//for i:=1 to 10 do
-//lpoke($7000000,10);
-
- //p297:
- //              asm
-
- //              end;
+p123:          mov   r0,#10
+               str   r0,[r7,#0x1fc]
 
 
-               asm
-       //         stmfd r13!,{r0-r12}
- p297:               ldr   r4,sidptr
+
+
+ p297:        ldr   r4,sidptr
 
                // phase accum 1
 
@@ -2061,11 +1843,17 @@ p224:          ldr r0,[r4,#0x30]
                      // for 12 bit pwm shift and unsign
 ldr r8,[r7,#0x1b0]
 asr r8,#18
-add r8,#2048
+mov r9,r8
+asr r9,#1
+add r8,r9
+add r8,#2592
 str r8,[r7,#0x1b0]
 ldr r8,[r7,#0x1ac]
 asr r8,#18
-add r8,#2048
+mov r9,r8
+asr r9,#1
+add r8,r9
+add r8,#2592
 str r8,[r7,#0x1ac]
 
 
@@ -2096,7 +1884,7 @@ sid[0]:= siddata[$6c]; //  2048+ (siddata[$6c] div (16*16384));//16384;//32768;
 sid[1]:= siddata[$6b];//2048+ (siddata[$6b] div (16*16384));//16384;//32768;
 
 oldsc:=sc;
-sc:=(siddata[$6c]+siddata[$6B]) -4096 ;//div 16384;
+sc:=(siddata[$6c]+siddata[$6B]) -5184 ;//div 16384;
 scope[scj]:=sc;
 inc(scj);
 if scj>959 then if (oldsc<0) and (sc>0) then scj:=0 else scj:=959;
@@ -2107,58 +1895,10 @@ end;
 
 
 
-// --------------- 6 poles Chebyshev antialias filter -------------------------
 
-function antialias6(input:double;var ft:Tfiltertable):double;
 
-const gain:double=6.855532108e+07 ;
 
-begin
 
-ft[0]:=ft[1];
-ft[1]:=ft[2];
-ft[2]:=ft[3];
-ft[3]:=ft[4];
-ft[4]:=ft[5];
-ft[5]:=ft[6];
-
-ft[6]:=input/gain;
-
-ft[7]:=ft[8];
-ft[8]:=ft[9];
-ft[9]:=ft[10];
-ft[10]:=ft[11];
-ft[11]:=ft[12];
-ft[12]:=ft[13];
-
-ft[13]:=(ft[0]+ft[6])+6*(ft[1]+ft[5])+15*(ft[3]+ft[4])+20*ft[3]
-                     + ( -0.7992422456 * ft[7]) + (  4.9534616898 * ft[8])
-                     + (-12.8163705530 * ft[9]) + ( 17.7202717200 * ft[10])
-                     + (-13.8090381750 * ft[11]) + (  5.7509166299 * ft[12]);
-
-antialias6:=ft[13];
-end;
-
-// ------------- sdl sound initializaton -------------------------------------
-{
-function sdl_sound_init:integer;
-
-begin
-Result:=0;
-desired.freq := 48000;                                     // sample rate
-desired.format := AUDIO_S16;                               // 16-bit samples
-desired.samples := 960;                                    // samples for 1 callback
-desired.channels := 2;                                     // stereo
-desired.callback := @AudioCallback;
-desired.userdata := nil;
-
-if (SDL_OpenAudio(@desired, @obtained) < 0) then
-  begin
-  Result:=-2;
-  end;
-end;
-
-}
 procedure AudioCallback(b:integer);
 
 label p999;
@@ -2203,7 +1943,7 @@ for k:=0 to 7 do
           fh:=-1;
           songtime:=0;
           timer1:=-1;
-          for i:=0 to 6 do raml^[$3500+i]:=0;
+          for i:=0 to 6 do lpoke($200d400+4*i,0);
           end;
         end
       else
@@ -2284,13 +2024,13 @@ i:=pinteger($3F200010)^ and  %11111111111111000111111111111000;
 lpoke($3F200010, i or       %00000000000000100000000000000100); // gpio 40/45 as alt0
 lpoke($3F1010a0,$5a000016); // set clock to pll D    16 plld
 lpoke($3F1010a4,$5a002000); // div 5
-lpoke($3F20C010,5208); // pwm 1 range  11bit 48 khz 2083
-lpoke($3F20C020,5208); // pwm 2 range
+lpoke($3F20C010,5208);      // pwm 1 range  12bit 48 khz 2083
+lpoke($3F20C020,5208);      // pwm 2 range
 lpoke($3F20C000,$00002161); // pwm contr0l - enable, clear fifo, use fifo
 lpoke($3F20C008,$80000307); // pwm dma enable
-lpoke($3F007ff0,pinteger($3F007FF0)^ or %100000000); // dma0 enable
-lpoke($3F007804,$c4000000);
-lpoke($3F007800,3);
+lpoke($3F007ff0,pinteger($3F007FF0)^ or %100000000000000); // dma 0e enable
+lpoke($3F007e04,$c4000000);
+lpoke($3F007e00,3);
 
 
 

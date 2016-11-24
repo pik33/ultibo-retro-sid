@@ -245,18 +245,13 @@ for i:=0 to 255 do keyboardstatus[i]:=0;
 startreportbuffer;
 repeat
   main2;
- // getkey;
-//box(200,200,400,100,33);
- // poke($200d508,peek($200d508)+1);
- ch:=getkeyboardreport;
- if (ch[2]<>0) and (ch[2]<>255) then activekey:=ch[2];
- if (ch[2]<>0) and (activekey>0) then inc(rptcnt);
- if ch[2]=0 then begin rptcnt:=0; activekey:=0; end;
- if rptcnt>26 then rptcnt:=24 ;
- if (rptcnt=1) or (rptcnt=24) then poke($2060028,byte(translatescantochar(activekey,0)));
-// for i:=0 to 7 do outtextxy(200+40*i,200,inttostr(ch[i]),40);
-// outtextxy(200,230,inttostr(activekey),44);
-// outtextxy(200,260,inttostr(rptcnt),44);
+
+  ch:=getkeyboardreport;
+  if (ch[2]<>0) and (ch[2]<>255) then activekey:=ch[2];
+  if (ch[2]<>0) and (activekey>0) then inc(rptcnt);
+  if ch[2]=0 then begin rptcnt:=0; activekey:=0; end;
+  if rptcnt>26 then rptcnt:=24 ;
+  if (rptcnt=1) or (rptcnt=24) then poke($2060028,byte(translatescantochar(activekey,0)));
 
   if pause1 then begin for i:=$200d400 to $200d400+25 do poke(i,0); end;
 
@@ -269,8 +264,6 @@ repeat
   if peek($2060028)=1 then begin dpoke($2060028,0); if peek($2070003)=0 then poke ($2070003,1) else poke ($2070003,0); end;
   if peek($2060028)=2 then begin dpoke($2060028,0); if peek($2070004)=0 then poke ($2070004,1) else poke ($2070004,0); end;
   if peek($2060028)=3 then begin dpoke($2060028,0); if peek($2070005)=0 then poke ($2070005,1) else poke ($2070005,0); end;
-
-
 
   if peek($2060028)=23 then
     begin
@@ -413,7 +406,6 @@ repeat
 
         songtime:=0;
 
- //       for i:=0 to 6 do lpoke($200d400+4*i,0);
         fn:= currentdir2+filenames[sel+selstart,0];
         sfh:=fileopen(fn,$40);
         s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4);
@@ -471,7 +463,6 @@ repeat
     end;
   until (peek($2060028)=27) ;
   sdl_pauseaudio(1);
-//  for i:=0 to 100000000 do;
   if sfh>0 then fileclose(sfh);
   setcurrentdir(workdir);
   stopmachine;

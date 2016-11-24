@@ -6,9 +6,8 @@ interface
 
 uses sysutils,classes,retromalina,platform;
 
-const ver='The retromachine player v. 0.11u --- 2016.11.22';
+const ver='The retromachine player v. 0.12u --- 2016.11.24';
 var test:integer ;
- //   event:tsdl_event;
     licznik:integer=0;
     songname:string;
     q1,q2,q3:extended;
@@ -25,7 +24,7 @@ var test:integer ;
     av6502:int64=0;
     qq:integer;
     avsct1,avspt1,sidtime1,av65021:array[0..59] of integer;
- //   pause:boolean=false;
+
 
 procedure main1;
 procedure main2;
@@ -137,11 +136,12 @@ avspt:=0;
 avall:=0;
 avsid:=0;
 rainbow;
+i:=lpeek($2060004);
 outtextxyz(24,1019,'A retromachine SID player by pik33 --- inspired by Johannes Ahlebrand''s Parallax Propeller SIDCog --- F1,F2,F3',89,2,2);
-blit($3000000,10,1011,$3800000,10,1011,1771,48,1792,1792);
+blit(i,10,1011,i+$800000,10,1011,1771,48,1792,1792);
 rainbow;
 outtextxyz(24,1019,'- channels 1..3 on/off; 1-100 Hz, 2-200 Hz, 3-150 Hz, 4-400 Hz, 5-50 Hz; F - toggle fullscreen, P - pause',89,2,2);
-blit($3000000,10,1011,$3800000,10,1059,1771,48,1792,1792);
+blit(i,10,1011,i+$800000,10,1059,1771,48,1792,1792);
 box2(10,800,894,848,246);
 box2(10,851,894,1008,244);
 outtextxyz(320,808,'Now playing',250,2,2);
@@ -167,7 +167,7 @@ begin
 
 clock:=timetostr(now);
 k:=lpeek($2060000);
-repeat until lpeek($2060000)<>k;
+repeat sleep(1) until lpeek($2060000)<>k;
 
 c:=c+1; c1:=c mod 60;
 if time6502>0 then c6+=1;
@@ -214,15 +214,16 @@ outtextxyz(1462,1050,'.',ii,2,2);
 for i:=64 to 88 do lpoke($2010000+4*i,lpeek($2010000+2048+4*((c div 2) mod 256)+4*i));
 if (c mod 32)=0 then lpoke($2010000+4*89,lpeek($2010000+2048+(4*(c div 64) mod 256)))   ;
 cc:=(2*c) mod 3544 ;
-if cc<1772 then blit($3800000,10+(cc),1011,$3000000,12,1011,1771-(cc),48,1792,1792);
-if cc<1772 then blit($3800000,10,1059,$3000000,11+1771-(cc),1011,(cc),48,1792,1792);
-if cc>=1772 then blit ($3800000,10,1011,$3000000,11+3543-(cc),1011,(cc-1772),48,1792,1792);
-if cc>=1772 then blit($3800000,10+(cc-1772),1059,$3000000,12,1011,1771-(cc-1772),48,1792,1792);
+a:=lpeek($2060004);
+if cc<1772 then blit(a+$800000,10+(cc),1011,a,12,1011,1771-(cc),48,1792,1792);
+if cc<1772 then blit(a+$800000,10,1059,a,11+1771-(cc),1011,(cc),48,1792,1792);
+if cc>=1772 then blit (a+$800000,10,1011,a,11+3543-(cc),1011,(cc-1772),48,1792,1792);
+if cc>=1772 then blit(a+$800000,10+(cc-1772),1059,a,12,1011,1771-(cc-1772),48,1792,1792);
 box2(10,610,894,797,178);
 box2(10,700,894,701,140);
 box2(10,636,894,637,140);
 box2(10,764,894,765,140);
-for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 48,2,2,190);
+for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 64,2,2,190);
 sprx:=round(dpeek($200d400)/40+74);
 spry:=920-3*(peek($200d406) and $F0);
 lpoke($2060040,(spry shl 16)+sprx+2048*(1-peek($2070003)));
