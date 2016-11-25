@@ -4928,8 +4928,8 @@ RETROMALINA_$$_SID$LONGINT$$TSAMPLE:
 	asr	r8,#18
 # [1846] mov r9,r8
 	mov	r9,r8
-# [1847] asr r9,#1
-	asr	r9,#1
+# [1847] asr r9,#2
+	asr	r9,#2
 # [1848] add r8,r9
 	add	r8,r9
 # [1849] add r8,#2592
@@ -4942,8 +4942,8 @@ RETROMALINA_$$_SID$LONGINT$$TSAMPLE:
 	asr	r8,#18
 # [1853] mov r9,r8
 	mov	r9,r8
-# [1854] asr r9,#1
-	asr	r9,#1
+# [1854] asr r9,#2
+	asr	r9,#2
 # [1855] add r8,r9
 	add	r8,r9
 # [1856] add r8,#2592
@@ -5137,7 +5137,7 @@ RETROMALINA_$$_AUDIOCALLBACK$LONGINT:
 	ldr	r0,[r0]
 	ldr	r1,[r1]
 	subs	r0,r2,r0
-# [1987] end;
+# [1985] end;
 	rsc	r1,r1,r2,asr #31
 # Rescheduled
 	ldr	r2,.Lj603
@@ -5486,7 +5486,7 @@ RETROMALINA_$$_AUDIOCALLBACK$LONGINT:
 	ldr	r1,.Lj714
 	str	r3,[r2]
 	str	r0,[r1]
-# [1962] CleanDataCacheRange($200d400,32);
+# [1960] CleanDataCacheRange($200d400,32);
 	mov	r10,#33554432
 # Rescheduled
 	ldr	r0,.Lj715
@@ -5503,7 +5503,7 @@ RETROMALINA_$$_AUDIOCALLBACK$LONGINT:
 	mov	r0,r10
 	blx	r2
 .Lj717:
-# [1963] timer1+=siddelay;
+# [1961] timer1+=siddelay;
 	ldr	r0,.Lj656
 # Rescheduled
 	ldr	r1,.Lj657
@@ -5523,7 +5523,7 @@ RETROMALINA_$$_AUDIOCALLBACK$LONGINT:
 	ldr	r2,.Lj657
 	str	r3,[r12]
 # Rescheduled
-# [1964] songtime+=siddelay;
+# [1962] songtime+=siddelay;
 	ldr	r0,.Lj662
 	str	r1,[r2]
 # Rescheduled
@@ -5547,11 +5547,11 @@ RETROMALINA_$$_AUDIOCALLBACK$LONGINT:
 .Lj678:
 .Lj616:
 .Lj609:
-# [1970] s:=sid(1);
+# [1968] s:=sid(1);
 	mov	r0,r13
 	mov	r1,#1
 	bl	RETROMALINA_$$_SID$LONGINT$$TSAMPLE
-# [1971] audio2[240*k]:=s[0];
+# [1969] audio2[240*k]:=s[0];
 	mov	r0,#240
 # Rescheduled
 # Peephole FoldShiftLdrStr done
@@ -5559,14 +5559,14 @@ RETROMALINA_$$_AUDIOCALLBACK$LONGINT:
 	ldrsh	r1,[r13]
 	mul	r0,r11,r0
 	str	r1,[r7, r0, lsl #2]
-# [1972] audio2[240*k+1]:=s[1];
+# [1970] audio2[240*k+1]:=s[1];
 	mov	r0,#240
 	mul	r0,r11,r0
 	ldrsh	r1,[r13, #2]
 	add	r2,r7,#4
 # Peephole FoldShiftLdrStr done
 	str	r1,[r2, r0, lsl #2]
-# [1974] for i:=120*k+1 to 120*k+119 do
+# [1972] for i:=120*k+1 to 120*k+119 do
 	mov	r0,#120
 	mul	r0,r11,r0
 	add	r10,r0,#119
@@ -5581,18 +5581,18 @@ RETROMALINA_$$_AUDIOCALLBACK$LONGINT:
 	.balign 4
 .Lj733:
 	add	r4,r4,#1
-# [1976] s:=sid(0);
+# [1974] s:=sid(0);
 	mov	r0,r13
 	mov	r1,#0
 	bl	RETROMALINA_$$_SID$LONGINT$$TSAMPLE
 # Rescheduled
 # Peephole FoldShiftLdrStr done
 # Rescheduled
-# [1977] audio2[2*i]:=s[0];
+# [1975] audio2[2*i]:=s[0];
 	ldrsh	r1,[r13]
 	mov	r0,r4,lsl #1
 	str	r1,[r7, r0, lsl #2]
-# [1978] audio2[2*i+1]:=s[1];
+# [1976] audio2[2*i+1]:=s[1];
 	mov	r0,r4,lsl #1
 	mov	r1,r0,lsl #2
 	ldrsh	r0,[r13, #2]
@@ -5603,13 +5603,13 @@ RETROMALINA_$$_AUDIOCALLBACK$LONGINT:
 .Lj732:
 	cmp	r11,#7
 	blt	.Lj602
-# [1982] inc(sidcount);
+# [1980] inc(sidcount);
 	ldr	r1,.Lj734
 	ldr	r0,[r1]
 	add	r0,r0,#1
 	str	r0,[r1]
 .Lj599:
-# [1985] sidtime:=clockgettotal-ttt;
+# [1983] sidtime:=clockgettotal-ttt;
 	ldr	r0,.Lj591
 	ldr	r0,[r0]
 	cmp	r0,#0
@@ -5687,7 +5687,7 @@ RETROMALINA_$$_AUDIOCALLBACK$LONGINT:
 	.balign 4
 .globl	RETROMALINA_$$_PWMBEEP
 RETROMALINA_$$_PWMBEEP:
-# [1998] begin
+# [1996] begin
 	stmfd	r13!,{r4,r14}
 	sub	r13,r13,#32
 	sub	r13,r13,#16384
@@ -5695,7 +5695,7 @@ RETROMALINA_$$_PWMBEEP:
 # Var sinus located at r13+0, size=OS_NO
 # Var ctrlblock located at r13+16384, size=OS_NO
 # Var i located in register r4
-# [1999] for i:=0 to 4095 do sinus[i]:=round(1040+1024*(sin(2*pi*i/512)));
+# [1997] for i:=0 to 4095 do sinus[i]:=round(1040+1024*(sin(2*pi*i/512)));
 	mov	r4,#0
 	sub	r4,r4,#1
 	.balign 4
@@ -5724,11 +5724,11 @@ RETROMALINA_$$_PWMBEEP:
 	blt	.Lj746
 # Rescheduled
 # Rescheduled
-# [2001] ctrlblock[0]:=$07050140; //transfer info
+# [1999] ctrlblock[0]:=$07050140; //transfer info
 	ldr	r1,.Lj751
 	ldr	r0,.Lj752
 	str	r1,[r13, r0]
-# [2002] ctrlblock[1]:=$c205a000;
+# [2000] ctrlblock[1]:=$c205a000;
 	mov	r0,#-1040187392
 # Rescheduled
 	ldr	r1,.Lj753
@@ -5736,45 +5736,45 @@ RETROMALINA_$$_PWMBEEP:
 	str	r0,[r13, r1]
 # Rescheduled
 # Rescheduled
-# [2003] ctrlblock[2]:=$7E20C018;
+# [2001] ctrlblock[2]:=$7E20C018;
 	ldr	r1,.Lj754
 	ldr	r0,.Lj755
 	str	r1,[r13, r0]
 # Rescheduled
-# [2004] ctrlblock[3]:=7680;
+# [2002] ctrlblock[3]:=7680;
 	ldr	r1,.Lj756
 	mov	r0,#7680
 	str	r0,[r13, r1]
 # Rescheduled
-# [2005] ctrlblock[4]:=$0;
+# [2003] ctrlblock[4]:=$0;
 	ldr	r0,.Lj757
 	mov	r1,#0
 	str	r1,[r13, r0]
-# [2006] ctrlblock[5]:=$c4000020;
+# [2004] ctrlblock[5]:=$c4000020;
 	mov	r0,#32
 # Rescheduled
 	ldr	r1,.Lj758
 	orr	r0,r0,#-1006632960
 	str	r0,[r13, r1]
 # Rescheduled
-# [2007] ctrlblock[6]:=$0;
+# [2005] ctrlblock[6]:=$0;
 	ldr	r0,.Lj759
 	mov	r1,#0
 	str	r1,[r13, r0]
 # Rescheduled
-# [2008] ctrlblock[7]:=$0;
+# [2006] ctrlblock[7]:=$0;
 	ldr	r0,.Lj760
 	mov	r1,#0
 	str	r1,[r13, r0]
 # Var i located in register r3
-# [2009] for i:=0 to 7 do lpoke($4000000+4*i,ctrlblock[i]);
+# [2007] for i:=0 to 7 do lpoke($4000000+4*i,ctrlblock[i]);
 	mov	r3,#0
 	sub	r3,r3,#1
 	.balign 4
 .Lj763:
 	add	r3,r3,#1
 # Peephole FoldShiftProcess done
-# [2037] end;
+# [2035] end;
 	add	r0,r13,r3,lsl #2
 	add	r0,r0,#16384
 	mov	r1,r3,lsl #2
@@ -5786,18 +5786,18 @@ RETROMALINA_$$_PWMBEEP:
 	cmp	r3,#7
 	blt	.Lj763
 # Rescheduled
-# [2010] ctrlblock[5]:=$c4000000;
+# [2008] ctrlblock[5]:=$c4000000;
 	ldr	r1,.Lj758
 	mov	r0,#-1006632960
 	str	r0,[r13, r1]
-# [2011] ctrlblock[1]:=$c205c000;
+# [2009] ctrlblock[1]:=$c205c000;
 	mov	r0,#-1040187392
 # Rescheduled
 	ldr	r1,.Lj753
 	orr	r0,r0,#376832
 	str	r0,[r13, r1]
 # Var i located in register r2
-# [2012] for i:=0 to 7 do lpoke($4000020+4*i,ctrlblock[i]);
+# [2010] for i:=0 to 7 do lpoke($4000020+4*i,ctrlblock[i]);
 	mov	r2,#0
 	sub	r2,r2,#1
 	.balign 4
@@ -5817,7 +5817,7 @@ RETROMALINA_$$_PWMBEEP:
 	cmp	r2,#7
 	blt	.Lj768
 # Var i located in register r3
-# [2013] for i:=0 to 4095 do lpoke ($8000000+4*i,sinus[i]);
+# [2011] for i:=0 to 4095 do lpoke ($8000000+4*i,sinus[i]);
 	mov	r3,#0
 	sub	r3,r3,#1
 	.balign 4
@@ -5836,7 +5836,7 @@ RETROMALINA_$$_PWMBEEP:
 	cmp	r3,r0
 	blt	.Lj772
 # Var i located in register r2
-# [2014] for i:=0 to 4095 do lpoke ($8004000+4*i,sinus[i]);
+# [2012] for i:=0 to 4095 do lpoke ($8004000+4*i,sinus[i]);
 	mov	r2,#0
 	sub	r2,r2,#1
 	.balign 4
@@ -5854,7 +5854,7 @@ RETROMALINA_$$_PWMBEEP:
 	cmp	r2,r0
 	blt	.Lj775
 # Var i located in register r1
-# [2015] for i:=0 to 4095 do lpoke ($8008000+4*i,sinus[2*(i mod 2048)]);
+# [2013] for i:=0 to 4095 do lpoke ($8008000+4*i,sinus[2*(i mod 2048)]);
 	mov	r1,#0
 	sub	r1,r1,#1
 	.balign 4
@@ -5882,7 +5882,7 @@ RETROMALINA_$$_PWMBEEP:
 	cmp	r1,r0
 	blt	.Lj778
 # Var i located in register r1
-# [2016] for i:=0 to 4095 do lpoke ($800C000+4*i,sinus[2*(i mod 2048)]);
+# [2014] for i:=0 to 4095 do lpoke ($800C000+4*i,sinus[2*(i mod 2048)]);
 	mov	r1,#0
 	sub	r1,r1,#1
 	.balign 4
@@ -5909,7 +5909,7 @@ RETROMALINA_$$_PWMBEEP:
 	orr	r0,r0,#3840
 	cmp	r1,r0
 	blt	.Lj781
-# [2017] CleanDataCacheRange($8000000,$10000);
+# [2015] CleanDataCacheRange($8000000,$10000);
 	ldr	r0,.Lj782
 	ldr	r0,[r0]
 	cmp	r0,#0
@@ -5922,7 +5922,7 @@ RETROMALINA_$$_PWMBEEP:
 	mov	r0,#134217728
 	blx	r2
 .Lj784:
-# [2018] CleanDataCacheRange($4000000,$10000);
+# [2016] CleanDataCacheRange($4000000,$10000);
 	ldr	r0,.Lj782
 	ldr	r0,[r0]
 	cmp	r0,#0
@@ -5935,16 +5935,16 @@ RETROMALINA_$$_PWMBEEP:
 	mov	r0,#67108864
 	blx	r2
 .Lj788:
-# [2019] sleep(1);
+# [2017] sleep(1);
 	mov	r0,#1
 	bl	THREADS_$$_THREADSLEEP$LONGWORD$$LONGWORD
-# [2023] i:=pinteger($3F200010)^ and  %11111111111111000111111111111000;
+# [2021] i:=pinteger($3F200010)^ and  %11111111111111000111111111111000;
 	ldr	r0,.Lj790
 	ldr	r0,[r0]
 	bic	r0,r0,#7
 	bic	r0,r0,#229376
 # Var i located in register r0
-# [2024] lpoke($3F200010, i or       %00000000000000100000000000000100); // gpio 40/45 as alt0
+# [2022] lpoke($3F200010, i or       %00000000000000100000000000000100); // gpio 40/45 as alt0
 	orr	r0,r0,#4
 # Rescheduled
 # Rescheduled
@@ -5952,7 +5952,7 @@ RETROMALINA_$$_PWMBEEP:
 	orr	r0,r0,#131072
 	bic	r1,r1,#3
 	str	r0,[r1]
-# [2025] lpoke($3F1010a0,$5a000016); // set clock to pll D    16 plld
+# [2023] lpoke($3F1010a0,$5a000016); // set clock to pll D    16 plld
 	mov	r1,#22
 # Rescheduled
 	ldr	r0,.Lj792
@@ -5961,7 +5961,7 @@ RETROMALINA_$$_PWMBEEP:
 	mov	r1,#22
 	orr	r1,r1,#1509949440
 	str	r1,[r0]
-# [2026] lpoke($3F1010a4,$5a002000); // div 5
+# [2024] lpoke($3F1010a4,$5a002000); // div 5
 	mov	r1,#1509949440
 # Rescheduled
 	ldr	r0,.Lj793
@@ -5970,7 +5970,7 @@ RETROMALINA_$$_PWMBEEP:
 	mov	r0,#1509949440
 	orr	r0,r0,#8192
 	str	r0,[r1]
-# [2027] lpoke($3F20C010,5208);      // pwm 1 range  12bit 48 khz 2083
+# [2025] lpoke($3F20C010,5208);      // pwm 1 range  12bit 48 khz 2083
 	mov	r0,#88
 # Rescheduled
 	ldr	r1,.Lj794
@@ -5979,7 +5979,7 @@ RETROMALINA_$$_PWMBEEP:
 	mov	r0,#88
 	orr	r0,r0,#5120
 	str	r0,[r1]
-# [2028] lpoke($3F20C020,5208);      // pwm 2 range
+# [2026] lpoke($3F20C020,5208);      // pwm 2 range
 	mov	r0,#88
 # Rescheduled
 	ldr	r1,.Lj795
@@ -5988,7 +5988,7 @@ RETROMALINA_$$_PWMBEEP:
 	mov	r0,#88
 	orr	r0,r0,#5120
 	str	r0,[r1]
-# [2029] lpoke($3F20C000,$00002161); // pwm contr0l - enable, clear fifo, use fifo
+# [2027] lpoke($3F20C000,$00002161); // pwm contr0l - enable, clear fifo, use fifo
 	mov	r0,#97
 	orr	r0,r0,#8448
 	mov	r0,#1056964608
@@ -5997,7 +5997,7 @@ RETROMALINA_$$_PWMBEEP:
 	mov	r0,#97
 	orr	r0,r0,#8448
 	str	r0,[r1]
-# [2030] lpoke($3F20C008,$80000307); // pwm dma enable
+# [2028] lpoke($3F20C008,$80000307); // pwm dma enable
 	mov	r0,#-2147483641
 # Rescheduled
 	ldr	r1,.Lj796
@@ -6006,7 +6006,7 @@ RETROMALINA_$$_PWMBEEP:
 	mov	r1,#-2147483641
 	orr	r1,r1,#768
 # Rescheduled
-# [2031] lpoke($3F007ff0,pinteger($3F007FF0)^ or %100000000000000); // dma 0e enable
+# [2029] lpoke($3F007ff0,pinteger($3F007FF0)^ or %100000000000000); // dma 0e enable
 	ldr	r2,.Lj797
 	str	r1,[r0]
 	ldr	r0,[r2]
@@ -6016,13 +6016,13 @@ RETROMALINA_$$_PWMBEEP:
 	orr	r0,r0,#16384
 	bic	r2,r1,#3
 # Rescheduled
-# [2032] lpoke($3F007e04,$c4000000);
+# [2030] lpoke($3F007e04,$c4000000);
 	ldr	r1,.Lj799
 	str	r0,[r2]
 	bic	r0,r1,#3
 	mov	r1,#-1006632960
 	str	r1,[r0]
-# [2033] lpoke($3F007e00,3);
+# [2031] lpoke($3F007e00,3);
 	mov	r0,#1056964608
 	orr	r0,r0,#32256
 	bic	r0,r0,#3
@@ -6088,72 +6088,88 @@ RETROMALINA_$$_PWMBEEP:
 	.balign 4
 .globl	RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT
 RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT:
-# [2042] begin
+# [2040] begin
 	stmfd	r13!,{r14}
 # Var mode located in register r0
-# [2043] if mode=1 then pause1:=true else pause1:=false;
+# [2041] if mode=1 then
 	cmp	r0,#1
+	bne	.Lj803
 # Rescheduled
-	ldreq	r0,.Lj804
-	moveq	r1,#1
-	streqb	r1,[r0]
-# Rescheduled
-	ldrne	r0,.Lj804
-	movne	r1,#0
-	strneb	r1,[r0]
-# [2044] for i:=$205a000 to $205dfff do poke(i,2048);
+# [2043] pause1:=true;
+	ldr	r0,.Lj804
+	mov	r1,#1
+	strb	r1,[r0]
+# [2046] sleep(5);
+	mov	r0,#5
+	bl	THREADS_$$_THREADSLEEP$LONGWORD$$LONGWORD
+# [2047] for i:=$205a000 to $205dfff do lpoke(i,2604);
 	mov	r0,#33554432
 # Rescheduled
-	ldr	r1,.Lj810
+	ldr	r1,.Lj808
 	orr	r0,r0,#368640
 # Rescheduled
-	ldr	r2,.Lj810
+	ldr	r2,.Lj808
 	str	r0,[r1]
 	ldr	r0,[r2]
 	sub	r0,r0,#1
 	str	r0,[r2]
 	.balign 4
-.Lj809:
-	ldr	r2,.Lj810
+.Lj807:
+	ldr	r1,.Lj808
+	ldr	r0,[r1]
+	add	r0,r0,#1
+	str	r0,[r1]
+	mov	r0,#44
+# Rescheduled
+	ldr	r1,.Lj808
+	orr	r0,r0,#2560
+	ldr	r0,[r1]
+	bic	r1,r0,#3
+	mov	r0,#44
+	orr	r0,r0,#2560
+# Rescheduled
+	ldr	r2,.Lj808
+	str	r0,[r1]
+# Rescheduled
+# Rescheduled
 	ldr	r0,[r2]
-	add	r1,r0,#1
-# Rescheduled
-	ldr	r0,.Lj810
-	str	r1,[r2]
-	ldr	r0,[r0]
-	mov	r1,#0
-# Rescheduled
-	ldr	r2,.Lj810
-	strb	r1,[r0]
-# Rescheduled
-# Rescheduled
-	ldr	r0,[r2]
-	ldr	r1,.Lj815
+	ldr	r1,.Lj813
 	cmp	r0,r1
-	blt	.Lj809
-# [2045] CleanDataCacheRange($205a000,16384);
+	blt	.Lj807
+# [2048] CleanDataCacheRange($205a000,16384);
 	mov	r0,#33554432
 # Rescheduled
-	ldr	r1,.Lj816
+	ldr	r1,.Lj814
 # Rescheduled
 	ldr	r1,[r1]
 	orr	r0,r0,#368640
 	cmp	r1,#0
 # Rescheduled
 # Rescheduled
-	ldrne	r2,.Lj816
+	ldrne	r2,.Lj814
 	movne	r1,#16384
 	ldrne	r2,[r2]
 	blxne	r2
-# [2046] end;
+# [2049] sleep(5);
+	mov	r0,#5
+	bl	THREADS_$$_THREADSLEEP$LONGWORD$$LONGWORD
+	b	.Lj818
+.Lj803:
+# Rescheduled
+# [2053] pause1:=false;
+	ldr	r1,.Lj804
+	mov	r0,#0
+	strb	r0,[r1]
+.Lj818:
+# [2055] end;
 	ldmfd	r13!,{r15}
 .Lj804:
 	.long	TC_$RETROMALINA_$$_PAUSE1
-.Lj810:
+.Lj808:
 	.long	U_$RETROMALINA_$$_I
-.Lj815:
+.Lj813:
 	.long	33939455
-.Lj816:
+.Lj814:
 	.long	U_$PLATFORM_$$_CLEANDATACACHERANGEHANDLER
 .Le32:
 	.size	RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT, .Le32 - RETROMALINA_$$_SDL_PAUSEAUDIO$LONGINT
@@ -6499,7 +6515,7 @@ VMT_$RETROMALINA_$$_TRETRO:
 	.long	CLASSES$_$TTHREAD_$__$$_DOTERMINATE
 	.long	RETROMALINA$_$TRETRO_$__$$_EXECUTE
 	.long	0
-# [2052] end.
+# [2061] end.
 .Le33:
 	.size	VMT_$RETROMALINA_$$_TRETRO, .Le33 - VMT_$RETROMALINA_$$_TRETRO
 
@@ -6839,7 +6855,7 @@ TC_$RETROMALINA$_$AUDIOCALLBACK$LONGINT_$$_AA:
 .globl	RTTI_$RETROMALINA_$$_TSRCCONVERT
 RTTI_$RETROMALINA_$$_TSRCCONVERT:
 	.byte	23,11
-# [2054] 
+# [2063] 
 	.ascii	"Tsrcconvert"
 	.byte	0,0,0,0,3,0,0
 	.long	0

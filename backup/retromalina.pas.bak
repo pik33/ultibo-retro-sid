@@ -298,7 +298,7 @@ for i:=16 to 8191 do  // make the memory executable, shareable, rw, cacheable, w
   Entry.Flags:=$3b2;
   PageTableSetEntry(Entry);
   end;
-for i:=$30000 to 30FFF do  // make the memory executable, shareable, rw, cacheable, writeback
+for i:=$30000 to $30FFF do  // make the memory executable, shareable, rw, cacheable, writeback
   begin
   Entry:=PageTableGetEntry(i*4096);
   Entry.Flags:=$3b2;
@@ -1844,14 +1844,14 @@ p224:          ldr r0,[r4,#0x30]
 ldr r8,[r7,#0x1b0]
 asr r8,#18
 mov r9,r8
-asr r9,#1
+asr r9,#2
 add r8,r9
 add r8,#2592
 str r8,[r7,#0x1b0]
 ldr r8,[r7,#0x1ac]
 asr r8,#18
 mov r9,r8
-asr r9,#1
+asr r9,#2
 add r8,r9
 add r8,#2592
 str r8,[r7,#0x1ac]
@@ -2040,9 +2040,20 @@ end;
 procedure sdl_pauseaudio(mode:integer);
 
 begin
-if mode=1 then pause1:=true else pause1:=false;
-for i:=$205a000 to $205dfff do poke(i,2048);
-CleanDataCacheRange($205a000,16384);
+if mode=1 then
+  begin
+  pause1:=true;
+//  for i:=$200d400 to $200d41f do  begin poke(i+32,peek(i)); poke(i,0); end;
+//  CleanDataCacheRange($200d400,32);
+  sleep(5);
+  for i:=$205a000 to $205dfff do lpoke(i,2604);
+  CleanDataCacheRange($205a000,16384);
+  sleep(5);
+  end
+else
+  begin
+  pause1:=false;
+  end;
 end;
 
 

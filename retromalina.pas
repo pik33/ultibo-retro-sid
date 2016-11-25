@@ -1844,14 +1844,14 @@ p224:          ldr r0,[r4,#0x30]
 ldr r8,[r7,#0x1b0]
 asr r8,#18
 mov r9,r8
-asr r9,#1
+asr r9,#2
 add r8,r9
 add r8,#2592
 str r8,[r7,#0x1b0]
 ldr r8,[r7,#0x1ac]
 asr r8,#18
 mov r9,r8
-asr r9,#1
+asr r9,#2
 add r8,r9
 add r8,#2592
 str r8,[r7,#0x1ac]
@@ -1956,9 +1956,7 @@ for k:=0 to 7 do
         t6:=0; for i:=0 to 15 do t6+=times6502[i];
         time6502:=t6-15;
 
-//      for i:=0 to 25 do buf[i]:= read6502($D400+i);
 
-//       for i:=0 to 25 do poke($200d400+i,buf[i]);
         CleanDataCacheRange($200d400,32);
         timer1+=siddelay;
         songtime+=siddelay;
@@ -2040,9 +2038,20 @@ end;
 procedure sdl_pauseaudio(mode:integer);
 
 begin
-if mode=1 then pause1:=true else pause1:=false;
-for i:=$205a000 to $205dfff do poke(i,2048);
-CleanDataCacheRange($205a000,16384);
+if mode=1 then
+  begin
+  pause1:=true;
+//  for i:=$200d400 to $200d41f do  begin poke(i+32,peek(i)); poke(i,0); end;
+//  CleanDataCacheRange($200d400,32);
+  sleep(5);
+  for i:=$205a000 to $205dfff do lpoke(i,2604);
+  CleanDataCacheRange($205a000,16384);
+  sleep(5);
+  end
+else
+  begin
+  pause1:=false;
+  end;
 end;
 
 

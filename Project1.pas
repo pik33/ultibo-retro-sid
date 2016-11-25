@@ -40,7 +40,7 @@ var s,currentdir,currentdir2:string;
     init:word;
     atitle,author,copyright:string[32];
     workdir:string;
-    pause1:boolean=true;
+    pause1a:boolean=true;
     ch:tkeyboardreport;
     keyboardstatus:array[0..255]of byte;
     activekey:byte=0;
@@ -209,6 +209,7 @@ end;
 
 begin
 
+
 while not DirectoryExists('C:\') do
   begin
   Sleep(100);
@@ -222,7 +223,7 @@ sleep(100);
 fs:=1;
 workdir:='C:\';
 songtime:=0;
-pause1:=true;
+pause1a:=true;
 siddelay:=20000;
 setcurrentdir(workdir);
 initmachine;
@@ -231,6 +232,25 @@ poke($2070006,0);
 poke($2070007,0);
 poke($2070008,1);
 lpoke($206000c,$002040);
+lpoke ($2060008,0);
+lpoke ($2060020,1792);
+lpoke ($2060024,1120);
+setataripallette(0);
+// A simple mandelbrot test
+{
+mandelbrot;
+startreportbuffer;
+repeat
+  begin
+  l:=lpeek($2060000);
+  repeat sleep(1) until lpeek($2060000)>l+1;
+  l:=lpeek($2010000+1020);
+  for j:=255 downto 2 do lpoke($2010000+4*j,lpeek($2010000+4*j-4)) ;
+  lpoke($2010000+4,l);
+  ch:=getkeyboardreport;
+  end;
+until ch[0]=1;
+}
 main1;
 dirlist('C:\');
 poke($2070003,1);
@@ -253,14 +273,14 @@ repeat
   if rptcnt>26 then rptcnt:=24 ;
   if (rptcnt=1) or (rptcnt=24) then poke($2060028,byte(translatescantochar(activekey,0)));
 
-  if pause1 then begin for i:=$200d400 to $200d400+25 do poke(i,0); end;
+//  if pause1a then begin for i:=$200d400 to $200d400+25 do poke(i,0); end;
 
   if peek($2060028)=ord('5') then begin dpoke ($2060028,0); siddelay:=20000; songfreq:=50; skip:=0; end;
   if peek($2060028)=ord('1') then begin dpoke ($2060028,0); siddelay:=10000; songfreq:=100; skip:=0; end;
   if peek($2060028)=ord('2') then begin dpoke ($2060028,0); siddelay:=5000; songfreq:=200; skip:=0;end;
   if peek($2060028)=ord('3') then begin dpoke ($2060028,0); siddelay:=6666; songfreq:=150; skip:=0; end;
   if peek($2060028)=ord('4') then begin dpoke ($2060028,0); siddelay:=2500; songfreq:=400; skip:=0; end;
-  if peek($2060028)=ord('p') then begin dpoke ($2060028,0); pause1:=not pause1; if pause1 then sdl_pauseaudio(1) else sdl_pauseaudio(0); end;
+  if peek($2060028)=ord('p') then begin dpoke ($2060028,0); pause1a:=not pause1a; if pause1a then sdl_pauseaudio(1) else sdl_pauseaudio(0); end;
   if peek($2060028)=1 then begin dpoke($2060028,0); if peek($2070003)=0 then poke ($2070003,1) else poke ($2070003,0); end;
   if peek($2060028)=2 then begin dpoke($2060028,0); if peek($2070004)=0 then poke ($2070004,1) else poke ($2070004,0); end;
   if peek($2060028)=3 then begin dpoke($2060028,0); if peek($2070005)=0 then poke ($2070005,1) else poke ($2070005,0); end;
@@ -390,9 +410,9 @@ repeat
         repeat until lpeek($2060000)>(i+4);
         if sfh>=0 then fileclose(sfh);
         sfh:=-1;
-      //  if not pause1 then
+      //  if not pause1a then
           begin
-          pause1:=true;
+          pause1a:=true;
           sdl_pauseaudio(1);
           end;
         i:=lpeek($2060000);
@@ -458,7 +478,7 @@ repeat
         songname:=s;
         songtime:=0;
         timer1:=-1;
-        if filetype<>2 then begin pause1:=false; sdl_pauseaudio(0); end;
+        if filetype<>2 then begin pause1a:=false; sdl_pauseaudio(0); end;
         end;
     end;
   until (peek($2060028)=27) ;

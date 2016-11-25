@@ -28,6 +28,7 @@ var test:integer ;
 
 procedure main1;
 procedure main2;
+procedure mandelbrot;
 
 implementation
 
@@ -140,7 +141,7 @@ i:=lpeek($2060004);
 outtextxyz(24,1019,'A retromachine SID player by pik33 --- inspired by Johannes Ahlebrand''s Parallax Propeller SIDCog --- F1,F2,F3',89,2,2);
 blit(i,10,1011,i+$800000,10,1011,1771,48,1792,1792);
 rainbow;
-outtextxyz(24,1019,'- channels 1..3 on/off; 1-100 Hz, 2-200 Hz, 3-150 Hz, 4-400 Hz, 5-50 Hz; F - toggle fullscreen, P - pause',89,2,2);
+outtextxyz(24,1019,'- channels 1..3 on/off; 1-100 Hz, 2-200 Hz, 3-150 Hz, 4-400 Hz, 5-50 Hz; P - pause --- ',89,2,2);
 blit(i,10,1011,i+$800000,10,1059,1771,48,1792,1792);
 box2(10,800,894,848,246);
 box2(10,851,894,1008,244);
@@ -223,7 +224,7 @@ box2(10,610,894,797,178);
 box2(10,700,894,701,140);
 box2(10,636,894,637,140);
 box2(10,764,894,765,140);
-for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 56,2,2,190);
+for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 64,2,2,190);
 sprx:=round(dpeek($200d400)/40+74);
 spry:=920-3*(peek($200d406) and $F0);
 lpoke($2060040,(spry shl 16)+sprx+2048*(1-peek($2070003)));
@@ -235,11 +236,82 @@ spr3y:=920-3*(peek($200d414) and $F0);
 lpoke($2060050,(spr3y shl 16)+spr3x+2048*(1-peek($2070005)));
 lpoke($2060078,lpeek($206002c) shl 1);
 
-
-
-
 end;
 
 
+procedure mandelbrot;
+
+
+const
+
+   cxmin = -2.5;
+   cxmax =  1.5;
+   cymin = -1.0;
+   cymax =  1.0;
+   maxiteration = 255;
+   escaperadius = 2;
+
+var
+
+
+   ixmax  :Word;
+   iymax  :Word;
+
+   ix, iy      :Word;
+   cx, cy       :real;
+   pixelwidth   :real;
+   pixelheight  :real;
+
+   colour    : Byte;
+
+   zx, zy       :real;
+   zx2, zy2     :real;
+   iteration   : integer;
+   er2         : real = (escaperadius * escaperadius);
+
+begin
+
+ ixmax:=1792;
+ iymax:=1120;
+
+
+ pixelheight:= (cymax - cymin) / iymax;
+ pixelwidth:= pixelheight;
+
+   for iy := 1 to iymax do
+   begin
+      cy := cymin + (iy - 1)*pixelheight;
+      if abs(cy) < pixelheight / 2 then cy := 0.0;
+      for ix := 1 to ixmax do
+      begin
+         cx := cxmin + (ix - 1)*pixelwidth;
+         zx := 0.0;
+         zy := 0.0;
+         zx2 := zx*zx;
+         zy2 := zy*zy;
+         iteration := 0;
+         while (iteration < maxiteration) and (zx2 + zy2 < er2) do
+         begin
+            zy := 2*zx*zy + cy;
+            zx := zx2 - zy2 + cx;
+            zx2 := zx*zx;
+            zy2 := zy*zy;
+            iteration := iteration + 1;
+         end;
+         if iteration = maxiteration then
+         begin
+           colour := 0;
+          end
+         else
+         begin
+            colour := iteration;
+         end;
+         putpixel(ix-1, iy-1, colour);
+
+      end;
+   end;
+
+
+end;
 end.
 
