@@ -215,8 +215,8 @@ while not DirectoryExists('C:\') do
   Sleep(100);
   end;
 
-//DeleteFile('C:\kernel7.img');
-//RenameFile('C:\kernel7_l.img','C:\kernel7.img');
+DeleteFile('C:\kernel7.img');
+RenameFile('C:\kernel7_l.img','C:\kernel7.img');
 
 sleep(100);
 

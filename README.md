@@ -1,4 +1,4 @@
-This is SID player for Ultibo/RPi3 v. 0.11 ALPHA
+This is SID player for Ultibo/RPi3 v. 0.13 ALPHA
 
 If you want to test this, unpack sidplay.zip file to FAT32 formatted SD, then put the SD into your Raspberry Pi 3 and switch it on.
 
