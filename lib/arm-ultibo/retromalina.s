@@ -4953,14 +4953,14 @@ RETROMALINA_$$_SID$LONGINT$$TSAMPLE:
 # [1860] ldmfd r13!,{r0-r12}
 	ldmfd	r13!,{r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12}
 # Rescheduled
-# [1883] sid[0]:= siddata[$6c]; //  2048+ (siddata[$6c] div (16*16384));//16384;//32768;
+# [1883] sid[0]:= siddata[$6b]; //  2048+ (siddata[$6c] div (16*16384));//16384;//32768;
 	ldr	r0,.Lj566
 # Rescheduled
 	ldrh	r0,[r0]
 	ldr	r1,[r11, #-52]
 	strh	r0,[r1]
 # Rescheduled
-# [1884] sid[1]:= siddata[$6b];//2048+ (siddata[$6b] div (16*16384));//16384;//32768;
+# [1884] sid[1]:= siddata[$6c];//2048+ (siddata[$6b] div (16*16384));//16384;//32768;
 	ldr	r0,.Lj567
 	ldr	r1,[r11, #-52]
 	ldrh	r0,[r0]
@@ -5031,9 +5031,9 @@ RETROMALINA_$$_SID$LONGINT$$TSAMPLE:
 .Lj578:
 	ldmea	r11,{r11,r13,r15}
 .Lj566:
-	.long	U_$RETROMALINA_$$_SIDDATA+432
-.Lj567:
 	.long	U_$RETROMALINA_$$_SIDDATA+428
+.Lj567:
+	.long	U_$RETROMALINA_$$_SIDDATA+432
 .Lj568:
 	.long	TC_$RETROMALINA$_$SID$LONGINT$$TSAMPLE_$$_SC
 .Lj569:
@@ -5961,13 +5961,13 @@ RETROMALINA_$$_PWMBEEP:
 	mov	r1,#22
 	orr	r1,r1,#1509949440
 	str	r1,[r0]
-# [2024] lpoke($3F1010a4,$5a002000); // div 5
-	mov	r1,#1509949440
+# [2024] lpoke($3F1010a4,$5a02000); // div 2
+	mov	r1,#94371840
 # Rescheduled
 	ldr	r0,.Lj793
 	orr	r1,r1,#8192
 	bic	r1,r0,#3
-	mov	r0,#1509949440
+	mov	r0,#94371840
 	orr	r0,r0,#8192
 	str	r0,[r1]
 # [2025] lpoke($3F20C010,5208);      // pwm 1 range  12bit 48 khz 2083

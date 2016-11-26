@@ -234,7 +234,7 @@ lpoke($2060048,(spr2y shl 16)+spr2x+2048*(1-peek($2070004)));
 spr3x:=round(dpeek($200d40e)/40+74);
 spr3y:=920-3*(peek($200d414) and $F0);
 lpoke($2060050,(spr3y shl 16)+spr3x+2048*(1-peek($2070005)));
-lpoke($2060078,lpeek($206002c) shl 1);
+//lpoke($2060078,lpeek($206002c) shl 1);
 
 end;
 

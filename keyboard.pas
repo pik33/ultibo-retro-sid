@@ -3,6 +3,11 @@ Ultibo Keyboard interface unit.
 
 Copyright (C) 2015 - SoftOz Pty Ltd.
 
+// -----------------------------------------------------------------------------
+// ---This version patched for using in retromachine sidplayer - pik33 @20161125
+// -----------------------------------------------------------------------------
+
+
 Arch
 ====
 
@@ -242,7 +247,9 @@ const
  {Entries not filled in are left 0 and are interpreted as unrecognized input and ignored (Section 10 of the Universal Serial Bus HID Usage Tables v1.12)}
  {Note: These are no longer used, see the Keymap unit for scan code to key code translation tables}
 
-USB_HID_BOOT_USAGE_ID:array[0..255] of array[0..1] of Char = (
+ // ----- the table uncommented and modified by pik33 @21061123 ----------------
+
+ USB_HID_BOOT_USAGE_ID:array[0..255] of array[0..1] of Char = (
     {0}   (#0, #0),       {Reserved (no event indicated)}
     {1}   (#0, #0),       {Keyboard ErrorRollOver}
     {2}   (#0, #0),       {Keyboard POSTFail}
@@ -500,7 +507,9 @@ USB_HID_BOOT_USAGE_ID:array[0..255] of array[0..1] of Char = (
     {254} (#0, #0),       {Reserved}
     {255} (#0, #0)        {Reserved (256 to 65535 Reserved)}
   );
- 
+
+// ------------------- end of patch  -------------------------------------------
+
  USB_HID_BOOT_USAGE_NUMLOCK    = 83;
  USB_HID_BOOT_USAGE_CAPSLOCK   = 57;
  USB_HID_BOOT_USAGE_SCROLLLOCK = 71;
@@ -686,7 +695,7 @@ function USBKeyboardDeviceSetProtocol(Keyboard:PUSBKeyboardDevice;Protocol:Byte)
 {==============================================================================}
 {==============================================================================}
 
-// added by pik33 @ 20161123
+// ---------------------------------patch added by pik33 @ 20161123 ------------
 
 type TKeyboardreport=array[0..7] of byte;
 
@@ -699,6 +708,7 @@ function getkeyboardreport:TKeyboardreport;
 procedure startreportbuffer;
 procedure stopreportbuffer;
 function translatescantochar(scan,shift:byte):char;
+
 
 implementation
 
@@ -735,8 +745,7 @@ if shift=0 then result:=USB_HID_BOOT_USAGE_ID[scan,0]
 else result:=USB_HID_BOOT_USAGE_ID[scan,1];
 end;
 
-//uses retromalina;
-
+// --------- end of patch ------------------------------------------------------
 
 {==============================================================================}
 {==============================================================================}
@@ -2851,7 +2860,8 @@ begin
           if (Keyboard.Keyboard.KeyboardLEDs and KEYBOARD_LED_KANA) <> 0 then Modifiers:=Modifiers or KEYBOARD_KANA;
          end;
 
-        // fill a report buffer  // added by pik3 @2016.11.23
+// ---- fill a report buffer ---- added by pik33 @2016.11.23 ------------------
+
          if report_buffer_active then
            begin
            if not ((rb_end=(rb_start-1)) or ((rb_end=63) and (rb_start=0))) then
@@ -2861,6 +2871,8 @@ begin
              if rb_end>=63 then rb_end-=63;
              end;
            end;
+
+// ----- end of patch ---------------------------------------------------------
 
         {Report Modifiers}
         if Report[0] <> 0 then

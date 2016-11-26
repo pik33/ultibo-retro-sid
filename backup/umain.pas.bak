@@ -141,7 +141,7 @@ i:=lpeek($2060004);
 outtextxyz(24,1019,'A retromachine SID player by pik33 --- inspired by Johannes Ahlebrand''s Parallax Propeller SIDCog --- F1,F2,F3',89,2,2);
 blit(i,10,1011,i+$800000,10,1011,1771,48,1792,1792);
 rainbow;
-outtextxyz(24,1019,'- channels 1..3 on/off; 1-100 Hz, 2-200 Hz, 3-150 Hz, 4-400 Hz, 5-50 Hz; P - pause --- ',89,2,2);
+outtextxyz(24,1019,'- channels 1..3 on/off; 1-100 Hz, 2-200 Hz, 3-150 Hz, 4-400 Hz, 5-50 Hz; P - pause; up/down/enter - select --- ',89,2,2);
 blit(i,10,1011,i+$800000,10,1059,1771,48,1792,1792);
 box2(10,800,894,848,246);
 box2(10,851,894,1008,244);

@@ -3,6 +3,11 @@ Ultibo Keyboard interface unit.
 
 Copyright (C) 2015 - SoftOz Pty Ltd.
 
+// -----------------------------------------------------------------------------
+// ---This version patched for using in retromachine sidplayer - pik33 @20161125
+// -----------------------------------------------------------------------------
+
+
 Arch
 ====
 
@@ -686,7 +691,7 @@ function USBKeyboardDeviceSetProtocol(Keyboard:PUSBKeyboardDevice;Protocol:Byte)
 {==============================================================================}
 {==============================================================================}
 
-// added by pik33 @ 20161123
+// ---------------------------------patch added by pik33 @ 20161123 ------------
 
 type TKeyboardreport=array[0..7] of byte;
 
@@ -699,6 +704,7 @@ function getkeyboardreport:TKeyboardreport;
 procedure startreportbuffer;
 procedure stopreportbuffer;
 function translatescantochar(scan,shift:byte):char;
+
 
 implementation
 
@@ -725,7 +731,7 @@ if rb_end <>rb_start then begin
   if rb_start>=63 then rb_start-=63;
   end
 else
-  for i:=0 to 7 do result[i]:=0;
+  for i:=0 to 7 do result[i]:=255;
 end;
 
 function translatescantochar(scan,shift:byte):char;
@@ -735,8 +741,7 @@ if shift=0 then result:=USB_HID_BOOT_USAGE_ID[scan,0]
 else result:=USB_HID_BOOT_USAGE_ID[scan,1];
 end;
 
-//uses retromalina;
-
+// --------- end of patch ------------------------------------------------------
 
 {==============================================================================}
 {==============================================================================}
@@ -2851,7 +2856,8 @@ begin
           if (Keyboard.Keyboard.KeyboardLEDs and KEYBOARD_LED_KANA) <> 0 then Modifiers:=Modifiers or KEYBOARD_KANA;
          end;
 
-        // fill a report buffer  // added by pik3 @2016.11.23
+// ---- fill a report buffer ---- added by pik33 @2016.11.23 ------------------
+
          if report_buffer_active then
            begin
            if not ((rb_end=(rb_start-1)) or ((rb_end=63) and (rb_start=0))) then
@@ -2861,6 +2867,8 @@ begin
              if rb_end>=63 then rb_end-=63;
              end;
            end;
+
+// ----- end of patch ---------------------------------------------------------
 
         {Report Modifiers}
         if Report[0] <> 0 then

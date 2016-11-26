@@ -1239,16 +1239,16 @@ UMAIN_$$_MAIN2:
 	ldr	r1,.Lj156
 	ldr	r0,[r0]
 	ldr	r1,[r1]
-	adds	r12,r0,#1
+	adds	r3,r0,#1
 # Rescheduled
 	ldr	r2,.Lj155
-	adc	r3,r1,#0
+	adc	r12,r1,#0
 # Rescheduled
 	ldr	r0,.Lj156
-	str	r12,[r2]
+	str	r3,[r2]
 # Rescheduled
 	ldr	r1,.Lj156
-	str	r3,[r0]
+	str	r12,[r0]
 # Rescheduled
 	ldr	r0,.Lj155
 	ldr	r3,[r1]
@@ -1559,7 +1559,7 @@ UMAIN_$$_MAIN2:
 	ldr	r3,.Lj201
 # Rescheduled
 	ldr	r2,.Lj202
-	b	.Lj377
+	b	.Lj375
 .Lj150:
 	.long	U_$RETROMALINA_$$_K
 .Lj155:
@@ -1617,7 +1617,7 @@ UMAIN_$$_MAIN2:
 .Lj213:
 # value: 0d+1.6666666666666666E-002
 	.byte	17,17,17,17,17,17,145,63
-.Lj377:
+.Lj375:
 	str	r0,[r3]
 	str	r1,[r2]
 # Rescheduled
@@ -1937,7 +1937,7 @@ UMAIN_$$_MAIN2:
 	sub	r1,r11,#236
 	mov	r3,#0
 	mov	r2,#2
-	b	.Lj378
+	b	.Lj376
 .Lj216:
 	.long	TC_$UMAIN_$$_AVSPT
 .Lj217:
@@ -1986,7 +1986,7 @@ UMAIN_$$_MAIN2:
 .Lj280:
 # value: 0d+6.2500000000000000E-002
 	.byte	0,0,0,0,0,0,176,63
-.Lj378:
+.Lj376:
 	sub	r0,r11,#224
 	bl	fpc_ansistr_concat_multi
 	ldr	r2,[r11, #-224]
@@ -2041,11 +2041,11 @@ UMAIN_$$_MAIN2:
 	bne	.Lj288
 	mov	r0,#2
 	str	r0,[r13, #4]
-# Peephole MovStrMov done
+	mov	r1,#2
 # Rescheduled
-	ldr	r1,.Lj289
-	str	r0,[r13]
-	ldrb	r0,[r1]
+	ldr	r0,.Lj289
+	str	r1,[r13]
+	ldrb	r0,[r0]
 	mov	r1,r0,lsr #4
 	mov	r2,#0
 	sub	r0,r11,#224
@@ -2304,10 +2304,10 @@ UMAIN_$$_MAIN2:
 	ldr	r0,.Lj312
 # Rescheduled
 	ldr	r1,.Lj313
-	ldr	r2,[r0]
-	ldr	r0,[r1]
-	adds	r2,r2,r2
-	adc	r3,r0,r0
+	ldr	r0,[r0]
+	ldr	r1,[r1]
+	adds	r2,r0,r0
+	adc	r3,r1,r1
 	mov	r1,#0
 	mov	r0,#216
 	orr	r0,r0,#3328
@@ -2501,15 +2501,14 @@ UMAIN_$$_MAIN2:
 	orr	r0,r0,#45824
 	cmp	r1,r0
 	bge	.Lj341
-	mov	r1,#190
+	mov	r0,#190
 # Rescheduled
-	ldr	r0,.Lj335
-	str	r1,[r13]
-# Rescheduled
-# Peephole FoldShiftLdrStr done
+	ldr	r1,.Lj335
+	str	r0,[r13]
+	ldr	r0,[r1]
 # Rescheduled
 	ldr	r1,.Lj339
-	ldr	r0,[r0]
+# Peephole FoldShiftLdrStr done
 	ldr	r0,[r1, r0, lsl #2]
 	mov	r1,r0,asr #31
 	add	r0,r0,r1,lsr #26
@@ -2535,7 +2534,7 @@ UMAIN_$$_MAIN2:
 	ldrh	r0,[r0]
 	vmov	s0,r0
 	vcvt.f64.u32	d0,s0
-	b	.Lj379
+	b	.Lj377
 .Lj282:
 	.long	34013187
 .Lj285:
@@ -2570,7 +2569,7 @@ UMAIN_$$_MAIN2:
 	.long	U_$RETROMALINA_$$_J
 .Lj339:
 	.long	U_$RETROMALINA_$$_SCOPE
-.Lj379:
+.Lj377:
 	vldr	d1,.Lj346
 	vmul.f64	d0,d0,d1
 	vldr	d1,.Lj347
@@ -2658,12 +2657,12 @@ UMAIN_$$_MAIN2:
 # Rescheduled
 	ldr	r1,.Lj364
 	add	r0,r0,r3
-	bic	r2,r1,#3
+	bic	r1,r1,#3
 # Rescheduled
 # [234] spr3x:=round(dpeek($200d40e)/40+74);
-	ldr	r1,.Lj365
-	str	r0,[r2]
-	bic	r0,r1,#1
+	ldr	r2,.Lj365
+	str	r0,[r1]
+	bic	r0,r2,#1
 	ldrh	r0,[r0]
 	vmov	s0,r0
 	vcvt.f64.u32	d1,s0
@@ -2706,17 +2705,6 @@ UMAIN_$$_MAIN2:
 # Rescheduled
 	ldr	r1,.Lj374
 	add	r0,r0,r3
-	bic	r2,r1,#3
-# Rescheduled
-# [237] lpoke($2060078,lpeek($206002c) shl 1);
-	ldr	r1,.Lj375
-	str	r0,[r2]
-	bic	r0,r1,#3
-	ldr	r0,[r0]
-# Rescheduled
-# Rescheduled
-	ldr	r1,.Lj376
-	mov	r0,r0,lsl #1
 	bic	r1,r1,#3
 	str	r0,[r1]
 .Lj148:
@@ -2789,10 +2777,6 @@ UMAIN_$$_MAIN2:
 	.long	34013189
 .Lj374:
 	.long	33947728
-.Lj375:
-	.long	33947692
-.Lj376:
-	.long	33947768
 .Le2:
 	.size	UMAIN_$$_MAIN2, .Le2 - UMAIN_$$_MAIN2
 
@@ -2823,7 +2807,7 @@ UMAIN_$$_MANDELBROT:
 # Var er2 located in register d0
 # Var er2 located in register d0
 # [245] const
-	ldr	r0,.Lj382
+	ldr	r0,.Lj380
 	vldr	d0,[r0]
 	vstr	d0,[r13]
 # Var ixmax located in register r5
@@ -2835,7 +2819,7 @@ UMAIN_$$_MANDELBROT:
 	mov	r0,#1120
 	vmov	s0,r0
 	vcvt.f32.u32	s0,s0
-	vldr	s2,.Lj383
+	vldr	s2,.Lj381
 	vdiv.f32	s0,s2,s0
 	vcvt.f64.f32	d0,s0
 # Var pixelheight located in register d0
@@ -2851,7 +2835,7 @@ UMAIN_$$_MANDELBROT:
 	sub	r9,r9,#1
 	uxth	r9,r9
 	.balign 4
-.Lj386:
+.Lj384:
 	add	r9,r9,#1
 	uxth	r9,r9
 # [283] cy := cymin + (iy - 1)*pixelheight;
@@ -2859,25 +2843,25 @@ UMAIN_$$_MANDELBROT:
 	vmov	s0,r0
 	vcvt.f64.s32	d0,s0
 	vmul.f64	d0,d0,d15
-	vldr	d1,.Lj387
+	vldr	d1,.Lj385
 	vadd.f64	d0,d1,d0
 	vmov.f64	d13,d0
 # [284] if abs(cy) < pixelheight / 2 then cy := 0.0;
 	vabs.f64	d1,d13
-	vldr	d0,.Lj388
+	vldr	d0,.Lj386
 	vmul.f64	d0,d15,d0
 	vcmpe.f64	d1,d0
 	vmrs	apsr_nzcv,fpscr
-	vldrmi	d13,.Lj391
+	vldrmi	d13,.Lj389
 # [285] for ix := 1 to ixmax do
 	mov	r4,r5
 	mov	r7,#1
 	cmp	r4,r7
-	bcc	.Lj393
+	bcc	.Lj391
 	sub	r7,r7,#1
 	uxth	r7,r7
 	.balign 4
-.Lj394:
+.Lj392:
 	add	r7,r7,#1
 	uxth	r7,r7
 # [287] cx := cxmin + (ix - 1)*pixelwidth;
@@ -2885,13 +2869,13 @@ UMAIN_$$_MANDELBROT:
 	vmov	s0,r0
 	vcvt.f64.s32	d0,s0
 	vmul.f64	d0,d0,d14
-	vldr	d1,.Lj395
+	vldr	d1,.Lj393
 	vadd.f64	d0,d1,d0
 	vmov.f64	d12,d0
 # [288] zx := 0.0;
-	vldr	d8,.Lj396
+	vldr	d8,.Lj394
 # [289] zy := 0.0;
-	vldr	d9,.Lj397
+	vldr	d9,.Lj395
 # [290] zx2 := zx*zx;
 	vmul.f64	d0,d8,d8
 	vmov.f64	d11,d0
@@ -2901,11 +2885,11 @@ UMAIN_$$_MANDELBROT:
 # [292] iteration := 0;
 	mov	r6,#0
 # [293] while (iteration < maxiteration) and (zx2 + zy2 < er2) do
-	b	.Lj399
+	b	.Lj397
 	.balign 4
-.Lj398:
+.Lj396:
 # [295] zy := 2*zx*zy + cy;
-	vldr	d0,.Lj401
+	vldr	d0,.Lj399
 	vmul.f64	d0,d0,d8
 	vmul.f64	d0,d0,d9
 	vadd.f64	d0,d0,d13
@@ -2923,15 +2907,15 @@ UMAIN_$$_MANDELBROT:
 # [299] iteration := iteration + 1;
 	add	r6,r6,#1
 # Peephole DataMov2Data removed superfluous mov
-.Lj399:
+.Lj397:
 	cmp	r6,#255
-	bge	.Lj400
+	bge	.Lj398
 	vadd.f64	d1,d11,d10
 	vldr	d0,[r13]
 	vcmpe.f64	d1,d0
 	vmrs	apsr_nzcv,fpscr
-	bmi	.Lj398
-.Lj400:
+	bmi	.Lj396
+.Lj398:
 # [301] if iteration = maxiteration then
 	cmp	r6,#255
 # [303] colour := 0;
@@ -2945,39 +2929,39 @@ UMAIN_$$_MANDELBROT:
 	mov	r2,r8
 	bl	RETROMALINA_$$_PUTPIXEL$LONGINT$LONGINT$LONGINT
 	cmp	r4,r7
-	bhi	.Lj394
-.Lj393:
+	bhi	.Lj392
+.Lj391:
 	cmp	r9,#1120
-	bcc	.Lj386
+	bcc	.Lj384
 # [315] end;
 	add	r12,r13,#8
 	vldm	r12,{d8,d9,d10,d11,d12,d13,d14,d15}
 	add	r13,r13,#72
 	ldmfd	r13!,{r4,r5,r6,r7,r8,r9,r15}
-.Lj382:
+.Lj380:
 	.long	TC_$UMAIN$_$MANDELBROT_$$_defaulter2
-.Lj383:
+.Lj381:
 # value: 0d+2.000000000E+00
 	.byte	0,0,0,64
-.Lj387:
+.Lj385:
 # value: 0d-1.0000000000000000E+000
 	.byte	0,0,0,0,0,0,240,191
-.Lj388:
+.Lj386:
 # value: 0d+5.0000000000000000E-001
 	.byte	0,0,0,0,0,0,224,63
-.Lj391:
+.Lj389:
+# value: 0d+0.0000000000000000E+000
+	.byte	0,0,0,0,0,0,0,0
+.Lj393:
+# value: 0d-2.5000000000000000E+000
+	.byte	0,0,0,0,0,0,4,192
+.Lj394:
 # value: 0d+0.0000000000000000E+000
 	.byte	0,0,0,0,0,0,0,0
 .Lj395:
-# value: 0d-2.5000000000000000E+000
-	.byte	0,0,0,0,0,0,4,192
-.Lj396:
 # value: 0d+0.0000000000000000E+000
 	.byte	0,0,0,0,0,0,0,0
-.Lj397:
-# value: 0d+0.0000000000000000E+000
-	.byte	0,0,0,0,0,0,0,0
-.Lj401:
+.Lj399:
 # value: 0d+2.0000000000000000E+000
 	.byte	0,0,0,0,0,0,0,64
 .Le3:
@@ -3001,10 +2985,10 @@ FINALIZE$_$UMAIN:
 .globl	UMAIN_$$_finalize_implicit
 UMAIN_$$_finalize_implicit:
 	stmfd	r13!,{r14}
-	ldr	r0,.Lj412
+	ldr	r0,.Lj410
 	bl	fpc_ansistr_decr_ref
 	ldmfd	r13!,{r15}
-.Lj412:
+.Lj410:
 	.long	U_$UMAIN_$$_SONGNAME
 .Le5:
 	.size	UMAIN_$$_finalize_implicit, .Le5 - UMAIN_$$_finalize_implicit

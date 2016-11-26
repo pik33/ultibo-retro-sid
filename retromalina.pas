@@ -1880,8 +1880,8 @@ str r8,[r7,#0x1ac]
 //until sidclock>=20000;//20526;
 //sidtime:=clockgettotal-ttt;
 //sidclock-=20000;//20526;
-sid[0]:= siddata[$6c]; //  2048+ (siddata[$6c] div (16*16384));//16384;//32768;
-sid[1]:= siddata[$6b];//2048+ (siddata[$6b] div (16*16384));//16384;//32768;
+sid[0]:= siddata[$6b]; //  2048+ (siddata[$6c] div (16*16384));//16384;//32768;
+sid[1]:= siddata[$6c];//2048+ (siddata[$6b] div (16*16384));//16384;//32768;
 
 oldsc:=sc;
 sc:=(siddata[$6c]+siddata[$6B]) -5184 ;//div 16384;
@@ -2021,7 +2021,7 @@ sleep(1);
 i:=pinteger($3F200010)^ and  %11111111111111000111111111111000;
 lpoke($3F200010, i or       %00000000000000100000000000000100); // gpio 40/45 as alt0
 lpoke($3F1010a0,$5a000016); // set clock to pll D    16 plld
-lpoke($3F1010a4,$5a002000); // div 5
+lpoke($3F1010a4,$5a02000); // div 2
 lpoke($3F20C010,5208);      // pwm 1 range  12bit 48 khz 2083
 lpoke($3F20C020,5208);      // pwm 2 range
 lpoke($3F20C000,$00002161); // pwm contr0l - enable, clear fifo, use fifo
