@@ -215,8 +215,8 @@ while not DirectoryExists('C:\') do
   Sleep(100);
   end;
 
-DeleteFile('C:\kernel7.img');
-RenameFile('C:\kernel7_l.img','C:\kernel7.img');
+//DeleteFile('C:\kernel7.img');
+//RenameFile('C:\kernel7_l.img','C:\kernel7.img');
 
 sleep(100);
 
@@ -227,10 +227,10 @@ pause1a:=true;
 siddelay:=20000;
 setcurrentdir(workdir);
 initmachine;
-poke($2070002,0);
-poke($2070006,0);
-poke($2070007,0);
-poke($2070008,1);
+poke($2100002,0);
+poke($2100006,0);
+poke($2100007,0);
+poke($2100008,1);
 lpoke($206000c,$002040);
 lpoke ($2060008,0);
 lpoke ($2060020,1792);
@@ -253,9 +253,9 @@ until ch[0]=1;
 }
 main1;
 dirlist('C:\');
-poke($2070003,1);
-poke($2070004,1);
-poke($2070005,1);
+poke($2100003,1);
+poke($2100004,1);
+poke($2100005,1);
 pwmbeep;
 //ThreadSetPriority(ThreadGetCurrent,6);
 threadsleep(1);
@@ -263,8 +263,20 @@ ThreadSetCPU(ThreadGetCurrent,CPU_ID_0);
 threadsleep(1);
 for i:=0 to 255 do keyboardstatus[i]:=0;
 startreportbuffer;
+//lpoke($3F1010a0,$5a000006);
+//threadsleep(1);
+//lpoke($3F1010a4,$5a003000); // div 2
+//lpoke($3F1010a0,$5a000016); // set clock to pll D    16 plld
+
 repeat
   main2;
+
+//  i:=(lpeek($2060000) div 120) mod 2 ;
+//  if i=0 then lpoke($3F1010a4,$5a002000) // div 2
+//    else
+
+
+
 
   ch:=getkeyboardreport;
   if (ch[2]<>0) and (ch[2]<>255) then activekey:=ch[2];
@@ -281,9 +293,9 @@ repeat
   if peek($2060028)=ord('3') then begin dpoke ($2060028,0); siddelay:=6666; songfreq:=150; skip:=0; end;
   if peek($2060028)=ord('4') then begin dpoke ($2060028,0); siddelay:=2500; songfreq:=400; skip:=0; end;
   if peek($2060028)=ord('p') then begin dpoke ($2060028,0); pause1a:=not pause1a; if pause1a then sdl_pauseaudio(1) else sdl_pauseaudio(0); end;
-  if peek($2060028)=1 then begin dpoke($2060028,0); if peek($2070003)=0 then poke ($2070003,1) else poke ($2070003,0); end;
-  if peek($2060028)=2 then begin dpoke($2060028,0); if peek($2070004)=0 then poke ($2070004,1) else poke ($2070004,0); end;
-  if peek($2060028)=3 then begin dpoke($2060028,0); if peek($2070005)=0 then poke ($2070005,1) else poke ($2070005,0); end;
+  if peek($2060028)=1 then begin dpoke($2060028,0); if peek($2100003)=0 then poke ($2100003,1) else poke ($2100003,0); end;
+  if peek($2060028)=2 then begin dpoke($2060028,0); if peek($2100004)=0 then poke ($2100004,1) else poke ($2100004,0); end;
+  if peek($2060028)=3 then begin dpoke($2060028,0); if peek($2100005)=0 then poke ($2100005,1) else poke ($2100005,0); end;
 
   if peek($2060028)=23 then
     begin

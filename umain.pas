@@ -6,7 +6,7 @@ interface
 
 uses sysutils,classes,retromalina,platform;
 
-const ver='The retromachine player v. 0.13u --- 2016.11.26';
+const ver='The retromachine player v. 0.14u --- 2016.11.27';
 var test:integer ;
     licznik:integer=0;
     songname:string;
@@ -199,9 +199,9 @@ outtextxyz(400,1070,'sprites '+inttostr(avspt)+' us',186,2,2);
 if sidcount<>0 then outtextxyz(656,1070,'SID '+inttostr(avall)+' us',233,2,2);
 outtextxyz(880,1070,'6502 '+floattostrf((av6502/16),fffixed,4,1)+' us',124,2,2);
 outtextxyz(1280,1070,clock,220,2,2);
-if peek($2070003)=1 then outtextxyz(1540,1070,inttostr(peek($200d404)shr 4),108,2,2);
-if peek($2070004)=1 then outtextxyz(1580,1070,inttostr(peek($200d40b)shr 4),200,2,2);
-if peek($2070005)=1 then outtextxyz(1620,1070,inttostr(peek($200d412)shr 4),40,2,2);
+if peek($2100003)=1 then outtextxyz(1540,1070,inttostr(peek($200d404)shr 4),108,2,2);
+if peek($2100004)=1 then outtextxyz(1580,1070,inttostr(peek($200d40b)shr 4),200,2,2);
+if peek($2100005)=1 then outtextxyz(1620,1070,inttostr(peek($200d412)shr 4),40,2,2);
 outtextxyz(1680,1070,inttostr(peek($2060028)),44,2,2);
 
 a:= TemperatureGetCurrent(0) div 1000;
@@ -224,17 +224,21 @@ box2(10,610,894,797,178);
 box2(10,700,894,701,140);
 box2(10,636,894,637,140);
 box2(10,764,894,765,140);
-for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 64,2,2,190);
+for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 768,2,2,190);
 sprx:=round(dpeek($200d400)/40+74);
 spry:=920-3*(peek($200d406) and $F0);
-lpoke($2060040,(spry shl 16)+sprx+2048*(1-peek($2070003)));
+lpoke($2060040,(spry shl 16)+sprx+2048*(1-peek($2100003)));
 spr2x:=round(dpeek($200d407)/40+74);
 spr2y:=920-3*(peek($200d40d) and $F0);
-lpoke($2060048,(spr2y shl 16)+spr2x+2048*(1-peek($2070004)));
+lpoke($2060048,(spr2y shl 16)+spr2x+2048*(1-peek($2100004)));
 spr3x:=round(dpeek($200d40e)/40+74);
 spr3y:=920-3*(peek($200d414) and $F0);
-lpoke($2060050,(spr3y shl 16)+spr3x+2048*(1-peek($2070005)));
+lpoke($2060050,(spr3y shl 16)+spr3x+2048*(1-peek($2100005)));
 //lpoke($2060078,lpeek($206002c) shl 1);
+
+//box(100,100,300,40,0);
+//outtextxyz(100,100,inttostr(siddata[$7a])+' '+inttostr(siddata[$7B]),40,2,2);
+
 
 end;
 

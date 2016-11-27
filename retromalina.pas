@@ -25,7 +25,8 @@
 //    0205_A000  -  0205_DFFF 16kB area for audio buffer
 //    0205_E000  -  0205_FFFF reserved
 //    0206_0000  -  0206_FFFF virtual hardware regs area
-//    0207_0000  -  02FF_FFFF low memory area / system procedures and variables
+//    0207_0000  -  020C_FFFF long audio buffer for noise shaper
+//    020D_0000  -  02FF_FFFF low memory area / system procedures and variables
 
 //    0300_0000  -  2FFF_FFFF program area - 754974719 bytes free
 //    3000_0000  -  30FF_FFFF virtual framebuffer area
@@ -138,6 +139,8 @@ var fh,filetype:integer;                // this needs cleaning...
     kbd:array[0..15] of TKeyboarddata;
     m:array[0..128] of Tmousedata;
     pause1:boolean=false;
+    i1l,i2l,fbl,topl:integer;
+    i1r,i2r,fbr,topr:integer;
 
 // prototypes
 
@@ -196,13 +199,14 @@ begin
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_1);
 threadsleep(1);
   repeat
-  repeat threadsleep(2); a:= lpeek($3F007e00) until (a and 2) <>0 ;
+  repeat threadsleep(2); a:= lpeek($3F007600) until (a and 2) <>0 ;
   if (a and 2)<>0 then
     begin
-    if lpeek($3f007e1c)=$c4000000 then audiocallback($0205a000)
+    if lpeek($3f00761c)=$c4000000 then audiocallback($0205a000)
                                   else audiocallback($0205c000);
-    lpoke($3F007e00,3);
+    lpoke($3F007600,3);
     CleanDataCacheRange($0205a000,$8000);
+    CleanDataCacheRange($02070000,$60000);
     end;
   until terminated;
 end;
@@ -304,7 +308,7 @@ for i:=$30000 to $30FFF do  // make the memory executable, shareable, rw, cachea
   Entry.Flags:=$3b2;
   PageTableSetEntry(Entry);
   end;
-for i:=$2000000 to $206FFFF do poke(i,0);
+for i:=$2000000 to $20bFFFF do poke(i,0);
 lpoke($2060004,$30000000);
 lpoke($2060000,$00000000);
 
@@ -925,9 +929,9 @@ sidptr:=@siddata;
 if mode=1 then  // get regs
 
   begin
-  siddata[$56]:=peek($2070003);
-  siddata[$57]:=peek($2070004);
-  siddata[$58]:=peek($2070005);
+  siddata[$56]:=peek($2100003);
+  siddata[$57]:=peek($2100004);
+  siddata[$58]:=peek($2100005);
   siddata[0]:=round(1.0263*(16*peek($200D400)+4096*peek($200d401))); //freq1
   siddata[$10]:=round(1.0263*(16*peek($200d407)+4096*peek($200d408)));
   siddata[$20]:=round(1.0263*(16*peek($200d40e)+4096*peek($200d40f)));
@@ -1842,18 +1846,23 @@ p224:          ldr r0,[r4,#0x30]
 
                      // for 12 bit pwm shift and unsign
 ldr r8,[r7,#0x1b0]
-asr r8,#18
 mov r9,r8
-asr r9,#2
+asr r9,#4
 add r8,r9
-add r8,#2592
+asr r8,#14
+
+//add r8,#2592
 str r8,[r7,#0x1b0]
+
 ldr r8,[r7,#0x1ac]
-asr r8,#18
+
 mov r9,r8
-asr r9,#2
+asr r9,#4
 add r8,r9
-add r8,#2592
+
+asr r8,#14  //#18
+
+//add r8,#2592
 str r8,[r7,#0x1ac]
 
 
@@ -1884,7 +1893,7 @@ sid[0]:= siddata[$6b]; //  2048+ (siddata[$6c] div (16*16384));//16384;//32768;
 sid[1]:= siddata[$6c];//2048+ (siddata[$6b] div (16*16384));//16384;//32768;
 
 oldsc:=sc;
-sc:=(siddata[$6c]+siddata[$6B]) -5184 ;//div 16384;
+sc:=(siddata[$6c]+siddata[$6B]);
 scope[scj]:=sc;
 inc(scj);
 if scj>959 then if (oldsc<0) and (sc>0) then scj:=0 else scj:=959;
@@ -1894,7 +1903,171 @@ if scj>959 then if (oldsc<0) and (sc>0) then scj:=0 else scj:=959;
 end;
 
 
+procedure noiseshaper(bufaddr:integer);
 
+var i,j:integer;
+
+// STUB!
+
+begin
+if bufaddr=$205a000 then
+  begin
+  for i:=0 to 959 do
+    begin
+    for j:=0 to 19 do
+      begin
+      i1l+=slpeek($205a000+8*i);
+      i2l+=i1l;
+      topl:=i2l div 256;
+      fbl:=topl * 256;
+      i1l-=fbl;
+      i2l-=fbl;
+      slpoke ($2070000+160*i+8*j, 128+topl);
+
+      i1r+=slpeek($205a000+8*i+4);
+      i2r+=i1r;
+      topr:=i2r div 256;
+      fbr:=topr * 256;
+      i1r-=fbr;
+      i2r-=fbr;
+      slpoke ($2070000+160*i+8*j+4, 128+topr);
+
+      end;
+    end;
+  end
+else
+  begin
+  for i:=0 to 959 do
+    begin
+    for j:=0 to 19 do
+      begin
+      i1l+=slpeek($205c000+8*i);
+       i2l+=i1l;
+       topl:=i2l div 256;
+       fbl:=topl * 256;
+       i1l-=fbl;
+       i2l-=fbl;
+       slpoke ($20a0000+160*i+8*j, 128+topl);
+
+       i1r+=slpeek($205c000+8*i+4);
+       i2r+=i1r;
+       topr:=i2r div 256;
+       fbr:=topr * 256;
+       i1r-=fbr;
+       i2r-=fbr;
+       slpoke ($20a0000+160*i+8*j+4, 128+topr);
+      end;
+    end;
+  end;
+end;
+
+{
+DAT
+                        org     0                         'initialization
+
+init                    mov     ctra,leftcounter         ' nco mode
+                        mov     ctrb,rightcounter
+                        mov     frqa,#1                  ' frq=1 for pwm mode
+                        mov     frqb,#1
+                        mov     dira,outputmask          ' enable output on selected pins
+                        mov     bufptr2,par
+                        mov     time,cnt
+                        add     time,delay
+
+loop                    cmp     smode,#0                 wz
+               if_z     jmp     #p3
+                        mov     ptr,bufptr               ' compute pointer to sample
+                        add     ptr,bufcnt
+                        rdword  lsample,ptr              ' get left
+                        shl     lsample,#16
+                        add     ptr, #2
+                        rdword  rsample,ptr              ' get right
+                        sar     lsample,#16
+                        shl     rsample,#16              ' extend sign to 32 bits
+                        sar     rsample,#16
+                        add     bufcnt,#4
+                        and     bufcnt,bufmask
+p4                      mov     over,overval
+                        wrlong  bufcnt,bufptr2           ' write actual sample number for main program
+                        jmp     #p2
+
+p3                      mov     ptr,bufptr
+                        rdlong  lsample,ptr
+                        sar     lsample,#16
+                        mov     rsample, lsample
+                        shl     rsample,#1
+                        add     lsample, rsample
+                        shl     rsample,#1
+                        add     lsample, rsample
+                        sar     lsample,#3
+
+                        mov     rsample,lsample
+                        jmp     #p4
+
+
+p2                      add     i1l,lsample              ' noise shape left
+                        add     i2l,i1l
+                        mov     topl,i2l
+                        sar     topl,#8
+                        mov     fbl,topl
+                        shl     fbl,#8
+                        sub     i1l,fbl
+                        sub     i2l,fbl
+
+                        add     i1r,rsample              ' noise shape right
+                        add     i2r,i1r
+                        mov     topr,i2r
+                        sar     topr,#8
+                        mov     fbr,topr
+                        shl     fbr,#8
+                        sub     i1r,fbr
+                        sub     i2r,fbr
+
+
+                        maxs    topr, maxval           ' clip max to avoid clicks
+                        mins    topr, minval
+                        add     topr, #$80             ' convert to 8 bit unsigned
+                        and     topr, #$FF
+                        maxs    topl, maxval
+                        mins    topl, minval
+                        add     topl, #$80
+                        and     topl, #$FF
+
+                        waitcnt time, delay
+                        neg     phsa, topr            ' Output.
+                        neg     phsb, topl            ' Output.
+
+                        djnz    over,#p2
+                        jmp    #loop
+
+leftcounter             long    0
+rightcounter            long    0
+outputmask              long    0
+delay                   long    259
+bufmask                 long    00_0000_0000_0000_0000_0111_1111_1111
+overval                 long    7
+maxval                  long    127
+minval                  long   -127
+bufptr                  long    0
+bufptr2                 long    0
+bufcnt                  long    0
+smode                   long    0
+
+over                    res 1
+lsample                 res 1
+rsample                 res 1
+time                    res 1
+topl                    res 1
+topr                    res 1
+fbl                     res 1
+fbr                     res 1
+i1r                     res 1
+i1l                     res 1
+i2l                     res 1
+i2r                     res 1
+ptr                     res 1
+
+}
 
 
 
@@ -1966,6 +2139,7 @@ for k:=0 to 7 do
 
 //  ttt:=clockgettotal;
   s:=sid(1);
+
   audio2[240*k]:=s[0];
   audio2[240*k+1]:=s[1];
 
@@ -1977,6 +2151,7 @@ for k:=0 to 7 do
     end;
 //  sidtime:=clockgettotal-ttt;
   end;
+noiseshaper(b);
 inc(sidcount);
 //sidtime+=gettime-t;
 p999:
@@ -1989,30 +2164,23 @@ end;
 
 procedure pwmbeep;
 
-var sinus:array[0..4095] of cardinal;
-    i:integer;
+var i:integer;
     ctrlblock:array[0..7] of cardinal;
 
 begin
-for i:=0 to 4095 do sinus[i]:=round(1040+1024*(sin(2*pi*i/512)));
 
-ctrlblock[0]:=$07050140; //transfer info
-ctrlblock[1]:=$c205a000;
+ctrlblock[0]:=$00050140; //transfer info
+ctrlblock[1]:=$c2070000;
 ctrlblock[2]:=$7E20C018;
-ctrlblock[3]:=7680;
+ctrlblock[3]:=20*7680;
 ctrlblock[4]:=$0;
 ctrlblock[5]:=$c4000020;
 ctrlblock[6]:=$0;
 ctrlblock[7]:=$0;
 for i:=0 to 7 do lpoke($4000000+4*i,ctrlblock[i]);
 ctrlblock[5]:=$c4000000;
-ctrlblock[1]:=$c205c000;
+ctrlblock[1]:=$c20a0000;
 for i:=0 to 7 do lpoke($4000020+4*i,ctrlblock[i]);
-for i:=0 to 4095 do lpoke ($8000000+4*i,sinus[i]);
-for i:=0 to 4095 do lpoke ($8004000+4*i,sinus[i]);
-for i:=0 to 4095 do lpoke ($8008000+4*i,sinus[2*(i mod 2048)]);
-for i:=0 to 4095 do lpoke ($800C000+4*i,sinus[2*(i mod 2048)]);
-CleanDataCacheRange($8000000,$10000);
 CleanDataCacheRange($4000000,$10000);
 sleep(1);
 
@@ -2022,13 +2190,13 @@ i:=pinteger($3F200010)^ and  %11111111111111000111111111111000;
 lpoke($3F200010, i or       %00000000000000100000000000000100); // gpio 40/45 as alt0
 lpoke($3F1010a0,$5a000016); // set clock to pll D    16 plld
 lpoke($3F1010a4,$5a002000); // div 2
-lpoke($3F20C010,5208);      // pwm 1 range  12bit 48 khz 2083
-lpoke($3F20C020,5208);      // pwm 2 range
-lpoke($3F20C000,$00002161); // pwm contr0l - enable, clear fifo, use fifo
+lpoke($3F20C010,260);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+lpoke($3F20C020,260);      // pwm 2 range
+lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
 lpoke($3F20C008,$80000307); // pwm dma enable
-lpoke($3F007ff0,pinteger($3F007FF0)^ or %100000000000000); // dma 0e enable
-lpoke($3F007e04,$c4000000);
-lpoke($3F007e00,3);
+lpoke($3F007ff0,pinteger($3F007FF0)^ or %1000000); // dma 06 enable
+lpoke($3F007604,$c4000000);
+lpoke($3F007600,3);
 
 
 
@@ -2044,8 +2212,10 @@ if mode=1 then
 //  for i:=$200d400 to $200d41f do  begin poke(i+32,peek(i)); poke(i,0); end;
 //  CleanDataCacheRange($200d400,32);
   sleep(5);
-  for i:=$205a000 to $205dfff do lpoke(i,2604);
+  for i:=$205a000 to $205dfff do if (i mod 4) = 0 then lpoke(i,0);
   CleanDataCacheRange($205a000,16384);
+  for i:=$2070000 to $20cffff do if (i mod 4) = 0 then lpoke(i,128);
+  CleanDataCacheRange($2070000,$60000);
   sleep(5);
   end
 else
