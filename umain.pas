@@ -6,7 +6,7 @@ interface
 
 uses sysutils,classes,retromalina,platform;
 
-const ver='The retromachine player v. 0.14u --- 2016.11.27';
+const ver='The retromachine player v. 0.15u --- 2016.12.27';
 var test:integer ;
     licznik:integer=0;
     songname:string;
@@ -136,6 +136,7 @@ sethidecolor(250,0,$FF);
 sethidecolor(44,0,$FF);
 sethidecolor(190,0,$FF);
 sethidecolor(188,0,$FF);
+sethidecolor(154,0,$FF);
 c:=0;
 avsct:=0;
 avspt:=0;
@@ -535,28 +536,28 @@ else
   begin
      sprx+=sprdx;
      spry+=sprdy;
-     if sprx>1792 then sprdx:=-1;
-     if spry>1096 then sprdy:=-1;
-     if sprx<64 then sprdx:=1;
-     if spry<40 then sprdy:=1;
+     if sprx>=1792 then sprdx:=-abs(sprdx);
+     if spry>=1096 then sprdy:=-abs(sprdy);
+     if sprx<=64 then sprdx:=abs(sprdx);
+     if spry<=40 then sprdy:=abs(sprdy);
      lpoke($2060040,(spry shl 16)+sprx);
      spr2x+=spr2dx;
      spr2y+=spr2dy;
-     if spr2x>1792 then spr2dx:=-2;
-     if spr2y>1096 then spr2dy:=-2;
-     if spr2x<64 then spr2dx:=2;
-     if spr2y<40 then spr2dy:=2;
+     if spr2x>=1792 then spr2dx:=-abs(spr2dx);
+     if spr2y>=1096 then spr2dy:=-abs(spr2dy);
+     if spr2x<=64 then spr2dx:=abs(spr2dx);
+     if spr2y<=40 then spr2dy:=abs(spr2dy);
      lpoke($2060048,(spr2y shl 16)+spr2x);
      spr3x+=spr3dx;
      spr3y+=spr3dy;
-     if spr3x>1792 then spr3dx:=-3;
-     if spr3y>1096 then spr3dy:=-3;
-     if spr3x<64 then spr3dx:=3;
-     if spr3y<40 then spr3dy:=3;
+     if spr3x>=1792 then spr3dx:=-abs(spr3dx);
+     if spr3y>=1096 then spr3dy:=-abs(spr3dy);
+     if spr3x<=64 then spr3dx:=abs(spr3dx);
+     if spr3y<=40 then spr3dy:=abs(spr3dy);
      lpoke($2060050,(spr3y shl 16)+spr3x);
-     if sqrt(sqr(sprx-spr2x)+sqr(spry-spr2y))<64 then begin sprdx:=-sprdx; sprdy:=-sprdy; spr2dx:=-spr2dx; spr2dy:=-spr2dy; end;
-     if sqrt(sqr(sprx-spr3x)+sqr(spry-spr3y))<64 then begin sprdx:=-sprdx; sprdy:=-sprdy; spr3dx:=-spr3dx; spr3dy:=-spr3dy; end;
-     if sqrt(sqr(spr3x-spr2x)+sqr(spr3y-spr2y))<64 then begin sprdx:=-sprdx; spr2dy:=-spr2dy; spr3dx:=-spr3dx; spr3dy:=-spr3dy; end;
+     if sqrt(sqr(sprx-spr2x)+sqr(spry-spr2y))<=64 then begin i:=sprdx; sprdx:=spr2dx; spr2dx:=i; i:=sprdy; sprdy:=spr2dy; spr2dy:=i; end;
+     if sqrt(sqr(sprx-spr3x)+sqr(spry-spr3y))<=64 then begin i:=sprdx; sprdx:=spr3dx; spr3dx:=i; i:=sprdy; sprdy:=spr3dy; spr3dy:=i; end;
+     if sqrt(sqr(spr3x-spr2x)+sqr(spr3y-spr2y))<=64 then begin i:=spr2dx; spr2dx:=spr3dx; spr3dx:=i; i:=-spr2dy; spr2dy:=spr3dy; spr3dy:=i; end;
      end;
 //lpoke($2060078,lpeek($206002c) shl 1);
 

@@ -553,7 +553,7 @@ repeat
           box(18,132,800,600,178);
           outtextxyz(18,132,'type: wave file',44,2,2);
           songs:=0;
-          siddelay:=2721;
+          siddelay:=8707;
           fileread(sfh,atitle[1],32);    fileread(sfh,atitle[1],12);
           if lpeek($206fffc)<>440 then
             begin
