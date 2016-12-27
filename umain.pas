@@ -12,9 +12,9 @@ var test:integer ;
     songname:string;
     q1,q2,q3:extended;
     thread:TRetro;
-    sprx,sprxd,spryd,spry:integer;
-    spr2x,spr2xd,spr2yd,spr2y:integer;
-    spr3x,spr3xd,spr3yd,spr3y:integer;
+    sprx,sprxd,spryd,spry,sprdx,sprdy:integer;
+    spr2x,spr2xd,spr2yd,spr2y,spr2dx,spr2dy:integer;
+    spr3x,spr3xd,spr3yd,spr3y,spr3dx,spr3dy:integer;
     c:int64=0;
     c6:int64=1;
     avsct:int64=0;
@@ -24,7 +24,8 @@ var test:integer ;
     av6502:int64=0;
     qq:integer;
     avsct1,avspt1,sidtime1,av65021:array[0..59] of integer;
-
+    song:word=0;
+      songs:word=0;
 
 procedure main1;
 procedure main2;
@@ -63,19 +64,20 @@ box2(10,1057,1782,1058,48+39);
 end;
 
 procedure main1 ;
-var  t:int64;
-     i:integer;
+var  fh2, t:int64;
+     i,j,k:integer;
+     bb:byte;
 
 begin
 
 // hide all sprites
 
 lpoke($2060040,$01001100); // position
-lpoke($2060044,$00040004); // zoom
+lpoke($2060044,$00020002); // zoom
 lpoke($2060048,$00101100);
-lpoke($206004c,$00040004);
+lpoke($206004c,$00020002);
 lpoke($2060050,$00181180);
-lpoke($2060054,$00040004);
+lpoke($2060054,$00020002);
 lpoke($2060058,$00201200);
 lpoke($206005c,$00040004);
 lpoke($2060060,$00281280);
@@ -88,12 +90,12 @@ lpoke($2060078,$00401400);
 lpoke($206007c,$00020002);
 // set sprite shapes
 
-for i:=0 to 31 do
-  for j:=0 to 31 do  begin
-    if j<16 then k:=j*16 else k:=(31-j)*16 ;
-    if k=0 then k:=8;
-    if (i<11) or (i>21) or (j<11) or (j>21) then lpoke($2052000+4*i+128*j,k)  else  lpoke($2052000+4*i+128*j,0);
-    end;
+//for i:=0 to 31 do
+//  for j:=0 to 31 do  begin
+//    if j<16 then k:=j*16 else k:=(31-j)*16 ;
+//    if k=0 then k:=8;
+//    if (i<11) or (i>21) or (j<11) or (j>21) then lpoke($2052000+4*i+128*j,k)  else  lpoke($2052000+4*i+128*j,0);
+//    end;
 
 for i:=0 to 31 do
   for j:=0 to 31 do  begin
@@ -110,6 +112,9 @@ for i:=0 to 31 do
     k:=k shl 16;
     if (i<11) or (i>21) or (j<11) or (j>21) then  lpoke($2054000+4*i+128*j,k)  else  lpoke($2054000+4*i+128*j,0);
     end;
+
+
+
 
 // --------- main program start
 
@@ -152,6 +157,285 @@ outtextxyz(320,75,'File info',188,2,2);
 box2(897,118,1782,1008,34);
 box2(897,67,1782,115,36);
 outtextxyz(1296,75,'Files',44,2,2);
+fh2:=fileopen('C:\retro\kulka01.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($12050000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($12050000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($12050000+4*i+0,bb);
+  poke($12050000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka02.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($12051000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($12051000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($12051000+4*i+0,bb);
+  poke($12051000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka03.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($12052000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($12052000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($12052000+4*i+0,bb);
+  poke($12052000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka04.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($12053000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($12053000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($12053000+4*i+0,bb);
+  poke($12053000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka05.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($12054000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($12054000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($12054000+4*i+0,bb);
+  poke($12054000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka06.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($12055000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($12055000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($12055000+4*i+0,bb);
+  poke($12055000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka07.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($12056000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($12056000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($12056000+4*i+0,bb);
+  poke($12056000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka08.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($12057000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($12057000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($12057000+4*i+0,bb);
+  poke($12057000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka09.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($12058000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($12058000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($12058000+4*i+0,bb);
+  poke($12058000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka10.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($12059000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($12059000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($12059000+4*i+0,bb);
+  poke($12059000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka11.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($1205a000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($1205a000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($1205a000+4*i+0,bb);
+  poke($1205a000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka12.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($1205b000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($1205b000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($1205b000+4*i+0,bb);
+  poke($1205b000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka13.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($1205c000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($1205c000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($1205c000+4*i+0,bb);
+  poke($1205c000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka14.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($1205d000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($1205d000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($1205d000+4*i+0,bb);
+  poke($1205d000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka15.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($1205e000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($1205e000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($1205e000+4*i+0,bb);
+  poke($1205e000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+fh2:=fileopen('C:\retro\kulka16.ppm',$40);
+fileseek(fh2,121,0);
+for i:=0 to 1023 do
+  begin
+  fileread(fh2,bb,1);
+ // bb:=255;
+  poke($1205f000+4*i+2,bb);
+  fileread(fh2,bb,1);
+  poke($1205f000+4*i+1,bb);
+  fileread(fh2,bb,1);
+  poke($1205f000+4*i+0,bb);
+  poke($1205f000+4*i+3,0);
+  end;
+//fileclose(fh);
+fileclose(fh2);
+
+for i:=0 to 16383 do
+  begin
+  poke($12060000+4*i,peek($12050000+4*i+1) );
+  poke($12060000+4*i+1,peek($12050000+4*i) );
+  poke($12060000+4*i+2,peek($12050000+4*i+2) );
+  poke($12060000+4*i+3,0);
+  end;
+for i:=0 to 16383 do
+  begin
+  poke($12070000+4*i,peek($12050000+4*i+1) );
+  poke($12070000+4*i+1,peek($12050000+4*i+2) );
+  poke($12070000+4*i+2,peek($12050000+4*i) );
+  poke($12070000+4*i+3,0);
+  end;
+
+lpoke($2060080,$12052000);
+sprdx:=1;
+sprdy:=1;
+spr2dx:=2;
+spr2dy:=2;
+spr3dx:=3;
+spr3dy:=3;
+
 end;
 
 
@@ -169,7 +453,9 @@ begin
 clock:=timetostr(now);
 k:=lpeek($2060000);
 repeat sleep(1) until lpeek($2060000)<>k;
-
+lpoke($2060080,$12050000+4096*((k mod 32) div 2));
+lpoke($2060084,$12060000+4096*((k mod 32) div 2));
+lpoke($2060088,$12070000+4096*((k mod 32) div 2));
 c:=c+1; c1:=c mod 60;
 if time6502>0 then c6+=1;
 ss:=(songtime div 1000000) mod 60;
@@ -181,7 +467,8 @@ hhs:=inttostr(hh); if hh<10 then hhs:='0'+hhs;
 songfreq:=1000000 div siddelay;
 box(18,864,640,32,244);
 box(18,960,640,32,244);
-outtextxyz(18,864,songname,250,2,2);
+if songs>1 then outtextxyz(18,864,songname+', song '+inttostr(song+1),250,2,2)
+else outtextxyz(18,864,songname,250,2,2);
 outtextxyz(18,960,hhs+':'+mms+':'+sss,190,4,2);
 avsct1[c1]:=tim;
 avspt1[c1]:=ts;
@@ -196,8 +483,13 @@ box2(10,1062,1782,1110,118);
 outtextxyz(32,1070,'Times: ',44,2,2);
 outtextxyz(144,1070,'screen '+inttostr(avsct)+' us',44,2,2);
 outtextxyz(400,1070,'sprites '+inttostr(avspt)+' us',186,2,2);
-if sidcount<>0 then outtextxyz(656,1070,'SID '+inttostr(avall)+' us',233,2,2);
+if sidcount<>0 then
+  begin
+  if filetype<>3 then outtextxyz(656,1070,'SID '+inttostr(avall)+' us',233,2,2)
+  else begin if sidtime>1000 then outtextxyz(656,1070,'wav '+inttostr(avall)+' us',233,2,2); end;
+  end;
 outtextxyz(880,1070,'6502 '+floattostrf((av6502/16),fffixed,4,1)+' us',124,2,2);
+outtextxyz(1140,1070,inttostr(lpeek($206fffc)),200,2,2);
 outtextxyz(1280,1070,clock,220,2,2);
 if peek($2100003)=1 then outtextxyz(1540,1070,inttostr(peek($200d404)shr 4),108,2,2);
 if peek($2100004)=1 then outtextxyz(1580,1070,inttostr(peek($200d40b)shr 4),200,2,2);
@@ -224,16 +516,48 @@ box2(10,610,894,797,178);
 box2(10,700,894,701,140);
 box2(10,636,894,637,140);
 box2(10,764,894,765,140);
-for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 768,2,2,190);
-sprx:=round(dpeek($200d400)/40+74);
-spry:=920-3*(peek($200d406) and $F0);
-lpoke($2060040,(spry shl 16)+sprx+2048*(1-peek($2100003)));
-spr2x:=round(dpeek($200d407)/40+74);
-spr2y:=920-3*(peek($200d40d) and $F0);
-lpoke($2060048,(spr2y shl 16)+spr2x+2048*(1-peek($2100004)));
-spr3x:=round(dpeek($200d40e)/40+74);
-spr3y:=920-3*(peek($200d414) and $F0);
-lpoke($2060050,(spr3y shl 16)+spr3x+2048*(1-peek($2100005)));
+if filetype<>3 then begin for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 768,2,2,190); end
+else begin for j:=0 to 767 do if abs(scope[j])<46000 then box(60+j,700-scope[j] div 768,2,2,190); end;
+
+if filetype<>3 then
+  begin
+  sprx:=round(dpeek($200d400)/40+74);
+  spry:=920-3*(peek($200d406) and $F0);
+  lpoke($2060040,(spry shl 16)+sprx+2048*(1-peek($2100003)));
+  spr2x:=round(dpeek($200d407)/40+74);
+  spr2y:=920-3*(peek($200d40d) and $F0);
+  lpoke($2060048,(spr2y shl 16)+spr2x+2048*(1-peek($2100004)));
+  spr3x:=round(dpeek($200d40e)/40+74);
+  spr3y:=920-3*(peek($200d414) and $F0);
+  lpoke($2060050,(spr3y shl 16)+spr3x+2048*(1-peek($2100005)));
+  end
+else
+  begin
+     sprx+=sprdx;
+     spry+=sprdy;
+     if sprx>1792 then sprdx:=-1;
+     if spry>1096 then sprdy:=-1;
+     if sprx<64 then sprdx:=1;
+     if spry<40 then sprdy:=1;
+     lpoke($2060040,(spry shl 16)+sprx);
+     spr2x+=spr2dx;
+     spr2y+=spr2dy;
+     if spr2x>1792 then spr2dx:=-2;
+     if spr2y>1096 then spr2dy:=-2;
+     if spr2x<64 then spr2dx:=2;
+     if spr2y<40 then spr2dy:=2;
+     lpoke($2060048,(spr2y shl 16)+spr2x);
+     spr3x+=spr3dx;
+     spr3y+=spr3dy;
+     if spr3x>1792 then spr3dx:=-3;
+     if spr3y>1096 then spr3dy:=-3;
+     if spr3x<64 then spr3dx:=3;
+     if spr3y<40 then spr3dy:=3;
+     lpoke($2060050,(spr3y shl 16)+spr3x);
+     if sqrt(sqr(sprx-spr2x)+sqr(spry-spr2y))<64 then begin sprdx:=-sprdx; sprdy:=-sprdy; spr2dx:=-spr2dx; spr2dy:=-spr2dy; end;
+     if sqrt(sqr(sprx-spr3x)+sqr(spry-spr3y))<64 then begin sprdx:=-sprdx; sprdy:=-sprdy; spr3dx:=-spr3dx; spr3dy:=-spr3dy; end;
+     if sqrt(sqr(spr3x-spr2x)+sqr(spr3y-spr2y))<64 then begin sprdx:=-sprdx; spr2dy:=-spr2dy; spr3dx:=-spr3dx; spr3dy:=-spr3dy; end;
+     end;
 //lpoke($2060078,lpeek($206002c) shl 1);
 
 //box(100,100,300,40,0);

@@ -1,5 +1,6 @@
 program Project1;
 
+
 {$mode objfpc}{$H+}
 
 uses
@@ -14,6 +15,7 @@ uses
   Classes,
   FileSystem,  {Include the file system core and interfaces}
   FATFS,       {Include the FAT file system driver}
+//  ntfs,
   MMC,         {Include the MMC/SD core to access our SD card}
   BCM2710,
   Ultibo,
@@ -24,7 +26,7 @@ uses
   Unit6502,
   umain;
 
-
+label p999;
 var s,currentdir,currentdir2:string;
     sr:tsearchrec;
     filenames:array[0..1000,0..1] of string;
@@ -35,8 +37,8 @@ var s,currentdir,currentdir2:string;
     fn:string;
     fs:integer;
     cia:integer;
-    song:word=0;
-    songs:word=0;
+//    song:word=0;
+//    songs:word=0;
     init:word;
     atitle,author,copyright:string[32];
     workdir:string;
@@ -45,6 +47,8 @@ var s,currentdir,currentdir2:string;
     keyboardstatus:array[0..255]of byte;
     activekey:byte=0;
     rptcnt:byte=0;
+    drivetable:array['A'..'Z'] of boolean;
+    c:char;
 
 // ---- procedures
 
@@ -82,7 +86,22 @@ if version>1 then begin
 for i:=1 to 32 do if byte(atitle[i])=$F1 then atitle[i]:=char(26);
 for i:=1 to 32 do if byte(author[i])=$F1 then author[i]:=char(26);
 box(18,132,800,600,178);
+outtextxyz(42,156,'type: PSID',177,2,2);
 outtextxyz(18,132,'type: PSID',188,2,2);
+
+outtextxyz(42,164+24,'version: '+inttostr(version),177,2,2);
+outtextxyz(42,196+24,'offset: ' +inttohex(offset,4),177,2,2);
+outtextxyz(42,228+24,'load: '+inttohex(load,4),177-144*b,2,2);
+outtextxyz(42,260+24,'init: '+inttohex(init,4),177,2,2);
+outtextxyz(42,292+24,'play: '+inttohex(play,4),177,2,2);
+outtextxyz(42,324+24,'songs: '+inttostr(songs),177,2,2);
+outtextxyz(42,356+24,'startsong: '+inttostr(startsong),177,2,2);
+outtextxyz(42,388+24,'speed: '+inttohex(speed,8),177,2,2);
+outtextxyz(42,420+24,'title: '+atitle,177,2,2);
+outtextxyz(42,452+24,'author: '+author,177,2,2);
+outtextxyz(42,484+24,'copyright: '+copyright,177,2,2);
+outtextxyz(42,516+24,'flags: '+inttohex(flags,4),177,2,2);
+
 outtextxyz(18,164,'version: '+inttostr(version),188,2,2);
 outtextxyz(18,196,'offset: ' +inttohex(offset,4),188,2,2);
 outtextxyz(18,228,'load: '+inttohex(load,4),188-144*b,2,2);
@@ -110,7 +129,8 @@ i:=lpeek($2060000);
 repeat until lpeek($2060000)>(i+4);
 jsr6502(song,init);
 cia:=read6502($dc04)+256*read6502($dc05);
-outtextxyz(18,578,'cia: '+inttohex(read6502($dc04)+256*read6502($dc05),4),188,2,2);
+outtextxyz(42,548+24,'cia: '+inttohex(read6502($dc04)+256*read6502($dc05),4),177,2,2);
+outtextxyz(18,548,'cia: '+inttohex(read6502($dc04)+256*read6502($dc05),4),188,2,2);
 end;
 
 
@@ -126,7 +146,7 @@ repeat
   j:=0;
   for i:=0 to ilf-2 do
     begin
-    if lowercase(filenames[i,0])>lowercase(filenames[i+1,0]) then
+    if lowercase(filenames[i,1]+filenames[i,0])>lowercase(filenames[i+1,1]+filenames[i+1,0]) then
       begin
       s:=filenames[i,0]; s2:=filenames[i,1];
       filenames[i,0]:=filenames[i+1,0];
@@ -153,13 +173,24 @@ if length(s)>55 then s:=copy(s,1,55);
 l:=length(s);
 outtextxyz(1344-8*l,75,s,44,2,2);
 ilf:=0;
+if length(dir)=3 then
+for c:='A' to 'Z' do
+  begin
+  if drivetable[c] then
+    begin
+    filenames[ilf,0]:=c+':\';
+    filenames[ilf,1]:='(DIR)';
+    ilf+=1;
+    end;
+  end;
+
 currentdir:=currentdir2+'*';
 if findfirst(currentdir,fadirectory,sr)=0 then
   repeat
   if (sr.attr and faDirectory) = faDirectory then
     begin
     filenames[ilf,0]:=sr.name;
-    filenames[ilf,1]:='[DIR]';
+    filenames[ilf,1]:='(DIR)';
     ilf+=1;
     end;
   until (findnext(sr)<>0) or (ilf=1000);
@@ -182,18 +213,28 @@ if findfirst(currentdir,faAnyFile,sr)=0 then
   ilf+=1;
   until (findnext(sr)<>0) or (ilf=1000);
 sysutils.findclose(sr);
+
+currentdir:=currentdir2+'*.wav';
+if findfirst(currentdir,faAnyFile,sr)=0 then
+  repeat
+  filenames[ilf,0]:=sr.name;
+  filenames[ilf,1]:='wav';
+  ilf+=1;
+  until (findnext(sr)<>0) or (ilf=1000);
+sysutils.findclose(sr);
+
 sort;
 
 box(920,132,840,32,36);
 if ilf<26 then ild:=ilf-1 else ild:=26;
 for i:=0 to ild do
   begin
-  if filenames[i,1]='' then l:=length(filenames[i,0])-4 else  l:=length(filenames[i,0]);
-  if filenames[i,1]='' then  s:=copy(filenames[i,0],1,length(filenames[i,0])-4) else s:=filenames[i,0];
+  if filenames[i,1]<>'(DIR)' then l:=length(filenames[i,0])-4 else  l:=length(filenames[i,0]);
+  if filenames[i,1]<>'(DIR)' then  s:=copy(filenames[i,0],1,length(filenames[i,0])-4) else s:=filenames[i,0];
   if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
   for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-  if filenames[i,1]='' then outtextxyz(1344-8*l,132+32*i,s,44,2,2);
-  if filenames[i,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*i,s,44,2,2);  outtextxyz(1672,132+32*i,'[DIR]',44,2,2);   end;
+  if filenames[i,1]<>'(DIR)' then outtextxyz(1344-8*l,132+32*i,s,44,2,2);
+  if filenames[i,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*i,s,44,2,2);  outtextxyz(1672,132+32*i,'(DIR)',44,2,2);   end;
   end;
 sel:=0; selstart:=0;
 box2(897,67,1782,115,36);
@@ -215,10 +256,11 @@ while not DirectoryExists('C:\') do
   Sleep(100);
   end;
 
-//DeleteFile('C:\kernel7.img');
-//RenameFile('C:\kernel7_l.img','C:\kernel7.img');
+DeleteFile('C:\kernel7.img');
+RenameFile('C:\kernel7_l.img','C:\kernel7.img');
 
-sleep(100);
+//sleep(3000);
+//for c:='C' to 'F' do drivetable[c]:=directoryexists(c+':\');
 
 fs:=1;
 workdir:='C:\';
@@ -267,7 +309,7 @@ startreportbuffer;
 //threadsleep(1);
 //lpoke($3F1010a4,$5a003000); // div 2
 //lpoke($3F1010a0,$5a000016); // set clock to pll D    16 plld
-
+lpoke($206fffc,440);
 repeat
   main2;
 
@@ -303,20 +345,20 @@ repeat
     if sel<ild then
       begin
       box(920,132+32*sel,840,32,34);
-      if filenames[sel+selstart,1]='' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
-      if filenames[sel+selstart,1]='' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
+      if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
+      if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
       if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
       for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-      if filenames[sel+selstart,1]='' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
-      if filenames[sel+selstart,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'[DIR]',44,2,2);   end;
+      if filenames[sel+selstart,1]<>'(DIR)'then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
+      if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
       sel+=1;
       box(920,132+32*sel,840,32,36);
-      if filenames[sel+selstart,1]='' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
-      if filenames[sel+selstart,1]='' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
+      if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
+      if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
       if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
       for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-      if filenames[sel+selstart,1]='' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
-      if filenames[sel+selstart,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'[DIR]',44,2,2);   end;
+      if filenames[sel+selstart,1]<>'(DIR)' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
+      if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
       end
     else if sel+selstart<ilf-1 then
       begin
@@ -325,12 +367,12 @@ repeat
       box(920,132+32*sel,840,32,36);
       for i:=0 to ild do
         begin
-        if filenames[i+selstart,1]='' then l:=length(filenames[i+selstart,0])-4 else  l:=length(filenames[i+selstart,0]);
-        if filenames[i+selstart,1]='' then  s:=copy(filenames[i+selstart,0],1,length(filenames[i+selstart,0])-4) else s:=filenames[i+selstart,0];
+        if filenames[i+selstart,1]<>'(DIR)' then l:=length(filenames[i+selstart,0])-4 else  l:=length(filenames[i+selstart,0]);
+        if filenames[i+selstart,1]<>'(DIR)'then  s:=copy(filenames[i+selstart,0],1,length(filenames[i+selstart,0])-4) else s:=filenames[i+selstart,0];
         if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
         for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-        if filenames[i+selstart,1]='' then outtextxyz(1344-8*l,132+32*i,s,44,2,2);
-        if filenames[i+selstart,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*i,s,44,2,2);  outtextxyz(1672,132+32*i,'[DIR]',44,2,2);   end;
+        if filenames[i+selstart,1]<>'(DIR)'then outtextxyz(1344-8*l,132+32*i,s,44,2,2);
+        if filenames[i+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*i,s,44,2,2);  outtextxyz(1672,132+32*i,'(DIR)',44,2,2);   end;
         end;
       end;
     end;
@@ -341,20 +383,20 @@ repeat
       if sel>0 then
         begin
         box(920,132+32*sel,840,32,34);
-        if filenames[sel+selstart,1]='' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
-        if filenames[sel+selstart,1]='' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
+        if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
+        if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
         if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
         for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-        if filenames[sel+selstart,1]='' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
-        if filenames[sel+selstart,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'[DIR]',44,2,2);   end;
+        if filenames[sel+selstart,1]<>'(DIR)' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
+        if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
         sel-=1;
         box(920,132+32*sel,840,32,36);
-        if filenames[sel+selstart,1]='' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
-        if filenames[sel+selstart,1]='' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
+        if filenames[sel+selstart,1]<>'(DIR)'then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
+        if filenames[sel+selstart,1]<>'(DIR)'then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
         if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
         for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-        if filenames[sel+selstart,1]='' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
-        if filenames[sel+selstart,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'[DIR]',44,2,2);   end;
+        if filenames[sel+selstart,1]<>'(DIR)' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
+        if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
         end
       else if sel+selstart>0 then
         begin
@@ -363,12 +405,12 @@ repeat
         box(920,132+32*sel,840,32,36);
         for i:=0 to ild do
           begin
-          if filenames[i+selstart,1]='' then l:=length(filenames[i+selstart,0])-4 else  l:=length(filenames[i+selstart,0]);
-          if filenames[i+selstart,1]='' then s:=copy(filenames[i+selstart,0],1,length(filenames[i+selstart,0])-4) else s:=filenames[i+selstart,0];
+          if filenames[i+selstart,1]<>'(DIR)' then l:=length(filenames[i+selstart,0])-4 else  l:=length(filenames[i+selstart,0]);
+          if filenames[i+selstart,1]<>'(DIR)' then s:=copy(filenames[i+selstart,0],1,length(filenames[i+selstart,0])-4) else s:=filenames[i+selstart,0];
           if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
           for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-          if filenames[i+selstart,1]='' then outtextxyz(1344-8*l,132+32*i,s,44,2,2);
-          if filenames[i+selstart,1]='[DIR]' then begin outtextxyz(1344-8*l,132+32*i,s,44,2,2);  outtextxyz(1672,132+32*i,'[DIR]',44,2,2);   end;
+          if filenames[i+selstart,1]<>'(DIR)' then outtextxyz(1344-8*l,132+32*i,s,44,2,2);
+          if filenames[i+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*i,s,44,2,2);  outtextxyz(1672,132+32*i,'(DIR)',44,2,2);   end;
           end;
         end;
       end;
@@ -378,7 +420,7 @@ repeat
       dpoke($2060028,0);
       if songs>0 then
         begin
-        if song<songs then
+        if song<songs-1 then
           begin
           sdl_pauseaudio(1);
           for i:=1 to 200000 do;
@@ -405,37 +447,62 @@ repeat
         end;
       end;
 
+     if peek($2060028)=ord('f') then
+      begin
+      dpoke($2060028,0);
+      lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
+      if filetype=3 then lpoke($3F20C010,275) else lpoke($3F20C010,265); // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+      if filetype=3 then lpoke($3F20C020,275) else lpoke($3F20C020,265);
+      lpoke($206fffc,432);
+      lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
+
+      end;
+     if peek($2060028)=ord('g') then
+      begin
+      dpoke($2060028,0);
+      lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
+      if filetype=3 then lpoke($3F20C010,270) else lpoke($3F20C010,260); // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+      if filetype=3 then lpoke($3F20C020,270) else lpoke($3F20C020,260);
+      lpoke($206fffc,440);
+      lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
+
+      end;
+
     if peek($2060028)=13 then
       begin
       dpoke($2060028,0);
-      if filenames[sel+selstart,1]='[DIR]' then
+      if filenames[sel+selstart,1]='(DIR)' then
         begin
-        dirlist(currentdir2+filenames[sel+selstart,0]+'\');
+        if copy(filenames[sel+selstart,0],2,1)<>':' then dirlist(currentdir2+filenames[sel+selstart,0]+'\')
+        else begin currentdir2:=filenames[sel+selstart,0] ; dirlist(currentdir2); end;
         end
 
       else
 
         begin
+        pause1a:=true;
+        sdl_pauseaudio(1);
+        i:=lpeek($2060000);
+        repeat until lpeek($2060000)>i+4;
 
         for i:=$200d400 to $200d420 do poke(i,0);
         i:=lpeek($2060000);
         repeat until lpeek($2060000)>(i+4);
         if sfh>=0 then fileclose(sfh);
         sfh:=-1;
-      //  if not pause1a then
-          begin
-          pause1a:=true;
-          sdl_pauseaudio(1);
-          end;
-        i:=lpeek($2060000);
-        repeat until lpeek($2060000)>i+4;
+
 
         for i:=0 to $2F do siddata[i]:=0;
         for i:=$50 to $7F do siddata[i]:=0;
         siddata[$0e]:=$7FFFF8;
         siddata[$1e]:=$7FFFF8;
         siddata[$2e]:=$7FFFF8;
-
+        lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
+        if lpeek($206fffc)=440 then lpoke($3F20C010,260) else lpoke($3F20C010,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+        if lpeek($206fffc)=440 then lpoke($3F20C020,260) else lpoke($3F20C020,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+        lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
+        lpoke ($400000c,20*960);
+        lpoke ($400002c,20*960);
         songtime:=0;
 
         fn:= currentdir2+filenames[sel+selstart,0];
@@ -456,9 +523,10 @@ repeat
           atitle:='                                ';
           fileread(sfh,atitle[1],16);
           fileread(sfh,buf,1);
-          outtextxyz(18,164,'atitle: '+atitle,188,2,2);
+          outtextxyz(18,164,'title: '+atitle,188,2,2);
           box(18,912,800,32,244);
           outtextxyz(18,912,'SIDCog DMP file, '+inttostr(songfreq)+' Hz',250,2,2);
+          songs:=0;
           end
         else if (buf[0]=ord('P')) and (buf[1]=ord('S')) and (buf[2]=ord('I')) and (buf[3]=ord('D')) then
           begin
@@ -479,6 +547,34 @@ repeat
           outtextxyz(18,132,'type: RSID, not yet supported',44,2,2);
           fileclose(sfh);
           end
+        else if (buf[0]=ord('R')) and (buf[1]=ord('I')) and (buf[2]=ord('F')) and (buf[3]=ord('F')) then
+          begin
+          filetype:=3;
+          box(18,132,800,600,178);
+          outtextxyz(18,132,'type: wave file',44,2,2);
+          songs:=0;
+          siddelay:=2721;
+          fileread(sfh,atitle[1],32);    fileread(sfh,atitle[1],12);
+          if lpeek($206fffc)<>440 then
+            begin
+            lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
+            lpoke($3F20C010,275);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+            lpoke($3F20C020,275);
+            lpoke($206fffc,432);
+            lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
+            end
+          else
+            begin
+            lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
+            lpoke($3F20C010,270);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+            lpoke($3F20C020,270);
+            lpoke($206fffc,440);
+            lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
+            end;
+          lpoke ($400000c,42*1536);
+          lpoke ($400002c,42*1536);
+          if sprx=spr2x then begin sprx:=100; spr2x:=200; spr3x:=300;end;
+          end
         else
           begin
           fileread(sfh,buf,21);
@@ -486,6 +582,7 @@ repeat
           outtextxyz(18,132,'type: unknown, 50 Hz SDMP assumed',188,2,2);
           box(18,912,800,32,244);
           outtextxyz(18,912,'SIDCog DMP file, 50 Hz',250,2,2);
+          songs:=0;
           end;
         songname:=s;
         songtime:=0;
@@ -499,5 +596,6 @@ repeat
   setcurrentdir(workdir);
   stopmachine;
   systemrestart(0);
+
 end.
 

@@ -55,8 +55,10 @@
 // TODO 206002C - mouse. 6002c,d x 6002e,f y
 // TODO 2060030   keys,
 // TODO 2060034 - current dl position
-// 2060040 - 206005C sprite control long 0 31..16 y pos  15..0 x pos
+// 2060040 - 206007C sprite control long 0 31..16 y pos  15..0 x pos
 //                               long 1 30..16 y zoom 15..0 x zoom 31 mode
+// TODO 2060080 - 206009C dynamic sprite data pointer
+// 20600A0 - text cursor position
 
 // TODO planned retromachine graphic modes: 00..15 Propeller retromachine compatible
 // 16 - 1792x1120 @ 8bpp
@@ -142,6 +144,7 @@ var fh,filetype:integer;                // this needs cleaning...
     i1l,i2l,fbl,topl:integer;
     i1r,i2r,fbr,topr:integer;
 
+    buf2:array[0..1919] of smallint;
 // prototypes
 
 procedure initmachine;
@@ -178,7 +181,7 @@ implementation
 
 // ---- prototypes
 
-procedure spritef(screen:pointer); forward;
+procedure sprite(screen:pointer); forward;
 
 // ---- TAudio thread methods --------------------------------------------------
 
@@ -197,14 +200,15 @@ var a,key:integer;
 
 begin
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_1);
+ThreadSetPriority(ThreadGetCurrent,5);
 threadsleep(1);
   repeat
-  repeat threadsleep(2); a:= lpeek($3F007600) until (a and 2) <>0 ;
+  repeat sleep(0); a:= lpeek($3F007600) until (a and 2) <>0 ;
   if (a and 2)<>0 then
     begin
     if lpeek($3f00761c)=$c4000000 then audiocallback($0205a000)
                                   else audiocallback($0205c000);
-    lpoke($3F007600,3);
+    lpoke($3F007600,$00000003);
     CleanDataCacheRange($0205a000,$8000);
     CleanDataCacheRange($02070000,$60000);
     end;
@@ -240,6 +244,8 @@ begin
 running:=1;
 id:=getcurrentthreadid  ;
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_3);
+ sleep(1);
+ThreadSetPriority(ThreadGetCurrent,5);
 sleep(1);
 repeat
   begin
@@ -249,7 +255,7 @@ repeat
   scrconvert16f(p2);
   tim:=clockgettotal-t;
   t:=clockgettotal;
-  spritef(p2);
+  sprite(p2);
   ts:=clockgettotal-t;
   vblank1:=1;
   CleanDataCacheRange(integer(p2),9216000);
@@ -263,7 +269,7 @@ repeat
   scrconvert16f(p2+2304000);
   tim:=clockgettotal-t;
   t:=clockgettotal;
-  spritef(p2+2304000);
+  sprite(p2+2304000);
   ts:=clockgettotal-t;
   vblank1:=1;
   CleanDataCacheRange(integer(p2)+9216000,9216000);
@@ -355,7 +361,9 @@ for i:=0 to 1023 do
   a:=a+(a shl 8) + (a shl 16);
   lpoke($2059000+4*i,a);
   end;
-fileclose(fh2);
+for i:=0 to 7 do lpoke($2060080+4*i,$2052000+4096*i); // sprite data pointers
+
+
 thread:=tretro.create(true);                    // start frame refreshing thread
 thread.start;
 sdl_pauseaudio(1);
@@ -565,16 +573,14 @@ end;
 
 
 
-procedure spritef(screen:pointer);
+procedure sprite(screen:pointer);
 
-/// A real retromachine sprite procedure
+// A sprite procedure
 
-label p100,p101,p102,p103,p104,p999;
-var a:integer;
-    spritebase:integer;
+label p101,p102,p103,p104,p105,p106,p999,a7680,affff,affff0000,spritedata;
+var spritebase:integer;
 
 begin
-//a:=$2000000;
 spritebase:=$2060040;
 
                asm
@@ -582,42 +588,35 @@ spritebase:=$2060040;
                mov r12,#0
                                        //sprite
                ldr r0,spritebase
-            //   ldr r1,a
-             //  add r0,r1
-p103:          ldr r1,[r0],#4
-               mov r2,r1               // sprite 0 position
-               mov r3,r1
-               ldr r5,p100
-               and r2,r5               // x pos
-               lsl r2,#2
-               ldr r4,p100+4
-               and r3,r4
-               lsr r3,#16              // y pos
-               cmp r2,#8192
-               ble p104
+ p103:         ldr r1,[r0],#4
+               mov r2,r1, lsl #16               // sprite 0 position
+               mov r3,r1, lsr #16
+               lsr r2,#14              // x pos*4
+               cmp r2,#8192            // switch off the sprite if y>8192
+               blt p104
                add r12,#1
                add r0,#4
                cmp r12,#8
                bge p999
-               b p103
+               b   p103
 
-p104:          ldr r4,p100+8
+p104:          ldr r4,a7680
                mul r3,r3,r4
-               add r3,r2      // sprite pos
+               add r3,r2              // sprite pos
                ldr r4,screen
-               add r3,r4      // pointer to upper left sprite pixel in r3
-               ldr r4,p100+12
-               add r4,r4,r12,lsl #12
-            //   ldr r5,a
-            //   add r4,r5      //pointer to sprite 0 data
+               add r3,r4              // pointer to upper left sprite pixel in r3
+               ldr r4,spritedata
+               add r4,r4,r12,lsl #2
+               ldr r4,[r4]
 
+ //              ldr r4,spritedata      // todo: dynamic addresses
+ //              add r4,r4,r12,lsl #12
                ldr r1,[r0],#4
-               mov r2,r1
-               ldr r5,p100
-               and r2,r5
-               lsr r1,#16
+               mov r2,r1,lsl #16
+               lsr r2,#16             // xzoom
+               lsr r1,#16             // yzoom
                cmp r1,#8
-               movgt r1,#8
+               movgt r1,#8            // zoom control, maybe switch it off?
                cmp r2,#8
                movgt r2,#8
                cmp r1,#1
@@ -625,22 +624,34 @@ p104:          ldr r4,p100+8
                cmp r2,#1
                movle r2,#1
                mov r7,r2
-               mov r8,#128
-               mul r8,r8,r2
-               mov r9,#32
-               mul r9,r9,r1 //y zoom
-               mov r10,r1
+               mov r8,r2,lsl #7        // xzoom * 128 (128=4*32)
+               mov r9,r1,lsl #5        //y zoom * 32
+               mov r10,r1              //y zoom counter
                mov r6,#32
+
+               push {r0}
+
 p101:          ldr r5,[r4],#4
-p102:          cmp r5,#0
-               strne r5,[r3],#4
-               addeq r3,#4
-               subs r7,#1
+               cmp r5,#0
                bne p102
+               add r3,r3,r8,lsr #5
                mov r7,r2
                subs r6,#1
                bne p101
-               add r3,#7680
+               b p106
+
+p102:          ldr r0,[r3]
+               cmp r12,r0,lsr #28
+               strge r5,[r3],#4
+               addlt r3,#4
+               subs r7,#1
+               bne p102
+
+p105:          mov r7,r2
+               subs r6,#1
+               bne p101
+
+p106:          add r3,#7680
                sub r3,r8
                subs r10,#1
                subne r4,#128
@@ -648,15 +659,20 @@ p102:          cmp r5,#0
                mov r6,#32
                subs r9,#1
                bne p101
+
+               pop {r0}
+
+
                add r12,#1
                cmp r12,#8
                bne p103
                b p999
 
-p100:          .long 0xFFFF
-               .long 0xFFFF0000
-               .long 7680
-               .long 0x2052000
+affff:         .long 0xFFFF
+affff0000:     .long 0xFFFF0000
+a7680:         .long 7680
+//spritedata:    .long 0x2052000
+spritedata:    .long 0x2060080
 
 p999:          ldmfd r13!,{r0-r12}
                end;
@@ -1902,6 +1918,65 @@ if scj>959 then if (oldsc<0) and (sc>0) then scj:=0 else scj:=959;
 //sid[1]:=sid1l;
 end;
 
+procedure noiseshaper2(bufaddr:integer);
+
+var i,j:integer;
+
+// STUB!
+
+begin
+if bufaddr=$205a000 then
+  begin
+  for i:=0 to 767 do
+    begin
+    for j:=0 to 20 do
+      begin
+
+      i1l+=slpeek($205a000+8*i);
+      i2l+=i1l;
+      topl:=i2l div 256;
+      fbl:=topl * 256;
+      i1l-=fbl;
+      i2l-=fbl;
+      slpoke ($2070000+168*i+8*j, 130+topl);
+
+      i1r+=slpeek($205a000+8*i+4);
+      i2r+=i1r;
+      topr:=i2r div 256;
+      fbr:=topr * 256;
+      i1r-=fbr;
+      i2r-=fbr;
+      slpoke ($2070000+168*i+8*j+4, 130+topr);
+
+      end;
+    end;
+  end
+else
+  begin
+  for i:=0 to 767 do
+    begin
+    for j:=0 to 20 do
+      begin
+      i1l+=slpeek($205c000+8*i);
+       i2l+=i1l;
+       topl:=i2l div 256;
+       fbl:=topl * 256;
+       i1l-=fbl;
+       i2l-=fbl;
+       slpoke ($20a0000+168*i+8*j, 130+topl);
+
+       i1r+=slpeek($205c000+8*i+4);
+       i2r+=i1r;
+       topr:=i2r div 256;
+       fbr:=topr * 256;
+       i1r-=fbr;
+       i2r-=fbr;
+       slpoke ($20a0000+168*i+8*j+4, 130+topr);
+      end;
+    end;
+  end;
+end;
+
 
 procedure noiseshaper(bufaddr:integer);
 
@@ -1912,7 +1987,7 @@ var i,j:integer;
 begin
 if bufaddr=$205a000 then
   begin
-  for i:=0 to 959 do
+  for i:=0 to 119 do
     begin
     for j:=0 to 19 do
       begin
@@ -1922,7 +1997,7 @@ if bufaddr=$205a000 then
       fbl:=topl * 256;
       i1l-=fbl;
       i2l-=fbl;
-      slpoke ($2070000+160*i+8*j, 128+topl);
+      slpoke ($2070000+160*i+8*j, 130+topl);
 
       i1r+=slpeek($205a000+8*i+4);
       i2r+=i1r;
@@ -1930,14 +2005,14 @@ if bufaddr=$205a000 then
       fbr:=topr * 256;
       i1r-=fbr;
       i2r-=fbr;
-      slpoke ($2070000+160*i+8*j+4, 128+topr);
+      slpoke ($2070000+160*i+8*j+4, 130+topr);
 
       end;
     end;
   end
 else
   begin
-  for i:=0 to 959 do
+  for i:=0 to 119 do
     begin
     for j:=0 to 19 do
       begin
@@ -1947,7 +2022,7 @@ else
        fbl:=topl * 256;
        i1l-=fbl;
        i2l-=fbl;
-       slpoke ($20a0000+160*i+8*j, 128+topl);
+       slpoke ($20a0000+160*i+8*j, 130+topl);
 
        i1r+=slpeek($205c000+8*i+4);
        i2r+=i1r;
@@ -1955,7 +2030,7 @@ else
        fbr:=topr * 256;
        i1r-=fbr;
        i2r-=fbr;
-       slpoke ($20a0000+160*i+8*j+4, 128+topr);
+       slpoke ($20a0000+160*i+8*j+4, 130+topr);
       end;
     end;
   end;
@@ -2071,7 +2146,6 @@ ptr                     res 1
 
 
 
-
 procedure AudioCallback(b:integer);
 
 label p999;
@@ -2081,13 +2155,45 @@ var audio2:pcardinal;
     ttt:int64;
     k,i,il:integer;
     buf:array[0..25] of byte;
-    const aa:integer=0;
+
+const aa:integer=0;
+const bb:integer=0;
+
 
 begin
 audio2:=pcardinal(b);
 ttt:=clockgettotal;
 if pause1=true then goto p999;
-for k:=0 to 7 do
+k:=0;
+
+if filetype=3 then
+  begin
+  if sfh>-1 then
+    begin
+    for i:=0 to 767 do audio2[i]:=buf2[i] ;
+    for i:=0 to 767 do scope[i]:=buf2[i]+buf2[i+1];
+    timer1+=siddelay;
+    songtime+=siddelay;
+    noiseshaper2(b);
+    il:=fileread(sfh,buf2[0],1536);
+    if il<>1536 then
+      begin
+      fileclose(sfh);
+      sfh:=-1;
+      songtime:=0;
+      pause1:=true;
+      timer1:=-1;
+      for i:=0 to 1535 do buf2[i]:=0;
+      sdl_pauseaudio(1);
+      noiseshaper2(b);
+      poke($2060028,23);
+      repeat until peek($2060028)=0;
+      poke($2060028,13);
+      end;
+    end;
+  end
+else
+
   begin
   aa+=2500;
   if (aa>=siddelay) then
@@ -2113,45 +2219,49 @@ for k:=0 to 7 do
         else
           begin
           fileclose(sfh);
-          fh:=-1;
+          sfh:=-1;
+          pause1:=true;
           songtime:=0;
           timer1:=-1;
           for i:=0 to 6 do lpoke($200d400+4*i,0);
           end;
         end
-      else
+      else if filetype=1 then
         begin
-
-      for i:=0 to 15 do times6502[i]:=times6502[i+1];
-       t6:=clockgettotal;
+        for i:=0 to 15 do times6502[i]:=times6502[i+1];
+        t6:=clockgettotal;
         jsr6502(256,play);
         times6502[15]:=clockgettotal-t6;
         t6:=0; for i:=0 to 15 do t6+=times6502[i];
         time6502:=t6-15;
-
-
         CleanDataCacheRange($200d400,32);
         timer1+=siddelay;
         songtime+=siddelay;
-        end;
+        end
+
       end;
     end;
 
 //  ttt:=clockgettotal;
-  s:=sid(1);
-
-  audio2[240*k]:=s[0];
-  audio2[240*k+1]:=s[1];
-
-  for i:=120*k+1 to 120*k+119 do
+  if filetype<>3 then
     begin
-    s:=sid(0);
-    audio2[2*i]:=s[0];
-    audio2[2*i+1]:=s[1];
+    s:=sid(1);
+    audio2[0]:=s[0];
+    audio2[1]:=s[1];
+    for i:=1 to 119 do
+      begin
+      s:=sid(0);
+      audio2[2*i]:=s[0];
+      audio2[2*i+1]:=s[1];
+      end;
+    noiseshaper(b);
+    end
+  else
+    begin
+
     end;
-//  sidtime:=clockgettotal-ttt;
   end;
-noiseshaper(b);
+//noiseshaper(b);
 inc(sidcount);
 //sidtime+=gettime-t;
 p999:
@@ -2172,7 +2282,7 @@ begin
 ctrlblock[0]:=$00050140; //transfer info
 ctrlblock[1]:=$c2070000;
 ctrlblock[2]:=$7E20C018;
-ctrlblock[3]:=20*7680;
+ctrlblock[3]:=21*960; //7680;
 ctrlblock[4]:=$0;
 ctrlblock[5]:=$c4000020;
 ctrlblock[6]:=$0;
@@ -2201,7 +2311,6 @@ lpoke($3F007600,3);
 
 
 end;
-
 
 procedure sdl_pauseaudio(mode:integer);
 
