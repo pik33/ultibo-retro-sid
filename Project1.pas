@@ -256,8 +256,12 @@ while not DirectoryExists('C:\') do
   Sleep(100);
   end;
 
-DeleteFile('C:\kernel7.img');
-RenameFile('C:\kernel7_l.img','C:\kernel7.img');
+if fileexists('C:\kernel7_l.img') then
+  begin
+  DeleteFile('C:\kernel7.img');
+  RenameFile('C:\kernel7_l.img','C:\kernel7.img');
+  end;
+
 
 //sleep(3000);
 //for c:='C' to 'F' do drivetable[c]:=directoryexists(c+':\');
@@ -334,7 +338,7 @@ repeat
   if peek($2060028)=ord('2') then begin dpoke ($2060028,0); siddelay:=5000; songfreq:=200; skip:=0;end;
   if peek($2060028)=ord('3') then begin dpoke ($2060028,0); siddelay:=6666; songfreq:=150; skip:=0; end;
   if peek($2060028)=ord('4') then begin dpoke ($2060028,0); siddelay:=2500; songfreq:=400; skip:=0; end;
-  if peek($2060028)=ord('p') then begin dpoke ($2060028,0); pause1a:=not pause1a; if pause1a then sdl_pauseaudio(1) else sdl_pauseaudio(0); end;
+  if peek($2060028)=ord('p') then begin dpoke ($2060028,0); pause1a:=not pause1a; if pause1a then pauseaudio(1) else pauseaudio(0); end;
   if peek($2060028)=1 then begin dpoke($2060028,0); if peek($2100003)=0 then poke ($2100003,1) else poke ($2100003,0); end;
   if peek($2060028)=2 then begin dpoke($2060028,0); if peek($2100004)=0 then poke ($2100004,1) else poke ($2100004,0); end;
   if peek($2060028)=3 then begin dpoke($2060028,0); if peek($2100005)=0 then poke ($2100005,1) else poke ($2100005,0); end;
@@ -422,11 +426,11 @@ repeat
         begin
         if song<songs-1 then
           begin
-          sdl_pauseaudio(1);
+          pauseaudio(1);
           for i:=1 to 200000 do;
           song+=1;
           jsr6502(song,init);
-          sdl_pauseaudio(0);
+          pauseaudio(0);
           end;
         end;
       end;
@@ -438,11 +442,11 @@ repeat
         begin
         if song>0 then
           begin
-          sdl_pauseaudio(1);
+          pauseaudio(1);
           for i:=1 to 200000 do;
           song-=1;
           jsr6502(song,init);
-          sdl_pauseaudio(0);
+          pauseaudio(0);
           end;
         end;
       end;
@@ -481,7 +485,7 @@ repeat
 
         begin
         pause1a:=true;
-        sdl_pauseaudio(1);
+        pauseaudio(1);
         i:=lpeek($2060000);
         repeat until lpeek($2060000)>i+4;
 
@@ -587,11 +591,11 @@ repeat
         songname:=s;
         songtime:=0;
         timer1:=-1;
-        if filetype<>2 then begin pause1a:=false; sdl_pauseaudio(0); end;
+        if filetype<>2 then begin pause1a:=false; pauseaudio(0); end;
         end;
     end;
   until (peek($2060028)=27) ;
-  sdl_pauseaudio(1);
+  pauseaudio(1);
   if sfh>0 then fileclose(sfh);
   setcurrentdir(workdir);
   stopmachine;

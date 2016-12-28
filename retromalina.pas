@@ -77,7 +77,7 @@ unit retromalina;
 
 interface
 
-uses sysutils,classes,unit6502,Platform,Framebuffer,keyboard,mouse,threads,GlobalConst,ultibo;
+uses sysutils,classes,unit6502,Platform,Framebuffer,keyboard,mouse,threads,GlobalConst,ultibo, retro;
 
 type Tsrcconvert=procedure(screen:pointer);
 
@@ -173,7 +173,7 @@ procedure outtextxyz(x,y:integer; t:string;c,xz,yz:integer);
 procedure scrollup;
 function sid(mode:integer):tsample;
 procedure pwmbeep;
-procedure sdl_pauseaudio(mode:integer);   // instead of the real one
+procedure pauseaudio(mode:integer);   // instead of the real one
 procedure AudioCallback(b:integer);
 
 
@@ -298,7 +298,7 @@ var a,i:integer;
     bb:byte;
     fh2:integer;
     Entry:TPageTableEntry ;
-
+    f: textfile;
 
 begin
 
@@ -318,9 +318,11 @@ for i:=$2000000 to $20bFFFF do poke(i,0);
 lpoke($2060004,$30000000);
 lpoke($2060000,$00000000);
 
-fh2:=fileopen('C:\retro\combinedwaveforms.bin',$40);   // load combined waveforms for SID
-fileread(fh2,combined,1024);
-fileclose(fh2);
+//fh2:=fileopen('C:\retro\combinedwaveforms.bin',$40);   // load combined waveforms for SID
+//fileread(fh2,combined,1024);
+//fileclose(fh2);
+
+combined:=combinedwaveforms;
 
 // init sid variables
 
@@ -350,24 +352,18 @@ FramebufferDeviceAllocate(fb,@FramebufferProperties);
 sleep(100);
 FramebufferDeviceGetProperties(fb,@FramebufferProperties);
 p2:=Pointer(FramebufferProperties.Address);
-fh2:=fileopen('C:\retro\st4font.def',$40);     // 8x16 font
-fileread(fh2,PInteger($2050000)^,2048);
-fileclose(fh2);
-fh2:=fileopen('C:\retro\mysz.def',$40);        // load mouse cursor definition at sprite 8
-for i:=0 to 1023 do
-  begin
-  fileread(fh2,bb,1);
-  a:=bb;
-  a:=a+(a shl 8) + (a shl 16);
-  lpoke($2059000+4*i,a);
-  end;
-for i:=0 to 7 do lpoke($2060080+4*i,$2052000+4096*i); // sprite data pointers
-
-
-thread:=tretro.create(true);                    // start frame refreshing thread
+// init Atari ST type font
+for i:=0 to 2047 do poke($2050000+i,st4font[i]);
+// init mouse cursor definition at sprite 8
+for i:=0 to 1023 do lpoke($2059000+4*i,mysz[i]);
+// sprite data pointers
+for i:=0 to 7 do lpoke($2060080+4*i,$2052000+4096*i);
+// start frame refreshing thread
+thread:=tretro.create(true);
 thread.start;
-sdl_pauseaudio(1);
-thread3:=taudio.Create(true);                   // start audio thread
+// start audio thread
+pauseaudio(1);
+thread3:=taudio.Create(true);
 thread3.start;
 end;
 
@@ -684,9 +680,10 @@ procedure setataripallette(bank:integer);
 var fh:integer;
 
 begin
-fh:=fileopen('C:\retro\ataripalette.def',$40);
-fileread(fh,Pinteger($2010000+1024*bank)^,1024);
-fileclose(fh);
+//fh:=fileopen('C:\retro\ataripalette.def',$40);
+//fileread(fh,Pinteger($2010000+1024*bank)^,1024);
+//fileclose(fh);
+for i:=0 to 255 do lpoke($2010000+4*i+1024*bank,ataripallette[i]);
 end;
 
 procedure sethidecolor(c,bank,mask:integer);
@@ -2184,7 +2181,7 @@ if filetype=3 then
       pause1:=true;
       timer1:=-1;
       for i:=0 to 1535 do buf2[i]:=0;
-      sdl_pauseaudio(1);
+      pauseaudio(1);
       noiseshaper2(b);
       poke($2060028,23);
       repeat until peek($2060028)=0;
@@ -2312,7 +2309,7 @@ lpoke($3F007600,3);
 
 end;
 
-procedure sdl_pauseaudio(mode:integer);
+procedure pauseaudio(mode:integer);
 
 begin
 if mode=1 then

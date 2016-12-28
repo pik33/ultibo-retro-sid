@@ -4,7 +4,7 @@ unit umain;
 
 interface
 
-uses sysutils,classes,retromalina,platform;
+uses sysutils,classes,retromalina,platform,retro;
 
 const ver='The retromachine player v. 0.15u --- 2016.12.27';
 var test:integer ;
@@ -67,6 +67,7 @@ procedure main1 ;
 var  fh2, t:int64;
      i,j,k:integer;
      bb:byte;
+     f: textfile;
 
 begin
 
@@ -160,7 +161,9 @@ box2(897,67,1782,115,36);
 outtextxyz(1296,75,'Files',44,2,2);
 fh2:=fileopen('C:\retro\kulka01.ppm',$40);
 fileseek(fh2,121,0);
-for i:=0 to 1023 do
+
+for i:=0 to 16383 do lpoke($12050000+4*i,balls[i]) ;
+{for i:=0 to 1023 do
   begin
   fileread(fh2,bb,1);
  // bb:=255;
@@ -413,7 +416,38 @@ for i:=0 to 1023 do
   end;
 //fileclose(fh);
 fileclose(fh2);
-
+assignfile(f,'c:\kulki.txt');
+rewrite(f);
+for i:=0 to 1023 do
+  begin
+  for j:=0 to 15 do
+    begin
+    write(f,'$');
+    write(f,inttohex(lpeek($12050000+64*i+4*j),8));
+    write(f,', ');
+    end;
+  writeln(f,' ');
+  end;
+closefile(f);
+ fh2:=fileopen('c:\retro\mysz.def',$40);
+ assignfile(f,'c:\mysz.txt');
+ rewrite(f);
+ for i:=0 to 63 do
+   begin
+   for j:=0 to 15 do
+     begin
+     k:=0;
+     fileread(fh2,k,1);
+     k:=k+(k shl 8) + (k shl 16);
+     write(f,'$');
+     write(f,inttohex(k,8));
+     write(f,', ');
+     end;
+   writeln(f,' ');
+   end;
+ closefile(f);
+ fileclose(fh2);
+  }
 for i:=0 to 16383 do
   begin
   poke($12060000+4*i,peek($12050000+4*i+1) );
@@ -525,7 +559,7 @@ if filetype<>3 then
   sprx:=round(dpeek($200d400)/40+74);
   spry:=920-3*(peek($200d406) and $F0);
   lpoke($2060040,(spry shl 16)+sprx+2048*(1-peek($2100003)));
-  spr2x:=round(dpeek($200d407)/40+74);
+  spr2x:=round((peek($200d407)+256*peek($200d408))/40+74);
   spr2y:=920-3*(peek($200d40d) and $F0);
   lpoke($2060048,(spr2y shl 16)+spr2x+2048*(1-peek($2100004)));
   spr3x:=round(dpeek($200d40e)/40+74);
@@ -559,7 +593,7 @@ else
      if sqrt(sqr(sprx-spr3x)+sqr(spry-spr3y))<=64 then begin i:=sprdx; sprdx:=spr3dx; spr3dx:=i; i:=sprdy; sprdy:=spr3dy; spr3dy:=i; end;
      if sqrt(sqr(spr3x-spr2x)+sqr(spr3y-spr2y))<=64 then begin i:=spr2dx; spr2dx:=spr3dx; spr3dx:=i; i:=-spr2dy; spr2dy:=spr3dy; spr3dy:=i; end;
      end;
-//lpoke($2060078,lpeek($206002c) shl 1);
+lpoke($2060078,lpeek($206002c) shl 1);
 
 //box(100,100,300,40,0);
 //outtextxyz(100,100,inttostr(siddata[$7a])+' '+inttostr(siddata[$7B]),40,2,2);
