@@ -26,6 +26,23 @@ uses
   Unit6502,
   umain;
 
+
+type wavehead=packed record
+    riff:integer;
+    size:cardinal;
+    wave:integer;
+    fmt:integer;
+    fmtl:integer;
+    pcm:smallint;
+    channels:smallint;
+    srate:integer;
+    brate:integer;
+    bytesps:smallint;
+    bps:smallint;
+    data:integer;
+    datasize:cardinal;
+  end;
+
 label p999;
 var s,currentdir,currentdir2:string;
     sr:tsearchrec;
@@ -51,6 +68,75 @@ var s,currentdir,currentdir2:string;
     c:char;
 
 // ---- procedures
+
+procedure waveopen (var fh:integer);
+
+label p999;
+
+var head:wavehead;
+    i,k:integer;
+    s:string;
+    head_datasize:int64;
+    samplenum:int64;
+    currentdatasize:int64;
+
+begin
+fileseek(fh,0,0);
+fileread(fh,head,44);
+if head.data<>1635017060 then
+  begin  //non-standard header
+  i:=0;
+  repeat fileseek(fh,i,fsfrombeginning); fileread(fh,k,4); i+=1 until (k=1635017060) or (i>512);
+  if k=1635017060 then
+    begin
+    head.data:=k;
+    fileread(fh,k,4);
+    head.datasize:=k;
+    end
+  else
+    begin
+    goto p999;
+    end;
+  end;
+
+// visualize wave data
+
+box(18,132,800,600,178);
+outtextxyz(42,156,'type: RIFF',177,2,2);
+outtextxyz(18,132,'type: RIFF',188,2,2);
+
+outtextxyz(42,164+24,'size:             '+inttostr(head.size),177,2,2);
+outtextxyz(42,196+24,'pcm type:         ' +inttostr(head.pcm),177,2,2);
+outtextxyz(42,228+24,'channels:         '+inttostr(head.channels),177,2,2);
+outtextxyz(42,260+24,'sample rate:      '+inttostr(head.srate),177,2,2);
+outtextxyz(42,292+24,'bitrate:          '+inttostr(head.brate),177,2,2);
+outtextxyz(42,324+24,'bytes per sample: '+inttostr(head.bytesps),177,2,2);
+outtextxyz(42,356+24,'bits per sample:  '+inttostr(head.bps),177,2,2);
+outtextxyz(42,388+24,'data size:        '+inttostr(head.datasize),177,2,2);
+
+outtextxyz(18,164,   'size:             '+inttostr(head.size),188,2,2);
+outtextxyz(18,196,   'pcm type:         ' +inttostr(head.pcm),188,2,2);
+outtextxyz(18,228,   'channels:         '+inttostr(head.channels),188,2,2);
+outtextxyz(18,260,   'sample rate:      '+inttostr(head.srate),188,2,2);
+outtextxyz(18,292,   'bitrate:          '+inttostr(head.brate),188,2,2);
+outtextxyz(18,324,   'bytes per sample: '+inttostr(head.bytesps),188,2,2);
+outtextxyz(18,356,   'bits per sample:  '+inttostr(head.bps),188,2,2);
+outtextxyz(18,388,   'data size:        '+inttostr(head.datasize),188,2,2);
+
+head_datasize:=head.datasize ;
+
+currentdatasize:=head.datasize;
+
+// determine the number of samples
+
+samplenum:=currentdatasize div (head.channels*head.bps div 8);
+outtextxyz(42,420+24,'samples:          '+inttostr(samplenum),177,2,2);
+outtextxyz(18,420,   'samples:          '+inttostr(samplenum),188,2,2);
+box(18,912,800,32,244);
+outtextxyz(18,912,'Wave file, '+inttostr(head.srate)+' Hz',250,2,2);
+p999:
+end;
+
 
 procedure sidopen (var fh:integer);
 
@@ -554,11 +640,13 @@ repeat
         else if (buf[0]=ord('R')) and (buf[1]=ord('I')) and (buf[2]=ord('F')) and (buf[3]=ord('F')) then
           begin
           filetype:=3;
-          box(18,132,800,600,178);
-          outtextxyz(18,132,'type: wave file',44,2,2);
+          waveopen(sfh);
+
+       //   box(18,132,800,600,178);
+       //   outtextxyz(18,132,'type: wave file',44,2,2);
           songs:=0;
           siddelay:=8707;
-          fileread(sfh,atitle[1],32);    fileread(sfh,atitle[1],12);
+          //fileread(sfh,atitle[1],32);    fileread(sfh,atitle[1],12);
           if lpeek($206fffc)<>440 then
             begin
             lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
@@ -577,7 +665,7 @@ repeat
             end;
           lpoke ($400000c,42*1536);
           lpoke ($400002c,42*1536);
-          if sprx=spr2x then begin sprx:=100; spr2x:=200; spr3x:=300;end;
+          if spr6x=spr7x then begin sprx:=100; spr2x:=200; spr3x:=300;spr4x:=400; spr5x:=500; spr6x:=600; spr7x:=700; end;
           end
         else
           begin

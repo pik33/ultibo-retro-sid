@@ -301,7 +301,7 @@ var a,i:integer;
     f: textfile;
 
 begin
-
+     {
 for i:=16 to 8191 do  // make the memory executable, shareable, rw, cacheable, writeback
   begin
   Entry:=PageTableGetEntry(i*4096);
@@ -313,7 +313,7 @@ for i:=$30000 to $30FFF do  // make the memory executable, shareable, rw, cachea
   Entry:=PageTableGetEntry(i*4096);
   Entry.Flags:=$3b2;
   PageTableSetEntry(Entry);
-  end;
+  end; }
 for i:=$2000000 to $20bFFFF do poke(i,0);
 lpoke($2060004,$30000000);
 lpoke($2060000,$00000000);
