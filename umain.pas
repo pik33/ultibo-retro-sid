@@ -30,6 +30,7 @@ var test:integer ;
     avsct1,avspt1,sidtime1,av65021:array[0..59] of integer;
     song:word=0;
       songs:word=0;
+          tbb:array[0..15] of integer;
 
 procedure main1;
 procedure main2;
@@ -205,12 +206,13 @@ end;
 
 procedure main2;
 
-var a,c1,ii,iii,il,i,cc:integer;
+var a,aaa,c1,ii,iii,il,i,cc:integer;
     buf:array[0..24] of byte;
     qqq,mm,hh,ss:int64;
     mms,hhs,sss,kwas:string;
 //    rect:tsdl_rect;
     clock:string;
+
 
 begin
 
@@ -264,11 +266,14 @@ if peek($2100004)=1 then outtextxyz(1580,1070,inttostr(peek($200d40b)shr 4),200,
 if peek($2100005)=1 then outtextxyz(1620,1070,inttostr(peek($200d412)shr 4),40,2,2);
 outtextxyz(1680,1070,inttostr(peek($2060028)),44,2,2);
 
-a:= TemperatureGetCurrent(0) div 1000;
-if a<75 then ii:=184
-else if a<80 then ii:=232
+for i:=0 to 14 do tbb[i]:=tbb[i+1];
+tbb[15]:=TemperatureGetCurrent(0) ;
+aaa:=0; for i:=0 to 15 do aaa+=tbb[i] ;
+aaa:=aaa div 16000;
+if aaa<75 then ii:=184
+else if aaa<80 then ii:=232
 else ii:=40;
-outtextxyz(1434,1070,inttostr(a),ii,2,2);
+outtextxyz(1434,1070,inttostr(aaa),ii,2,2);
 outtextxyz(1474,1070,'C',ii,2,2);
 outtextxyz(1462,1050,'.',ii,2,2);
 

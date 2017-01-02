@@ -102,6 +102,7 @@ type Tsrcconvert=procedure(screen:pointer);
      end;
 
      TSample=array[0..1] of smallint;
+     TSample32=array[0..1] of integer;
 
 var fh,filetype:integer;                // this needs cleaning...
     sfh:integer;                        // SID file handler
@@ -171,7 +172,7 @@ procedure sethidecolor(c,bank,mask:integer);
 procedure putcharz(x,y:integer;ch:char;col,xz,yz:integer);
 procedure outtextxyz(x,y:integer; t:string;c,xz,yz:integer);
 procedure scrollup;
-function sid(mode:integer):tsample;
+function sid(mode:integer):tsample32;
 procedure pwmbeep;
 procedure pauseaudio(mode:integer);   // instead of the real one
 procedure AudioCallback(b:integer);
@@ -862,7 +863,7 @@ begin
 end;
 
 
-function sid(mode:integer):tsample;
+function sid(mode:integer):tsample32;
 
 //  SID frequency 985248 Hz
 
@@ -1902,8 +1903,8 @@ str r8,[r7,#0x1ac]
 //until sidclock>=20000;//20526;
 //sidtime:=clockgettotal-ttt;
 //sidclock-=20000;//20526;
-sid[0]:= siddata[$6b]; //  2048+ (siddata[$6c] div (16*16384));//16384;//32768;
-sid[1]:= siddata[$6c];//2048+ (siddata[$6b] div (16*16384));//16384;//32768;
+sid[0]:= (siddata[$6b]*3) div 4; //  2048+ (siddata[$6c] div (16*16384));//16384;//32768;
+sid[1]:= (siddata[$6c]*3) div 4;//2048+ (siddata[$6b] div (16*16384));//16384;//32768;
 
 oldsc:=sc;
 sc:=(siddata[$6c]+siddata[$6B]);
@@ -2148,7 +2149,7 @@ procedure AudioCallback(b:integer);
 label p999;
 
 var audio2:pcardinal;
-    s:tsample;
+    s:tsample32;
     ttt:int64;
     k,i,il:integer;
     buf:array[0..25] of byte;

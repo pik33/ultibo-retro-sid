@@ -9,6 +9,7 @@ uses
   GlobalTypes,
   Platform,
   Threads,
+  dos,
   Framebuffer,
   BCM2837,
   SysUtils,
@@ -22,6 +23,7 @@ uses
   Keyboard,    {Keyboard uses USB so that will be included automatically}
   Mouse,
   DWCOTG,
+
   retromalina,
   Unit6502,
   umain;
@@ -47,7 +49,7 @@ label p999;
 var s,currentdir,currentdir2:string;
     sr:tsearchrec;
     filenames:array[0..1000,0..1] of string;
-    l,i,j,ilf,ild:integer;
+    hh,mm,ss,l,i,j,ilf,ild:integer;
     sel:integer=0;
     selstart:integer=0;
     buf:array[0..25] of  byte;
@@ -66,6 +68,7 @@ var s,currentdir,currentdir2:string;
     rptcnt:byte=0;
     drivetable:array['A'..'Z'] of boolean;
     c:char;
+    f:textfile;
 
 // ---- procedures
 
@@ -336,10 +339,20 @@ end;
 
 begin
 
+//settime(12,34,56,0);
 
 while not DirectoryExists('C:\') do
   begin
   Sleep(100);
+  end;
+
+if fileexists('C:\now.txt') then
+  begin
+  assignfile(f,'c:\now.txt');
+  reset(f);
+  read(f,hh); read(f,mm); read(f,ss);
+  closefile(f);
+  settime(hh,mm,ss,0);
   end;
 
 if fileexists('C:\kernel7_l.img') then
