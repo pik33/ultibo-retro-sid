@@ -14,10 +14,11 @@ uses
   BCM2837,
   SysUtils,
   Classes,
+  MMC,         {Include the MMC/SD core to access our SD card}
   FileSystem,  {Include the file system core and interfaces}
   FATFS,       {Include the FAT file system driver}
 //  ntfs,
-  MMC,         {Include the MMC/SD core to access our SD card}
+
   BCM2710,
   Ultibo,
   Keyboard,    {Keyboard uses USB so that will be included automatically}
@@ -69,7 +70,7 @@ var s,currentdir,currentdir2:string;
     drivetable:array['A'..'Z'] of boolean;
     c:char;
     f:textfile;
-
+     drive:string;
 // ---- procedures
 
 procedure waveopen (var fh:integer);
@@ -235,7 +236,7 @@ repeat
   j:=0;
   for i:=0 to ilf-2 do
     begin
-    if lowercase(filenames[i,1]+filenames[i,0])>lowercase(filenames[i+1,1]+filenames[i+1,0]) then
+    if (copy(filenames[i,0],3,1)<>'\') and (lowercase(filenames[i,1]+filenames[i,0])>lowercase(filenames[i+1,1]+filenames[i+1,0])) then
       begin
       s:=filenames[i,0]; s2:=filenames[i,1];
       filenames[i,0]:=filenames[i+1,0];
@@ -340,33 +341,45 @@ end;
 begin
 
 //settime(12,34,56,0);
-
 while not DirectoryExists('C:\') do
   begin
   Sleep(100);
   end;
 
-if fileexists('C:\now.txt') then
+  if fileexists('C:\kernel7.img') then begin workdir:='C:\ultibo\'; drive:='C:\'; end
+  else if fileexists('D:\kernel7.img') then begin workdir:='D:\ultibo\' ; drive:='D:\'; end
+  else if fileexists('E:\kernel7.img') then begin workdir:='E:\ultibo\' ; drive:='E:\'; end
+  else if fileexists('F:\kernel7.img') then begin workdir:='F:\ultibo\' ; drive:='F:\'; end
+  else
+    begin
+    outtextxyz(440,1060,'Error. No Ultibo folder found. Press Enter to reboot',157,2,2);
+    repeat until peek($2060028)=$13;
+    systemrestart(0);
+    end;
+
+
+
+if fileexists(drive+'now.txt') then
   begin
-  assignfile(f,'c:\now.txt');
+  assignfile(f,drive+'now.txt');
   reset(f);
   read(f,hh); read(f,mm); read(f,ss);
   closefile(f);
   settime(hh,mm,ss,0);
   end;
 
-if fileexists('C:\kernel7_l.img') then
+if fileexists(drive+'kernel7_l.img') then
   begin
-  DeleteFile('C:\kernel7.img');
-  RenameFile('C:\kernel7_l.img','C:\kernel7.img');
+  DeleteFile(pchar(drive+'kernel7.img'));
+  RenameFile(drive+'kernel7_l.img',drive+'kernel7.img');
   end;
 
 
 //sleep(3000);
-//for c:='C' to 'F' do drivetable[c]:=directoryexists(c+':\');
+for c:='C' to 'F' do drivetable[c]:=directoryexists(c+':\');
 
 fs:=1;
-workdir:='C:\';
+workdir:=drive;
 songtime:=0;
 pause1a:=true;
 siddelay:=20000;
@@ -397,7 +410,7 @@ repeat
 until ch[0]=1;
 }
 main1;
-dirlist('C:\');
+dirlist(drive);
 poke($2100003,1);
 poke($2100004,1);
 poke($2100005,1);

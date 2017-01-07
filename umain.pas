@@ -138,8 +138,8 @@ outtextxyz(320,75,'File info',188,2,2);
 box2(897,118,1782,1008,34);
 box2(897,67,1782,115,36);
 outtextxyz(1296,75,'Files',44,2,2);
-fh2:=fileopen('C:\retro\kulka01.ppm',$40);
-fileseek(fh2,121,0);
+//fh2:=fileopen('C:\retro\kulka01.ppm',$40);
+//fileseek(fh2,121,0);
 
 for i:=0 to 16383 do lpoke($12050000+4*i,balls[i]) ;
 for i:=0 to 16383 do
