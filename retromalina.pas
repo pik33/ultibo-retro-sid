@@ -101,6 +101,29 @@ type Tsrcconvert=procedure(screen:pointer);
       Constructor Create(CreateSuspended : boolean);
      end;
 
+
+     // File buffer thread
+
+     TFileBuffer= class(TThread)
+     private
+     buf:array[0..131071] of byte;
+     tempbuf:array[0..32767] of byte;
+     pocz:integer;
+     koniec:integer;
+     il,fh,newfh:integer;
+     empty,full:boolean;
+     newfilename:string;
+     needclear:boolean;
+     protected
+       procedure Execute; override;
+     public
+      Constructor Create(CreateSuspended : boolean);
+      function getdata(b,ii:integer):integer;
+      procedure setfile(nfh:integer);
+      procedure clear;
+     end;
+
+
      TSample=array[0..1] of smallint;
      TSample32=array[0..1] of integer;
 
@@ -146,6 +169,8 @@ var fh,filetype:integer;                // this needs cleaning...
     i1r,i2r,fbr,topr:integer;
 
     buf2:array[0..1919] of smallint;
+    filebuffer:TFileBuffer;
+
 // prototypes
 
 procedure initmachine;
@@ -183,6 +208,102 @@ implementation
 // ---- prototypes
 
 procedure sprite(screen:pointer); forward;
+
+
+// ---- TFileBuffer thread methods --------------------------------------------------
+
+constructor TFileBuffer.Create(CreateSuspended : boolean);
+
+begin
+FreeOnTerminate := True;
+inherited Create(CreateSuspended);
+self.pocz:=0;
+self.koniec:=0;
+self.fh:=-1;
+self.newfh:=-1;
+self.il:=0;
+self.newfilename:='';
+self.empty:=true; self.full:=false;
+self.needclear:=false;
+end;
+
+procedure TFileBuffer.Execute;
+
+var i,m:integer;
+
+begin
+
+repeat
+if self.needclear then begin self.koniec:=0; self.pocz:=0; self.needclear:=false; self.empty:=true; end;
+if self.fh>0 then
+  begin
+  if self.koniec>=self.pocz then m:=131072-self.koniec+self.pocz-1 else m:=self.pocz-self.koniec-1;
+  if {not full and} (m>=32768) then
+    begin
+    self.il:=fileread(self.fh,self.tempbuf[0],32768);
+    if self.il>0 then self.empty:=false;
+    for i:=0 to il-1 do self.buf[(i+self.koniec) and $1FFFF]:=self.tempbuf[i] ;
+    self.koniec:=(self.koniec+self.il) and $1FFFF;
+ //   if koniec=pocz then full:=true;
+    if self.il<>32768 then
+      begin
+   //   fileclose(fh); fh:=-1;
+      if self.newfh>0 then
+        begin
+        self.fh:=self.newfh; self.newfh:=-1;
+        end;
+      end;
+    end;
+  end
+else
+  begin
+  if self.newfh>0 then fh:=self.newfh;
+  end;
+sleep(10);
+//if full then box(100,100,1000,100,35)
+//else if empty then box(100,100,1000,100,78)
+//else box(100,100,1000,100,0);
+//outtextxyz(100,100,inttostr(pocz),40,2,2);     outtextxyz(200,100,inttostr(koniec),40,2,2);
+//outtextxyz(300,100,inttostr(m),40,2,2);  outtextxyz(600,100,newfilename,40,2,2);
+until terminated;
+
+end;
+
+function TFileBuffer.getdata(b,ii:integer):integer;
+
+var i,d:integer;
+
+begin
+result:=0;
+if not self.empty then
+  begin
+  if self.koniec>=self.pocz then d:=self.koniec-self.pocz
+  else d:=131072-self.pocz+self.koniec;
+  if d>=ii then
+    begin
+    self.full:=false;
+    result:=ii;
+    for i:=0 to ii-1 do poke(b+i,buf[(self.pocz+i) and $1FFFF]);
+    self.pocz:=(self.pocz+ii) and $1FFFF;
+    if self.pocz=self.koniec then self.empty:=true;
+    end
+  else
+    result:=0;
+  end;
+end;
+
+
+procedure TFileBuffer.setfile(nfh:integer);
+
+begin
+self.newfh:=nfh;
+end;
+procedure TFileBuffer.clear;
+
+begin
+self.needclear:=true;
+end;
+
 
 // ---- TAudio thread methods --------------------------------------------------
 
@@ -366,6 +487,8 @@ thread.start;
 pauseaudio(1);
 thread3:=taudio.Create(true);
 thread3.start;
+filebuffer:=Tfilebuffer.create(true);
+filebuffer.start;
 end;
 
 
@@ -2173,7 +2296,8 @@ if filetype=3 then
     timer1+=siddelay;
     songtime+=siddelay;
     noiseshaper2(b);
-    il:=fileread(sfh,buf2[0],1536);
+    //    il:=fileread(sfh,buf2[0],1536);
+    il:=filebuffer.getdata(integer(@buf2[0]),1536);
     if il<>1536 then
       begin
       fileclose(sfh);

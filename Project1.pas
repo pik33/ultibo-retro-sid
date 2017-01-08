@@ -263,7 +263,7 @@ if length(s)>55 then s:=copy(s,1,55);
 l:=length(s);
 outtextxyz(1344-8*l,75,s,44,2,2);
 ilf:=0;
-if length(dir)=3 then
+if length(currentdir2)=3 then
 for c:='A' to 'Z' do
   begin
   if drivetable[c] then
@@ -442,6 +442,10 @@ repeat
   if ch[2]=0 then begin rptcnt:=0; activekey:=0; end;
   if rptcnt>26 then rptcnt:=24 ;
   if (rptcnt=1) or (rptcnt=24) then poke($2060028,byte(translatescantochar(activekey,0)));
+
+// if peek($2060028)<>0 then begin box(100,100,100,100,0); outtextxyz(100,100,inttostr(peek($2060028)),40, 2,2); end;
+
+
 
 //  if pause1a then begin for i:=$200d400 to $200d400+25 do poke(i,0); end;
 
@@ -667,7 +671,8 @@ repeat
           begin
           filetype:=3;
           waveopen(sfh);
-
+          filebuffer.clear;
+          filebuffer.setfile(sfh);
        //   box(18,132,800,600,178);
        //   outtextxyz(18,132,'type: wave file',44,2,2);
           songs:=0;
@@ -692,6 +697,7 @@ repeat
           lpoke ($400000c,42*1536);
           lpoke ($400002c,42*1536);
           if spr6x=spr7x then begin sprx:=100; spr2x:=200; spr3x:=300;spr4x:=400; spr5x:=500; spr6x:=600; spr7x:=700; end;
+          sleep(100);
           end
         else
           begin

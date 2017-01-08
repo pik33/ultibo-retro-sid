@@ -6,7 +6,7 @@ interface
 
 uses sysutils,classes,retromalina,platform,retro;
 
-const ver='The retromachine player v. 0.15u --- 2016.12.27';
+const ver='The retromachine player v. 0.16u --- 2017.01.08';
 var test:integer ;
     licznik:integer=0;
     songname:string;

@@ -726,16 +726,15 @@ end;
 
 function getkeyboardreport:TKeyboardreport;
 
-var i:integer;
+var ii:integer;
 
 begin
 if rb_end <>rb_start then begin
-  for i:=0 to 7 do result[i]:=report_buffer[8*rb_start+i];
-  rb_start+=1;
-  if rb_start>=63 then rb_start-=63;
+  for ii:=0 to 7 do result[ii]:=report_buffer[8*rb_start+ii];
+  rb_start:=(rb_start+1) and $3F;
   end
 else
-  for i:=0 to 7 do result[i]:=255;
+  for ii:=0 to 7 do result[ii]:=255;
 end;
 
 function translatescantochar(scan,shift:byte):char;
@@ -2789,7 +2788,7 @@ procedure USBKeyboardReportWorker(Request:PUSBRequest);
 {Called (by a Worker thread) to process a completed USB request from a USB keyboard IN interrupt endpoint}
 {Request: The USB request which has completed}
 var
- i:integer;
+ ii:integer;
  Index:Byte;
  Saved:Byte;
  Count:Integer;
@@ -2866,9 +2865,8 @@ begin
            begin
            if not ((rb_end=(rb_start-1)) or ((rb_end=63) and (rb_start=0))) then
              begin
-             for i:=0 to 7 do report_buffer[8*rb_end+i]:=report[i];
-             rb_end+=1;
-             if rb_end>=63 then rb_end-=63;
+             for ii:=0 to 7 do report_buffer[8*rb_end+ii]:=report[ii];
+             rb_end:=(rb_end+1) and $3f;
              end;
            end;
 
