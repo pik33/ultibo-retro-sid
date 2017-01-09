@@ -71,6 +71,9 @@ var s,currentdir,currentdir2:string;
     c:char;
     f:textfile;
      drive:string;
+     mb:tmousedata;
+     mi:cardinal;
+
 // ---- procedures
 
 procedure waveopen (var fh:integer);
@@ -251,7 +254,11 @@ end;
 
 procedure dirlist(dir:string);
 
+var c:char;
+
+
 begin
+for c:='C' to 'F' do drivetable[c]:=directoryexists(c+':\');
 currentdir2:=dir;
 setcurrentdir(currentdir2);
 currentdir2:=getcurrentdir;
@@ -384,7 +391,11 @@ songtime:=0;
 pause1a:=true;
 siddelay:=20000;
 setcurrentdir(workdir);
+
 initmachine;
+dpoke($206002c,960);
+dpoke($206002e,600);
+dpoke($2060032,128);
 poke($2100002,0);
 poke($2100006,0);
 poke($2100007,0);
@@ -445,7 +456,8 @@ repeat
 
 // if peek($2060028)<>0 then begin box(100,100,100,100,0); outtextxyz(100,100,inttostr(peek($2060028)),40, 2,2); end;
 
-
+  if (peek($2060028)=0) and (dpeek($2060032)=127) then begin poke($2060028,23); dpoke ($2060032,128); end;
+  if (peek($2060028)=0) and (dpeek($2060032)=129) then begin poke($2060028,24);  dpoke ($2060032,128); end;
 
 //  if pause1a then begin for i:=$200d400 to $200d400+25 do poke(i,0); end;
 

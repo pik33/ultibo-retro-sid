@@ -112,11 +112,11 @@ box2(10,1062,1782,1110,120);
 outtextxyz(32,1070,'Screen time:',124,2,2);
 k:=lpeek($2060000);
 lpoke($206000c,$002040);
-sethidecolor(250,0,$FF);
-sethidecolor(44,0,$FF);
-sethidecolor(190,0,$FF);
-sethidecolor(188,0,$FF);
-sethidecolor(154,0,$FF);
+sethidecolor(250,0,$80);
+sethidecolor(44,0,$80);
+sethidecolor(190,0,$80);
+sethidecolor(188,0,$80);
+sethidecolor(154,0,$80);
 c:=0;
 avsct:=0;
 avspt:=0;
@@ -277,8 +277,8 @@ outtextxyz(1434,1070,inttostr(aaa),ii,2,2);
 outtextxyz(1474,1070,'C',ii,2,2);
 outtextxyz(1462,1050,'.',ii,2,2);
 
-for i:=64 to 88 do lpoke($2010000+4*i,lpeek($2010000+2048+4*((c div 2) mod 256)+4*i));
-if (c mod 32)=0 then lpoke($2010000+4*89,lpeek($2010000+2048+(4*(c div 64) mod 256)))   ;
+for i:=64 to 88 do lpoke($2010000+4*i,lpeek($2010000+2048+4*((c div 2) mod 256)+4*i) and $FFFFFF);
+if (c mod 32)=0 then lpoke($2010000+4*89,lpeek($2010000+2048+(4*(c div 64) mod 256)) and $FFFFFF);
 cc:=(2*c) mod 3544 ;
 a:=lpeek($2060004);
 if cc<1772 then blit(a+$800000,10+(cc),1011,a,12,1011,1771-(cc),48,1792,1792);
@@ -381,10 +381,10 @@ else
      if spr7y<=40 then spr7dy:=abs(spr7dy);
      lpoke($2060070,(spr7y shl 16)+spr7x);
      end;
-//lpoke($2060078,lpeek($206002c) shl 1);
+lpoke($2060078,lpeek($206002c) );
 
 //box(100,100,300,40,0);
-//outtextxyz(100,100,inttostr(siddata[$7a])+' '+inttostr(siddata[$7B]),40,2,2);
+//outtextxyz(100,100,inttostr(dpeek($2060030))+' '+inttostr(dpeek($2060032)),40,2,2);
 
 
 end;

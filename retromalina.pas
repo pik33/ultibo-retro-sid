@@ -52,8 +52,8 @@
 // 2060020 - x res
 // 2060024 - y res
 // TODO 2060028 - KBD. 28 - ASCII/scan. 29,2A modifiers, 2B 1 if key pressed 2 if special
-// TODO 206002C - mouse. 6002c,d x 6002e,f y
-// TODO 2060030   keys,
+// 206002C - mouse. 6002c,d x 6002e,f y
+// 2060030 - mouse keys, 2060032 - mouse wheel
 // TODO 2060034 - current dl position
 // 2060040 - 206007C sprite control long 0 31..16 y pos  15..0 x pos
 //                               long 1 30..16 y zoom 15..0 x zoom 31 mode
@@ -123,6 +123,15 @@ type Tsrcconvert=procedure(screen:pointer);
       procedure clear;
      end;
 
+     // mouse thread
+
+     Tmouse= class(TThread)
+     private
+     protected
+       procedure Execute; override;
+     public
+      Constructor Create(CreateSuspended : boolean);
+     end;
 
      TSample=array[0..1] of smallint;
      TSample32=array[0..1] of integer;
@@ -170,6 +179,7 @@ var fh,filetype:integer;                // this needs cleaning...
 
     buf2:array[0..1919] of smallint;
     filebuffer:TFileBuffer;
+    amouse:tmouse ;
 
 // prototypes
 
@@ -208,6 +218,44 @@ implementation
 // ---- prototypes
 
 procedure sprite(screen:pointer); forward;
+
+// ---- TAudio thread methods --------------------------------------------------
+
+constructor TMouse.Create(CreateSuspended : boolean);
+
+begin
+FreeOnTerminate := True;
+inherited Create(CreateSuspended);
+end;
+
+
+procedure TMouse.Execute;
+
+var mb:tmousedata;
+    mi:cardinal;
+    x,y,w:integer;
+
+begin
+  repeat
+  if mouseread(@mb,sizeof(tMousedata),mi)=0 then
+    begin
+    x:=dpeek($206002c)+mb.offsetx;
+    if x<64 then x:=64;
+    if x>1855 then x:=1855;
+    dpoke($206002c,x);
+    y:=dpeek($206002e)+mb.offsety;
+    if y<40 then y:=40;
+    if y>1159 then y:=1159;
+    dpoke($206002e,y);
+    dpoke($2060030,mb.Buttons);
+    w:=dpeek($2060032)+mb.OffsetWheel;
+    if w<127 then w:=127;
+    if w>129 then w:=129;
+    dpoke($2060032,w);
+    end;
+//  sleep(0);
+  until terminated;
+end;
 
 
 // ---- TFileBuffer thread methods --------------------------------------------------
@@ -259,7 +307,7 @@ else
   begin
   if self.newfh>0 then fh:=self.newfh;
   end;
-sleep(10);
+sleep(1);
 //if full then box(100,100,1000,100,35)
 //else if empty then box(100,100,1000,100,78)
 //else box(100,100,1000,100,0);
@@ -489,6 +537,8 @@ thread3:=taudio.Create(true);
 thread3.start;
 filebuffer:=Tfilebuffer.create(true);
 filebuffer.start;
+amouse:=tmouse.create(true);
+amouse.start;
 end;
 
 
