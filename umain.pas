@@ -331,6 +331,14 @@ else
      if (sqr(spr5x-spr6x)+sqr(spr5y-spr6y))<=4096 then begin i:=spr5dx; spr5dx:=spr6dx; spr6dx:=i; i:=spr5dy; spr5dy:=spr6dy; spr6dy:=i; end;
      if (sqr(spr5x-spr7x)+sqr(spr5y-spr7y))<=4096 then begin i:=spr5dx; spr5dx:=spr7dx; spr7dx:=i; i:=spr5dy; spr5dy:=spr7dy; spr7dy:=i; end;
      if (sqr(spr6x-spr7x)+sqr(spr6y-spr7y))<=4096 then begin i:=spr6dx; spr6dx:=spr7dx; spr7dx:=i; i:=spr6dy; spr6dy:=spr7dy; spr7dy:=i; end;
+     if (sqr(32+spr7x-dpeek($206002c))+sqr(32+spr7y-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  spr7dx:=-spr7dx; spr7dy:=-spr7dy;  end;
+     if (sqr(32+spr6x-dpeek($206002c))+sqr(32+spr6y-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  spr6dx:=-spr6dx; spr6dy:=-spr6dy;  end;
+     if (sqr(32+spr5x-dpeek($206002c))+sqr(32+spr5y-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  spr5dx:=-spr5dx; spr5dy:=-spr5dy;  end;
+     if (sqr(32+spr4x-dpeek($206002c))+sqr(32+spr4y-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  spr4dx:=-spr4dx; spr4dy:=-spr4dy;  end;
+     if (sqr(32+spr3x-dpeek($206002c))+sqr(32+spr3y-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  spr3dx:=-spr3dx; spr3dy:=-spr3dy;  end;
+     if (sqr(32+spr2x-dpeek($206002c))+sqr(32+spr2y-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  spr2dx:=-spr2dx; spr2dy:=-spr2dy;  end;
+     if (sqr(32+sprx-dpeek($206002c))+sqr(32+spry-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  sprdx:=-sprdx; sprdy:=-sprdy; poke($2060030,0); end;
+
      sprx+=sprdx;
      spry+=sprdy;
      if sprx>=1792 then sprdx:=-abs(sprdx);

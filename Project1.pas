@@ -53,6 +53,7 @@ var s,currentdir,currentdir2:string;
     hh,mm,ss,l,i,j,ilf,ild:integer;
     sel:integer=0;
     selstart:integer=0;
+    nsel:integer;
     buf:array[0..25] of  byte;
     fn:string;
     fs:integer;
@@ -73,6 +74,7 @@ var s,currentdir,currentdir2:string;
      drive:string;
      mb:tmousedata;
      mi:cardinal;
+     click, dblclick, dblcnt:integer;
 
 // ---- procedures
 
@@ -459,6 +461,18 @@ repeat
   if (peek($2060028)=0) and (dpeek($2060032)=127) then begin poke($2060028,23); dpoke ($2060032,128); end;
   if (peek($2060028)=0) and (dpeek($2060032)=129) then begin poke($2060028,24);  dpoke ($2060032,128); end;
 
+  if (dblclick=0) and (peek($2060030)=1) then begin dblclick:=1; dblcnt:=0; end;
+  if (dblclick=1) and (peek($2060030)=0) then begin dblclick:=2; dblcnt:=0; end;
+  if (dblclick=2) and (peek($2060030)=1) then begin dblclick:=3; dblcnt:=0; end;
+  if (dblclick=3) and (peek($2060030)=0) then begin dblclick:=4; dblcnt:=0; end;
+
+  inc(dblcnt); if dblcnt>10 then begin dblcnt:=10; dblclick:=0; end;
+
+  if (dblclick=4) and (peek($2060028)=0) and (dpeek($206002c)>960) then begin dblclick:=0; poke($2060028,13); end;
+  if (peek($2060030)=1) and (click=0) then click:=1;
+  if (peek($2060030)=0) then click:=0;
+
+
 //  if pause1a then begin for i:=$200d400 to $200d400+25 do poke(i,0); end;
 
   if peek($2060028)=ord('5') then begin dpoke ($2060028,0); siddelay:=20000; songfreq:=50; skip:=0; end;
@@ -470,6 +484,31 @@ repeat
   if peek($2060028)=1 then begin dpoke($2060028,0); if peek($2100003)=0 then poke ($2100003,1) else poke ($2100003,0); end;
   if peek($2060028)=2 then begin dpoke($2060028,0); if peek($2100004)=0 then poke ($2100004,1) else poke ($2100004,0); end;
   if peek($2060028)=3 then begin dpoke($2060028,0); if peek($2100005)=0 then poke ($2100005,1) else poke ($2100005,0); end;
+
+  if (click=1) and (dpeek($206002c)>960) then
+    begin
+    click:=2;
+    nsel:=(dpeek($206002e)-172) div 32;
+    if (nsel<=ild) and (nsel>=0) then
+      begin
+      box(920,132+32*sel,840,32,34);
+      if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
+      if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
+      if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
+      for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+      if filenames[sel+selstart,1]<>'(DIR)'then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
+      if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
+      sel:=nsel;
+      box(920,132+32*sel,840,32,36);
+      if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
+      if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
+      if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
+      for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+      if filenames[sel+selstart,1]<>'(DIR)' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
+      if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
+      end;
+    end;
+
 
   if peek($2060028)=23 then
     begin
