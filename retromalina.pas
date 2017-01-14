@@ -79,6 +79,8 @@ interface
 
 uses sysutils,classes,unit6502,Platform,Framebuffer,keyboard,mouse,threads,GlobalConst,ultibo, retro;
 
+const base=$2000000; // retromachine system area base
+
 type Tsrcconvert=procedure(screen:pointer);
 
      // Retromachine main thread
@@ -239,19 +241,19 @@ begin
   repeat
   if mouseread(@mb,sizeof(tMousedata),mi)=0 then
     begin
-    x:=dpeek($206002c)+mb.offsetx;
+    x:=dpeek(base+$6002c)+mb.offsetx;
     if x<64 then x:=64;
     if x>1855 then x:=1855;
-    dpoke($206002c,x);
-    y:=dpeek($206002e)+mb.offsety;
+    dpoke(base+$6002c,x);
+    y:=dpeek(base+$6002e)+mb.offsety;
     if y<40 then y:=40;
     if y>1159 then y:=1159;
-    dpoke($206002e,y);
-    dpoke($2060030,mb.Buttons);
-    w:=dpeek($2060032)+mb.OffsetWheel;
+    dpoke(base+$6002e,y);
+    dpoke(base+$60030,mb.Buttons);
+    w:=dpeek(base+$60032)+mb.OffsetWheel;
     if w<127 then w:=127;
     if w>129 then w:=129;
-    dpoke($2060032,w);
+    dpoke(base+$60032,w);
     end;
 //  sleep(0);
   until terminated;
@@ -286,16 +288,16 @@ if self.needclear then begin self.koniec:=0; self.pocz:=0; self.needclear:=false
 if self.fh>0 then
   begin
   if self.koniec>=self.pocz then m:=131072-self.koniec+self.pocz-1 else m:=self.pocz-self.koniec-1;
-  if {not full and} (m>=32768) then
+  if  (m>=32768) then
     begin
     self.il:=fileread(self.fh,self.tempbuf[0],32768);
     if self.il>0 then self.empty:=false;
     for i:=0 to il-1 do self.buf[(i+self.koniec) and $1FFFF]:=self.tempbuf[i] ;
     self.koniec:=(self.koniec+self.il) and $1FFFF;
- //   if koniec=pocz then full:=true;
+
     if self.il<>32768 then
       begin
-   //   fileclose(fh); fh:=-1;
+
       if self.newfh>0 then
         begin
         self.fh:=self.newfh; self.newfh:=-1;
@@ -308,11 +310,6 @@ else
   if self.newfh>0 then fh:=self.newfh;
   end;
 sleep(1);
-//if full then box(100,100,1000,100,35)
-//else if empty then box(100,100,1000,100,78)
-//else box(100,100,1000,100,0);
-//outtextxyz(100,100,inttostr(pocz),40,2,2);     outtextxyz(200,100,inttostr(koniec),40,2,2);
-//outtextxyz(300,100,inttostr(m),40,2,2);  outtextxyz(600,100,newfilename,40,2,2);
 until terminated;
 
 end;
@@ -365,22 +362,21 @@ end;
 
 procedure TAudio.Execute;
 
-var a,key:integer;
-    q:cardinal;
+var a:integer;
+
 
 begin
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_1);
-ThreadSetPriority(ThreadGetCurrent,5);
+//ThreadSetPriority(ThreadGetCurrent,5);
 threadsleep(1);
   repeat
   repeat sleep(0); a:= lpeek($3F007600) until (a and 2) <>0 ;
   if (a and 2)<>0 then
     begin
-    if lpeek($3f00761c)=$c4000000 then audiocallback($0205a000)
-                                  else audiocallback($0205c000);
+    if lpeek($3f00761c)=base+$c2000000 then audiocallback(base+$5a000)
+                                  else audiocallback(base+$5c000);
     lpoke($3F007600,$00000003);
-    CleanDataCacheRange($0205a000,$8000);
-    CleanDataCacheRange($02070000,$60000);
+
     end;
   until terminated;
 end;
@@ -407,6 +403,8 @@ end;
 
 procedure TRetro.Execute;
 
+// --- rev 21070111
+
 var id:integer;
 
 begin
@@ -415,7 +413,7 @@ running:=1;
 id:=getcurrentthreadid  ;
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_3);
  sleep(1);
-ThreadSetPriority(ThreadGetCurrent,5);
+//ThreadSetPriority(ThreadGetCurrent,5);
 sleep(1);
 repeat
   begin
@@ -429,7 +427,7 @@ repeat
   ts:=clockgettotal-t;
   vblank1:=1;
   CleanDataCacheRange(integer(p2),9216000);
-  lpoke($2060000,lpeek($2060000)+1);
+  lpoke(base+$60000,lpeek(base+$60000)+1);
 
   FramebufferDeviceSetOffset(fb,0,0,True);
   FramebufferDeviceWaitSync(fb);
@@ -443,7 +441,7 @@ repeat
   ts:=clockgettotal-t;
   vblank1:=1;
   CleanDataCacheRange(integer(p2)+9216000,9216000);
-  lpoke($2060000,lpeek($2060000)+1);
+  lpoke(base+$60000,lpeek(base+$60000)+1);
 
   FramebufferDeviceSetOffset(fb,0,1200,True);
   FramebufferDeviceWaitSync(fb);
@@ -464,6 +462,8 @@ end;
 
 procedure initmachine;
 
+// -- rev 20170111
+
 var a,i:integer;
     bb:byte;
     fh2:integer;
@@ -471,26 +471,20 @@ var a,i:integer;
     f: textfile;
 
 begin
-     {
+
+{ The ugly hack not needed now
+
 for i:=16 to 8191 do  // make the memory executable, shareable, rw, cacheable, writeback
   begin
   Entry:=PageTableGetEntry(i*4096);
   Entry.Flags:=$3b2;
   PageTableSetEntry(Entry);
   end;
-for i:=$30000 to $30FFF do  // make the memory executable, shareable, rw, cacheable, writeback
-  begin
-  Entry:=PageTableGetEntry(i*4096);
-  Entry.Flags:=$3b2;
-  PageTableSetEntry(Entry);
-  end; }
-for i:=$2000000 to $20bFFFF do poke(i,0);
-lpoke($2060004,$30000000);
-lpoke($2060000,$00000000);
+}
 
-//fh2:=fileopen('C:\retro\combinedwaveforms.bin',$40);   // load combined waveforms for SID
-//fileread(fh2,combined,1024);
-//fileclose(fh2);
+for i:=base to base+$FFFFF do poke(i,0);
+lpoke(base+$60004,$30000000);  // vitual framebuffer address
+lpoke(base+$60000,$00000000);  // frame counter
 
 combined:=combinedwaveforms;
 
@@ -522,16 +516,19 @@ FramebufferDeviceAllocate(fb,@FramebufferProperties);
 sleep(100);
 FramebufferDeviceGetProperties(fb,@FramebufferProperties);
 p2:=Pointer(FramebufferProperties.Address);
+
 // init Atari ST type font
-for i:=0 to 2047 do poke($2050000+i,st4font[i]);
+for i:=0 to 2047 do poke(base+$50000+i,st4font[i]);
 // init mouse cursor definition at sprite 8
-for i:=0 to 1023 do lpoke($2059000+4*i,mysz[i]);
+for i:=0 to 1023 do lpoke(base+$59000+4*i,mysz[i]);
 // sprite data pointers
-for i:=0 to 7 do lpoke($2060080+4*i,$2052000+4096*i);
+for i:=0 to 7 do lpoke(base+$60080+4*i,base+$52000+4096*i);
+
 // start frame refreshing thread
 thread:=tretro.create(true);
 thread.start;
-// start audio thread
+
+// start audio, mouse and file buffer threads
 pauseaudio(1);
 thread3:=taudio.Create(true);
 thread3.start;
@@ -546,7 +543,7 @@ end;
 //   procedure stopmachine
 //   destructor for the retromachine
 //   stop the process, free the RAM
-//   rev. 2016.11.24
+//   rev. 20170111
 //  ---------------------------------------------------------------------
 
 procedure stopmachine;
@@ -565,7 +562,7 @@ end;
 //  ---------------------------------------------------------------------
 //   BASIC type poke/peek procedures
 //   works @ byte addresses
-//   rev. 2016.11.24
+//   rev. 20161124
 // ----------------------------------------------------------------------
 
 procedure poke(addr:integer;b:byte); inline;
@@ -620,12 +617,13 @@ end;
 procedure blit(from,x,y,too,x2,y2,length,lines,bpl1,bpl2:integer);
 
 // --- TODO - write in asm, add advanced blitting modes
+// --- rev 21070111
 
 var i,j:integer;
     b1,b2:integer;
 
 begin
-if lpeek($2060008)<16 then
+if lpeek(base+$60008)<16 then
   begin
   from:=from+x;
   too:=too+x2;
@@ -643,25 +641,26 @@ end;
 
 procedure scrconvert16f(screen:pointer);
 
+// --- rev 21070111
+
 var a,b:integer;
     e:integer;
-label p1,p0,p002,p10,p11,p12,p20,p21,p22,p100,p101,p102,p103,p104,p999;
+label p1,p0,p002,p10,p11,p12,p999;
 
 begin
-a:=lpeek($2060004); // TODO! a:=0! Get a screen pointer from sys var !
-e:=lpeek($206000c);
-b:=$2010000;
+a:=lpeek(base+$60004);
+e:=lpeek(base+$6000c);
+b:=base+$10000;
+
                 asm
                 stmfd r13!,{r0-r12}   //Push registers
                 ldr r1,a
-               // add r1,#0x1000000
                 mov r6,r1
                 add r6,#1
                 ldr r2,screen
                 mov r12,r2
                 add r12,#4
                 ldr r3,b
-  //              add r3,#0x10000
                 mov r5,r2
                                     //upper border
                 add r5,#307200
@@ -746,12 +745,13 @@ end;
 procedure sprite(screen:pointer);
 
 // A sprite procedure
+// --- rev 21070111
 
 label p101,p102,p103,p104,p105,p106,p999,a7680,affff,affff0000,spritedata;
 var spritebase:integer;
 
 begin
-spritebase:=$2060040;
+spritebase:=base+$60040;
 
                asm
                stmfd r13!,{r0-r12}     //Push registers
@@ -779,8 +779,6 @@ p104:          ldr r4,a7680
                add r4,r4,r12,lsl #2
                ldr r4,[r4]
 
- //              ldr r4,spritedata      // todo: dynamic addresses
- //              add r4,r4,r12,lsl #12
                ldr r1,[r0],#4
                mov r2,r1,lsl #16
                lsr r2,#16             // xzoom
@@ -841,8 +839,7 @@ p106:          add r3,#7680
 affff:         .long 0xFFFF
 affff0000:     .long 0xFFFF0000
 a7680:         .long 7680
-//spritedata:    .long 0x2052000
-spritedata:    .long 0x2060080
+spritedata:    .long base+0x60080
 
 p999:          ldmfd r13!,{r0-r12}
                end;
@@ -854,45 +851,43 @@ procedure setataripallette(bank:integer);
 var fh:integer;
 
 begin
-//fh:=fileopen('C:\retro\ataripalette.def',$40);
-//fileread(fh,Pinteger($2010000+1024*bank)^,1024);
-//fileclose(fh);
-for i:=0 to 255 do lpoke($2010000+4*i+1024*bank,ataripallette[i]);
+for i:=0 to 255 do lpoke(base+$10000+4*i+1024*bank,ataripallette[i]);
 end;
 
 procedure sethidecolor(c,bank,mask:integer);
 
 begin
-lpoke(($2010000+1024*bank+4*c),lpeek($2010000+1024*bank+4*c)+(mask shl 24));
+lpoke((base+$10000+1024*bank+4*c),lpeek(base+$10000+1024*bank+4*c)+(mask shl 24));
 end;
 
 procedure cls(c:integer);
+
+// --- rev 20170111
 
 var c2, i,l:integer;
     c3: cardinal;
     screenstart:integer;
 
 begin
-screenstart:=lpeek($2060004);
+screenstart:=lpeek(base+$60004);
 c:=c mod 256;
-l:=(lpeek($2060020)*lpeek($2060024)) div 4 ;
+l:=(lpeek(base+$60020)*lpeek(base+$60024)) div 4 ;
 c3:=c+(c shl 8) + (c shl 16) + (c shl 24);
 for i:=0 to l do lpoke(screenstart+4*i,c3);
-
 end;
 
 //  ---------------------------------------------------------------------
 //   putpixel (x,y,color)
 //   asm procedure - put color pixel on screen at position (x,y)
-//   rev. 2015.10.14
+//   rev. 20170111
 //  ---------------------------------------------------------------------
 
-procedure putpixel(x,y,color:integer);
+procedure putpixel(x,y,color:integer); inline;
 
 var adr:integer;
 
 begin
-adr:=lpeek($2060004)+x+1792*y; if adr<lpeek($2060004)+$FFFFFF then poke(adr,color);
+adr:=lpeek(base+$60004)+x+1792*y; if adr<lpeek(base+$60004)+$FFFFFF then poke(adr,color);
 end;
 
 
@@ -900,7 +895,7 @@ end;
 //   box(x,y,l,h,color)
 //   asm procedure - draw a filled rectangle, upper left at position (x,y)
 //   length l, height h
-//   rev. 2015.10.14
+//   rev. 20170111
 //  ---------------------------------------------------------------------
 
 procedure box(x,y,l,h,c:integer);
@@ -911,7 +906,7 @@ var adr,i,j,screenptr:integer;
 
 begin
 
-screenptr:=lpeek($2060004);
+screenptr:=lpeek(base+$60004);
 if x<0 then x:=0;
 if x>1792 then x:=1792;
 if y<0 then y:=0;
@@ -919,18 +914,14 @@ if y>1120 then y:=1120;
 if x+l>1792 then l:=1792-x-1;
 if y+h>1120 then h:=1120-y-1 ;
 for j:=y to y+h-1 do begin
-//  begin
-//  adr:=$1000000+1792*j;
-//  for i:=x to x+l-1 do ramb^[adr+i]:=c;
-//  end;
 
     asm
-    stmfd r13!,{r0-r2}     //Push registers
+    stmfd r13!,{r0-r2}
     mov r0,#1792
     ldr r1,j
     mul r0,r0,r1
     ldr r1,screenptr
-    add r0,r1       //Todo - screen pointer!
+    add r0,r1
     ldr r1,c
     ldr r2,x
     add r0,r2
@@ -972,12 +963,12 @@ end;
 procedure putchar(x,y:integer;ch:char;col:integer);
 
 // --- TODO: translate to asm, use system variables
-
+// --- rev 20170111
 var i,j,start:integer;
   b:byte;
 
 begin
-start:=$2050000+16*ord(ch);
+start:=base+$50000+16*ord(ch);
 for i:=0 to 15 do
   begin
   b:=peek(start+i);
@@ -997,7 +988,7 @@ var i,j,k,l,start:integer;
   b:byte;
 
 begin
-start:=$2050000+16*ord(ch);
+start:=base+$50000+16*ord(ch);
 for i:=0 to 15 do
   begin
   b:=peek(start+i);
@@ -1116,63 +1107,63 @@ sidptr:=@siddata;
 if mode=1 then  // get regs
 
   begin
-  siddata[$56]:=peek($2100003);
-  siddata[$57]:=peek($2100004);
-  siddata[$58]:=peek($2100005);
-  siddata[0]:=round(1.0263*(16*peek($200D400)+4096*peek($200d401))); //freq1
-  siddata[$10]:=round(1.0263*(16*peek($200d407)+4096*peek($200d408)));
-  siddata[$20]:=round(1.0263*(16*peek($200d40e)+4096*peek($200d40f)));
-  siddata[1]:=peek($200d404) and 1;  // gate1
-  siddata[2]:=peek($200d404) and 4;  // ring1
-  siddata[3]:=peek($200d404) and 8;  // test1
-  siddata[4]:=((peek($200d404) and 2) shr 1)-1; //sync1
+  siddata[$56]:=peek(base+$100003);
+  siddata[$57]:=peek(base+$100004);
+  siddata[$58]:=peek(base+$100005);
+  siddata[0]:=round(1.0263*(16*peek(base+$D400)+4096*peek(base+$d401))); //freq1
+  siddata[$10]:=round(1.0263*(16*peek(base+$d407)+4096*peek(base+$d408)));
+  siddata[$20]:=round(1.0263*(16*peek(base+$d40e)+4096*peek(base+$d40f)));
+  siddata[1]:=peek(base+$d404) and 1;  // gate1
+  siddata[2]:=peek(base+$d404) and 4;  // ring1
+  siddata[3]:=peek(base+$d404) and 8;  // test1
+  siddata[4]:=((peek(base+$d404) and 2) shr 1)-1; //sync1
 
-  siddata[5]:=peek($200d405) and $F;   //sd1,
-  siddata[6]:=peek($200d405) shr 4;    //sa1,
-  siddata[7]:=peek($200d406) and $F;    //sr1
-  siddata[$0d]:=(peek($200d406) and $F0) shl 22;      //0d,sussvol1
-  siddata[$53]:=((peek($200d402)+256*peek($200d403)) and $FFF);
+  siddata[5]:=peek(base+$d405) and $F;   //sd1,
+  siddata[6]:=peek(base+$d405) shr 4;    //sa1,
+  siddata[7]:=peek(base+$d406) and $F;    //sr1
+  siddata[$0d]:=(peek(base+$d406) and $F0) shl 22;      //0d,sussvol1
+  siddata[$53]:=((peek(base+$d402)+256*peek(base+$d403)) and $FFF);
 
-  siddata[$11]:=peek($200d40b) and 1;
-  siddata[$12]:=peek($200d40b) and 4;
-  siddata[$13]:=peek($200d40b) and 8;
-  siddata[$14]:=((peek($200d40b) and 2) shr 1)-1;
-  siddata[$15]:=peek($200d40c) and  $F;
-  siddata[$16]:=peek($200d40c) shr 4;
-  siddata[$17]:=peek($200d40d)and $F;
-  siddata[$1d]:=(peek($200d40d) and $F0) shl 22;
-  siddata[$54]:=((peek($200d409)+256*peek($200d40a)) and $FFF);
+  siddata[$11]:=peek(base+$d40b) and 1;
+  siddata[$12]:=peek(base+$d40b) and 4;
+  siddata[$13]:=peek(base+$d40b) and 8;
+  siddata[$14]:=((peek(base+$d40b) and 2) shr 1)-1;
+  siddata[$15]:=peek(base+$d40c) and  $F;
+  siddata[$16]:=peek(base+$d40c) shr 4;
+  siddata[$17]:=peek(base+$d40d)and $F;
+  siddata[$1d]:=(peek(base+$d40d) and $F0) shl 22;
+  siddata[$54]:=((peek(base+$d409)+256*peek(base+$d40a)) and $FFF);
 
-  siddata[$21]:=peek($200d412) and 1;
-  siddata[$22]:=peek($200d412) and 4;
-  siddata[$23]:=peek($200d412) and 8;
-  siddata[$24]:=((peek($200d412) and 2) shr 1)-1;
-  siddata[$25]:=peek($200d413) and  $F;
-  siddata[$26]:=peek($200d413) shr 4;
-  siddata[$27]:=peek($200d414)and $F;
-  siddata[$2d]:=(peek($200d414) and $F0) shl 22;
-  siddata[$55]:=((peek($200d410)+256*peek($200d411)) and $FFF);
+  siddata[$21]:=peek(base+$d412) and 1;
+  siddata[$22]:=peek(base+$d412) and 4;
+  siddata[$23]:=peek(base+$d412) and 8;
+  siddata[$24]:=((peek(base+$d412) and 2) shr 1)-1;
+  siddata[$25]:=peek(base+$d413) and  $F;
+  siddata[$26]:=peek(base+$d413) shr 4;
+  siddata[$27]:=peek(base+$d414)and $F;
+  siddata[$2d]:=(peek(base+$d414) and $F0) shl 22;
+  siddata[$55]:=((peek(base+$d410)+256*peek(base+$d411)) and $FFF);
 
 // original filter_freq:=((ff * 5.8) + 30)/240000;
 // instead: ff*6 div 262144
 
-  ff:=(peek($200d416) shl 3)+(peek($200d415) and 7);
+  ff:=(peek(base+$d416) shl 3)+(peek(base+$d415) and 7);
   siddata[$6E]:=(ff shl 1)+(ff shl 2)+32;
 
-  siddata[$59]:=(peek($200d417) and 1); //filter 1
-  siddata[$5a]:=(peek($200d417) and 2);
-  siddata[$5B]:=(peek($200d417) and 4);
-  siddata[$6D]:=(peek($200d418) and $70) shr 4;   // filter output switch
+  siddata[$59]:=(peek(base+$d417) and 1); //filter 1
+  siddata[$5a]:=(peek(base+$d417) and 2);
+  siddata[$5B]:=(peek(base+$d417) and 4);
+  siddata[$6D]:=(peek(base+$d418) and $70) shr 4;   // filter output switch
 
 // original filter_resonance2:=0.5+(0.5/(1+(peek($d416) shr 4)));
 
-  siddata[$6F]:=round(65536.0*(0.5+(0.5/(1+(peek($200d416) shr 4)))));
+  siddata[$6F]:=round(65536.0*(0.5+(0.5/(1+(peek(base+$d416) shr 4)))));
 
-  siddata[$70]:=(peek($200d418) and 15); //volume
+  siddata[$70]:=(peek(base+$d418) and 15); //volume
 
-  siddata[$50]:=peek($200d404) shr 4;
-  siddata[$51]:=peek($200d40b) shr 4;
-  siddata[$52]:=peek($200d412) shr 4;     //waveforms
+  siddata[$50]:=peek(base+$d404) shr 4;
+  siddata[$51]:=peek(base+$d40b) shr 4;
+  siddata[$52]:=peek(base+$d412) shr 4;     //waveforms
   end;
 
                asm
@@ -2093,34 +2084,35 @@ procedure noiseshaper2(bufaddr:integer);
 
 var i,j:integer;
 
-// STUB!
+// -- rev 20170111
 
 begin
-if bufaddr=$205a000 then
+if bufaddr=base+$5a000 then
   begin
   for i:=0 to 767 do
     begin
     for j:=0 to 20 do
       begin
 
-      i1l+=slpeek($205a000+8*i);
+      i1l+=slpeek(base+$5a000+8*i);
       i2l+=i1l;
       topl:=i2l div 256;
       fbl:=topl * 256;
       i1l-=fbl;
       i2l-=fbl;
-      slpoke ($2070000+168*i+8*j, 130+topl);
+      slpoke (base+$70000+168*i+8*j, 130+topl);
 
-      i1r+=slpeek($205a000+8*i+4);
+      i1r+=slpeek(base+$5a000+8*i+4);
       i2r+=i1r;
       topr:=i2r div 256;
       fbr:=topr * 256;
       i1r-=fbr;
       i2r-=fbr;
-      slpoke ($2070000+168*i+8*j+4, 130+topr);
+      slpoke (base+$70000+168*i+8*j+4, 130+topr);
 
       end;
     end;
+    CleanDataCacheRange(base+$70000,$10000);
   end
 else
   begin
@@ -2128,23 +2120,24 @@ else
     begin
     for j:=0 to 20 do
       begin
-      i1l+=slpeek($205c000+8*i);
+      i1l+=slpeek(base+$5c000+8*i);
        i2l+=i1l;
        topl:=i2l div 256;
        fbl:=topl * 256;
        i1l-=fbl;
        i2l-=fbl;
-       slpoke ($20a0000+168*i+8*j, 130+topl);
+       slpoke (base+$a0000+168*i+8*j, 130+topl);
 
-       i1r+=slpeek($205c000+8*i+4);
+       i1r+=slpeek(base+$5c000+8*i+4);
        i2r+=i1r;
        topr:=i2r div 256;
        fbr:=topr * 256;
        i1r-=fbr;
        i2r-=fbr;
-       slpoke ($20a0000+168*i+8*j+4, 130+topr);
+       slpoke (base+$a0000+168*i+8*j+4, 130+topr);
       end;
     end;
+    CleanDataCacheRange(base+$a0000,$10000);
   end;
 end;
 
@@ -2153,33 +2146,33 @@ procedure noiseshaper(bufaddr:integer);
 
 var i,j:integer;
 
-// STUB!
+// -- rev 20170111
 
 begin
-if bufaddr=$205a000 then
+if bufaddr=base+$5a000 then
   begin
   for i:=0 to 119 do
     begin
     for j:=0 to 19 do
       begin
-      i1l+=slpeek($205a000+8*i);
+      i1l+=slpeek(base+$5a000+8*i);
       i2l+=i1l;
       topl:=i2l div 256;
       fbl:=topl * 256;
       i1l-=fbl;
       i2l-=fbl;
-      slpoke ($2070000+160*i+8*j, 130+topl);
+      slpoke (base+$70000+160*i+8*j, 130+topl);
 
-      i1r+=slpeek($205a000+8*i+4);
+      i1r+=slpeek(base+$5a000+8*i+4);
       i2r+=i1r;
       topr:=i2r div 256;
       fbr:=topr * 256;
       i1r-=fbr;
       i2r-=fbr;
-      slpoke ($2070000+160*i+8*j+4, 130+topr);
-
+      slpoke (base+$70000+160*i+8*j+4, 130+topr);
       end;
     end;
+  CleanDataCacheRange(base+$70000,$10000);
   end
 else
   begin
@@ -2187,133 +2180,26 @@ else
     begin
     for j:=0 to 19 do
       begin
-      i1l+=slpeek($205c000+8*i);
+      i1l+=slpeek(base+$5c000+8*i);
        i2l+=i1l;
        topl:=i2l div 256;
        fbl:=topl * 256;
        i1l-=fbl;
        i2l-=fbl;
-       slpoke ($20a0000+160*i+8*j, 130+topl);
+       slpoke (base+$a0000+160*i+8*j, 130+topl);
 
-       i1r+=slpeek($205c000+8*i+4);
+       i1r+=slpeek(base+$5c000+8*i+4);
        i2r+=i1r;
        topr:=i2r div 256;
        fbr:=topr * 256;
        i1r-=fbr;
        i2r-=fbr;
-       slpoke ($20a0000+160*i+8*j+4, 130+topr);
+       slpoke (base+$a0000+160*i+8*j+4, 130+topr);
       end;
     end;
+    CleanDataCacheRange(base+$a0000,$10000);
   end;
 end;
-
-{
-DAT
-                        org     0                         'initialization
-
-init                    mov     ctra,leftcounter         ' nco mode
-                        mov     ctrb,rightcounter
-                        mov     frqa,#1                  ' frq=1 for pwm mode
-                        mov     frqb,#1
-                        mov     dira,outputmask          ' enable output on selected pins
-                        mov     bufptr2,par
-                        mov     time,cnt
-                        add     time,delay
-
-loop                    cmp     smode,#0                 wz
-               if_z     jmp     #p3
-                        mov     ptr,bufptr               ' compute pointer to sample
-                        add     ptr,bufcnt
-                        rdword  lsample,ptr              ' get left
-                        shl     lsample,#16
-                        add     ptr, #2
-                        rdword  rsample,ptr              ' get right
-                        sar     lsample,#16
-                        shl     rsample,#16              ' extend sign to 32 bits
-                        sar     rsample,#16
-                        add     bufcnt,#4
-                        and     bufcnt,bufmask
-p4                      mov     over,overval
-                        wrlong  bufcnt,bufptr2           ' write actual sample number for main program
-                        jmp     #p2
-
-p3                      mov     ptr,bufptr
-                        rdlong  lsample,ptr
-                        sar     lsample,#16
-                        mov     rsample, lsample
-                        shl     rsample,#1
-                        add     lsample, rsample
-                        shl     rsample,#1
-                        add     lsample, rsample
-                        sar     lsample,#3
-
-                        mov     rsample,lsample
-                        jmp     #p4
-
-
-p2                      add     i1l,lsample              ' noise shape left
-                        add     i2l,i1l
-                        mov     topl,i2l
-                        sar     topl,#8
-                        mov     fbl,topl
-                        shl     fbl,#8
-                        sub     i1l,fbl
-                        sub     i2l,fbl
-
-                        add     i1r,rsample              ' noise shape right
-                        add     i2r,i1r
-                        mov     topr,i2r
-                        sar     topr,#8
-                        mov     fbr,topr
-                        shl     fbr,#8
-                        sub     i1r,fbr
-                        sub     i2r,fbr
-
-
-                        maxs    topr, maxval           ' clip max to avoid clicks
-                        mins    topr, minval
-                        add     topr, #$80             ' convert to 8 bit unsigned
-                        and     topr, #$FF
-                        maxs    topl, maxval
-                        mins    topl, minval
-                        add     topl, #$80
-                        and     topl, #$FF
-
-                        waitcnt time, delay
-                        neg     phsa, topr            ' Output.
-                        neg     phsb, topl            ' Output.
-
-                        djnz    over,#p2
-                        jmp    #loop
-
-leftcounter             long    0
-rightcounter            long    0
-outputmask              long    0
-delay                   long    259
-bufmask                 long    00_0000_0000_0000_0000_0111_1111_1111
-overval                 long    7
-maxval                  long    127
-minval                  long   -127
-bufptr                  long    0
-bufptr2                 long    0
-bufcnt                  long    0
-smode                   long    0
-
-over                    res 1
-lsample                 res 1
-rsample                 res 1
-time                    res 1
-topl                    res 1
-topr                    res 1
-fbl                     res 1
-fbr                     res 1
-i1r                     res 1
-i1l                     res 1
-i2l                     res 1
-i2r                     res 1
-ptr                     res 1
-
-}
 
 
 
@@ -2358,9 +2244,9 @@ if filetype=3 then
       for i:=0 to 1535 do buf2[i]:=0;
       pauseaudio(1);
       noiseshaper2(b);
-      poke($2060028,23);
-      repeat until peek($2060028)=0;
-      poke($2060028,13);
+      poke(base+$60028,23);
+      repeat until peek(base+$60028)=0;
+      poke(base+$60028,13);
       end;
     end;
   end
@@ -2379,7 +2265,7 @@ else
         if skip=1 then  il:=fileread(sfh,buf,25);
         if il=25 then
           begin
-          for i:=0 to 24 do poke($200d400+i,buf[i]);
+          for i:=0 to 24 do poke(base+$d400+i,buf[i]);
           for i:=0 to 15 do times6502[i]:=times6502[i+1];
           t6:=clockgettotal;
           times6502[15]:=0;
@@ -2395,7 +2281,7 @@ else
           pause1:=true;
           songtime:=0;
           timer1:=-1;
-          for i:=0 to 6 do lpoke($200d400+4*i,0);
+          for i:=0 to 6 do lpoke(base+$d400+4*i,0);
           end;
         end
       else if filetype=1 then
@@ -2406,7 +2292,7 @@ else
         times6502[15]:=clockgettotal-t6;
         t6:=0; for i:=0 to 15 do t6+=times6502[i];
         time6502:=t6-15;
-        CleanDataCacheRange($200d400,32);
+      //  CleanDataCacheRange($d400,32);
         timer1+=siddelay;
         songtime+=siddelay;
         end
@@ -2452,18 +2338,18 @@ var i:integer;
 begin
 
 ctrlblock[0]:=$00050140; //transfer info
-ctrlblock[1]:=$c2070000;
+ctrlblock[1]:=base+$c0070000;
 ctrlblock[2]:=$7E20C018;
 ctrlblock[3]:=21*960; //7680;
 ctrlblock[4]:=$0;
-ctrlblock[5]:=$c4000020;
+ctrlblock[5]:=base+$c2000020;
 ctrlblock[6]:=$0;
 ctrlblock[7]:=$0;
-for i:=0 to 7 do lpoke($4000000+4*i,ctrlblock[i]);
-ctrlblock[5]:=$c4000000;
-ctrlblock[1]:=$c20a0000;
-for i:=0 to 7 do lpoke($4000020+4*i,ctrlblock[i]);
-CleanDataCacheRange($4000000,$10000);
+for i:=0 to 7 do lpoke(base+$2000000+4*i,ctrlblock[i]);
+ctrlblock[5]:=base+$c2000000;
+ctrlblock[1]:=base+$c00a0000;
+for i:=0 to 7 do lpoke(base+$2000020+4*i,ctrlblock[i]);
+CleanDataCacheRange(base+$2000000,$10000);
 sleep(1);
 
 
@@ -2477,7 +2363,7 @@ lpoke($3F20C020,260);      // pwm 2 range
 lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
 lpoke($3F20C008,$80000307); // pwm dma enable
 lpoke($3F007ff0,pinteger($3F007FF0)^ or %1000000); // dma 06 enable
-lpoke($3F007604,$c4000000);
+lpoke($3F007604,base+$c2000000);
 lpoke($3F007600,3);
 
 
@@ -2490,13 +2376,11 @@ begin
 if mode=1 then
   begin
   pause1:=true;
-//  for i:=$200d400 to $200d41f do  begin poke(i+32,peek(i)); poke(i,0); end;
-//  CleanDataCacheRange($200d400,32);
   sleep(5);
-  for i:=$205a000 to $205dfff do if (i mod 4) = 0 then lpoke(i,0);
-  CleanDataCacheRange($205a000,16384);
-  for i:=$2070000 to $20cffff do if (i mod 4) = 0 then lpoke(i,128);
-  CleanDataCacheRange($2070000,$60000);
+  for i:=base+$5a000 to base+$5dfff do if (i mod 4) = 0 then lpoke(i,0);
+  CleanDataCacheRange(base+$5a000,16384);
+  for i:=base+$70000 to base+$cffff do if (i mod 4) = 0 then lpoke(i,128);
+  CleanDataCacheRange(base+$70000,$60000);
   sleep(5);
   end
 else

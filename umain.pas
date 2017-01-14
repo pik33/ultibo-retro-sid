@@ -6,7 +6,7 @@ interface
 
 uses sysutils,classes,retromalina,platform,retro;
 
-const ver='The retromachine player v. 0.16u --- 2017.01.08';
+const ver='The retromachine player v. 0.17u --- 2017.01.11';
 var test:integer ;
     licznik:integer=0;
     songname:string;
@@ -37,7 +37,6 @@ procedure main2;
 procedure mandelbrot;
 
 implementation
-
 
 procedure rainbow;
 
@@ -78,29 +77,29 @@ begin
 
 // hide all sprites
 
-lpoke($2060040,$01001100); // position
-lpoke($2060044,$00020002); // zoom
-lpoke($2060048,$00101100);
-lpoke($206004c,$00020002);
-lpoke($2060050,$00181180);
-lpoke($2060054,$00020002);
-lpoke($2060058,$00201200);
-lpoke($206005c,$00020002);
-lpoke($2060060,$00281280);
-lpoke($2060064,$00020002);
-lpoke($2060068,$00301300);
-lpoke($206006c,$00020002);
-lpoke($2060070,$00381380);
-lpoke($2060074,$00020002);
-lpoke($2060078,$00401400);
-lpoke($206007c,$00020002);
+lpoke(base+$60040,$01001100); // position
+lpoke(base+$60044,$00020002); // zoom
+lpoke(base+$60048,$00101100);
+lpoke(base+$6004c,$00020002);
+lpoke(base+$60050,$00181180);
+lpoke(base+$60054,$00020002);
+lpoke(base+$60058,$00201200);
+lpoke(base+$6005c,$00020002);
+lpoke(base+$60060,$00281280);
+lpoke(base+$60064,$00020002);
+lpoke(base+$60068,$00301300);
+lpoke(base+$6006c,$00020002);
+lpoke(base+$60070,$00381380);
+lpoke(base+$60074,$00020002);
+lpoke(base+$60078,$00401400);
+lpoke(base+$6007c,$00020002);
 
 
 // --------- main program start
 
-lpoke ($2060008,0);
-lpoke ($2060020,1792);
-lpoke ($2060024,1120);
+lpoke (base+$60008,0);
+lpoke (base+$60020,1792);
+lpoke (base+$60024,1120);
 setataripallette(0);
 setataripallette(1);
 setataripallette(2);
@@ -110,8 +109,8 @@ outtextxyz(128,16,ver,154,4,2);
 box2(8,64,1784,1112,0);
 box2(10,1062,1782,1110,120);
 outtextxyz(32,1070,'Screen time:',124,2,2);
-k:=lpeek($2060000);
-lpoke($206000c,$002040);
+k:=lpeek(base+$60000);
+lpoke(base+$6000c,$002040);
 sethidecolor(250,0,$80);
 sethidecolor(44,0,$80);
 sethidecolor(190,0,$80);
@@ -123,7 +122,7 @@ avspt:=0;
 avall:=0;
 avsid:=0;
 rainbow;
-i:=lpeek($2060004);
+i:=lpeek(base+$60004);
 outtextxyz(24,1019,'A retromachine SID player by pik33 --- inspired by Johannes Ahlebrand''s Parallax Propeller SIDCog --- F1,F2,F3',89,2,2);
 blit(i,10,1011,i+$800000,10,1011,1771,48,1792,1792);
 rainbow;
@@ -138,8 +137,7 @@ outtextxyz(320,75,'File info',188,2,2);
 box2(897,118,1782,1008,34);
 box2(897,67,1782,115,36);
 outtextxyz(1296,75,'Files',44,2,2);
-//fh2:=fileopen('C:\retro\kulka01.ppm',$40);
-//fileseek(fh2,121,0);
+
 
 for i:=0 to 16383 do lpoke($12050000+4*i,balls[i]) ;
 for i:=0 to 16383 do
@@ -185,7 +183,7 @@ for i:=0 to 16383 do
   poke($120b0000+4*i+3,0);
   end;
 
-lpoke($2060080,$12052000);
+lpoke(base+$60080,$12052000);
 sprdx:=1;
 sprdy:=1;
 spr2dx:=2;
@@ -217,15 +215,15 @@ var a,aaa,c1,ii,iii,il,i,cc:integer;
 begin
 
 clock:=timetostr(now);
-k:=lpeek($2060000);
-repeat sleep(1) until lpeek($2060000)<>k;
-lpoke($2060080,$12050000+4096*((k mod 32) div 2));
-lpoke($2060084,$12060000+4096*((k mod 32) div 2));
-lpoke($2060088,$12070000+4096*((k mod 32) div 2));
-lpoke($206008c,$12080000+4096*((k mod 32) div 2));
-lpoke($2060090,$12090000+4096*((k mod 32) div 2));
-lpoke($2060094,$120a0000+4096*((k mod 32) div 2));
-lpoke($2060098,$120b0000+4096*((k mod 32) div 2));
+k:=lpeek(base+$60000);
+repeat sleep(1) until lpeek(base+$60000)<>k;
+lpoke(base+$60080,$12050000+4096*((k mod 32) div 2));
+lpoke(base+$60084,$12060000+4096*((k mod 32) div 2));
+lpoke(base+$60088,$12070000+4096*((k mod 32) div 2));
+lpoke(base+$6008c,$12080000+4096*((k mod 32) div 2));
+lpoke(base+$60090,$12090000+4096*((k mod 32) div 2));
+lpoke(base+$60094,$120a0000+4096*((k mod 32) div 2));
+lpoke(base+$60098,$120b0000+4096*((k mod 32) div 2));
 c:=c+1; c1:=c mod 60;
 if time6502>0 then c6+=1;
 ss:=(songtime div 1000000) mod 60;
@@ -259,12 +257,12 @@ if sidcount<>0 then
   else begin if sidtime>1000 then outtextxyz(656,1070,'wav '+inttostr(avall)+' us',233,2,2); end;
   end;
 outtextxyz(880,1070,'6502 '+floattostrf((av6502/16),fffixed,4,1)+' us',124,2,2);
-outtextxyz(1140,1070,inttostr(lpeek($206fffc)),200,2,2);
+outtextxyz(1140,1070,inttostr(lpeek(base+$6fffc)),200,2,2);
 outtextxyz(1280,1070,clock,220,2,2);
-if peek($2100003)=1 then outtextxyz(1540,1070,inttostr(peek($200d404)shr 4),108,2,2);
-if peek($2100004)=1 then outtextxyz(1580,1070,inttostr(peek($200d40b)shr 4),200,2,2);
-if peek($2100005)=1 then outtextxyz(1620,1070,inttostr(peek($200d412)shr 4),40,2,2);
-outtextxyz(1680,1070,inttostr(peek($2060028)),44,2,2);
+if peek(base+$100003)=1 then outtextxyz(1540,1070,inttostr(peek(base+$d404)shr 4),108,2,2);
+if peek(base+$100004)=1 then outtextxyz(1580,1070,inttostr(peek(base+$d40b)shr 4),200,2,2);
+if peek(base+$100005)=1 then outtextxyz(1620,1070,inttostr(peek(base+$d412)shr 4),40,2,2);
+outtextxyz(1680,1070,inttostr(peek(base+$60028)),44,2,2);
 
 for i:=0 to 14 do tbb[i]:=tbb[i+1];
 tbb[15]:=TemperatureGetCurrent(0) ;
@@ -277,10 +275,10 @@ outtextxyz(1434,1070,inttostr(aaa),ii,2,2);
 outtextxyz(1474,1070,'C',ii,2,2);
 outtextxyz(1462,1050,'.',ii,2,2);
 
-for i:=64 to 88 do lpoke($2010000+4*i,lpeek($2010000+2048+4*((c div 2) mod 256)+4*i) and $FFFFFF);
-if (c mod 32)=0 then lpoke($2010000+4*89,lpeek($2010000+2048+(4*(c div 64) mod 256)) and $FFFFFF);
+for i:=64 to 88 do lpoke(base+$10000+4*i,lpeek(base+$10000+2048+4*((c div 2) mod 256)+4*i) and $FFFFFF);
+if (c mod 32)=0 then lpoke(base+$10000+4*89,lpeek(base+$10000+2048+(4*(c div 64) mod 256)) and $FFFFFF);
 cc:=(2*c) mod 3544 ;
-a:=lpeek($2060004);
+a:=lpeek(base+$60004);
 if cc<1772 then blit(a+$800000,10+(cc),1011,a,12,1011,1771-(cc),48,1792,1792);
 if cc<1772 then blit(a+$800000,10,1059,a,11+1771-(cc),1011,(cc),48,1792,1792);
 if cc>=1772 then blit (a+$800000,10,1011,a,11+3543-(cc),1011,(cc-1772),48,1792,1792);
@@ -294,19 +292,19 @@ else begin for j:=0 to 767 do if abs(scope[j])<46000 then box(60+j,700-scope[j] 
 
 if filetype<>3 then
   begin
-  sprx:=round(dpeek($200d400)/40+74);
-  spry:=920-3*(peek($200d406) and $F0);
-  lpoke($2060040,(spry shl 16)+sprx+2048*(1-peek($2100003)));
-  spr2x:=round((peek($200d407)+256*peek($200d408))/40+74);
-  spr2y:=920-3*(peek($200d40d) and $F0);
-  lpoke($2060048,(spr2y shl 16)+spr2x+2048*(1-peek($2100004)));
-  spr3x:=round(dpeek($200d40e)/40+74);
-  spr3y:=920-3*(peek($200d414) and $F0);
-  lpoke($2060050,(spr3y shl 16)+spr3x+2048*(1-peek($2100005)));
-  lpoke($2060058,$20002000);
-  lpoke($2060060,$20002000);
-  lpoke($2060068,$20002000);
-  lpoke($2060070,$20002000);
+  sprx:=round(dpeek(base+$d400)/40+74);
+  spry:=920-3*(peek(base+$d406) and $F0);
+  lpoke(base+$60040,(spry shl 16)+sprx+2048*(1-peek(base+$100003)));
+  spr2x:=round((peek(base+$d407)+256*peek(base+$d408))/40+74);
+  spr2y:=920-3*(peek(base+$d40d) and $F0);
+  lpoke(base+$60048,(spr2y shl 16)+spr2x+2048*(1-peek(base+$100004)));
+  spr3x:=round(dpeek(base+$d40e)/40+74);
+  spr3y:=920-3*(peek(base+$d414) and $F0);
+  lpoke(base+$60050,(spr3y shl 16)+spr3x+2048*(1-peek(base+$100005)));
+  lpoke(base+$60058,$20002000);
+  lpoke(base+$60060,$20002000);
+  lpoke(base+$60068,$20002000);
+  lpoke(base+$60070,$20002000);
   end
 else
   begin
@@ -331,13 +329,13 @@ else
      if (sqr(spr5x-spr6x)+sqr(spr5y-spr6y))<=4096 then begin i:=spr5dx; spr5dx:=spr6dx; spr6dx:=i; i:=spr5dy; spr5dy:=spr6dy; spr6dy:=i; end;
      if (sqr(spr5x-spr7x)+sqr(spr5y-spr7y))<=4096 then begin i:=spr5dx; spr5dx:=spr7dx; spr7dx:=i; i:=spr5dy; spr5dy:=spr7dy; spr7dy:=i; end;
      if (sqr(spr6x-spr7x)+sqr(spr6y-spr7y))<=4096 then begin i:=spr6dx; spr6dx:=spr7dx; spr7dx:=i; i:=spr6dy; spr6dy:=spr7dy; spr7dy:=i; end;
-     if (sqr(32+spr7x-dpeek($206002c))+sqr(32+spr7y-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  spr7dx:=-spr7dx; spr7dy:=-spr7dy;  end;
-     if (sqr(32+spr6x-dpeek($206002c))+sqr(32+spr6y-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  spr6dx:=-spr6dx; spr6dy:=-spr6dy;  end;
-     if (sqr(32+spr5x-dpeek($206002c))+sqr(32+spr5y-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  spr5dx:=-spr5dx; spr5dy:=-spr5dy;  end;
-     if (sqr(32+spr4x-dpeek($206002c))+sqr(32+spr4y-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  spr4dx:=-spr4dx; spr4dy:=-spr4dy;  end;
-     if (sqr(32+spr3x-dpeek($206002c))+sqr(32+spr3y-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  spr3dx:=-spr3dx; spr3dy:=-spr3dy;  end;
-     if (sqr(32+spr2x-dpeek($206002c))+sqr(32+spr2y-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  spr2dx:=-spr2dx; spr2dy:=-spr2dy;  end;
-     if (sqr(32+sprx-dpeek($206002c))+sqr(32+spry-dpeek($206002e))<=1024) and (peek($2060030)=1) then begin  sprdx:=-sprdx; sprdy:=-sprdy; poke($2060030,0); end;
+     if (sqr(32+spr7x-dpeek(base+$6002c))+sqr(32+spr7y-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  spr7dx:=-spr7dx; spr7dy:=-spr7dy;  end;
+     if (sqr(32+spr6x-dpeek(base+$6002c))+sqr(32+spr6y-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  spr6dx:=-spr6dx; spr6dy:=-spr6dy;  end;
+     if (sqr(32+spr5x-dpeek(base+$6002c))+sqr(32+spr5y-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  spr5dx:=-spr5dx; spr5dy:=-spr5dy;  end;
+     if (sqr(32+spr4x-dpeek(base+$6002c))+sqr(32+spr4y-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  spr4dx:=-spr4dx; spr4dy:=-spr4dy;  end;
+     if (sqr(32+spr3x-dpeek(base+$6002c))+sqr(32+spr3y-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  spr3dx:=-spr3dx; spr3dy:=-spr3dy;  end;
+     if (sqr(32+spr2x-dpeek(base+$6002c))+sqr(32+spr2y-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  spr2dx:=-spr2dx; spr2dy:=-spr2dy;  end;
+     if (sqr(32+sprx-dpeek(base+$6002c))+sqr(32+spry-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  sprdx:=-sprdx; sprdy:=-sprdy; end;
 
      sprx+=sprdx;
      spry+=sprdy;
@@ -345,51 +343,51 @@ else
      if spry>=1096 then sprdy:=-abs(sprdy);
      if sprx<=64 then sprdx:=abs(sprdx);
      if spry<=40 then sprdy:=abs(sprdy);
-     lpoke($2060040,(spry shl 16)+sprx);
+     lpoke(base+$60040,(spry shl 16)+sprx);
      spr2x+=spr2dx;
      spr2y+=spr2dy;
      if spr2x>=1792 then spr2dx:=-abs(spr2dx);
      if spr2y>=1096 then spr2dy:=-abs(spr2dy);
      if spr2x<=64 then spr2dx:=abs(spr2dx);
      if spr2y<=40 then spr2dy:=abs(spr2dy);
-     lpoke($2060048,(spr2y shl 16)+spr2x);
+     lpoke(base+$60048,(spr2y shl 16)+spr2x);
      spr3x+=spr3dx;
      spr3y+=spr3dy;
      if spr3x>=1792 then spr3dx:=-abs(spr3dx);
      if spr3y>=1096 then spr3dy:=-abs(spr3dy);
      if spr3x<=64 then spr3dx:=abs(spr3dx);
      if spr3y<=40 then spr3dy:=abs(spr3dy);
-     lpoke($2060050,(spr3y shl 16)+spr3x);
+     lpoke(base+$60050,(spr3y shl 16)+spr3x);
      spr4x+=spr4dx;
      spr4y+=spr4dy;
      if spr4x>=1792 then spr4dx:=-abs(spr4dx);
      if spr4y>=1096 then spr4dy:=-abs(spr4dy);
      if spr4x<=64 then spr4dx:=abs(spr4dx);
      if spr4y<=40 then spr4dy:=abs(spr4dy);
-     lpoke($2060058,(spr4y shl 16)+spr4x);
+     lpoke(base+$60058,(spr4y shl 16)+spr4x);
      spr5x+=spr5dx;
      spr5y+=spr5dy;
      if spr5x>=1792 then spr5dx:=-abs(spr5dx);
      if spr5y>=1096 then spr5dy:=-abs(spr5dy);
      if spr5x<=64 then spr5dx:=abs(spr5dx);
      if spr5y<=40 then spr5dy:=abs(spr5dy);
-     lpoke($2060060,(spr5y shl 16)+spr5x);
+     lpoke(base+$60060,(spr5y shl 16)+spr5x);
      spr6x+=spr6dx;
      spr6y+=spr6dy;
      if spr6x>=1792 then spr6dx:=-abs(spr6dx);
      if spr6y>=1096 then spr6dy:=-abs(spr6dy);
      if spr6x<=64 then spr6dx:=abs(spr6dx);
      if spr6y<=40 then spr6dy:=abs(spr6dy);
-     lpoke($2060068,(spr6y shl 16)+spr6x);
+     lpoke(base+$60068,(spr6y shl 16)+spr6x);
      spr7x+=spr7dx;
      spr7y+=spr7dy;
      if spr7x>=1792 then spr7dx:=-abs(spr7dx);
      if spr7y>=1096 then spr7dy:=-abs(spr7dy);
      if spr7x<=64 then spr7dx:=abs(spr7dx);
      if spr7y<=40 then spr7dy:=abs(spr7dy);
-     lpoke($2060070,(spr7y shl 16)+spr7x);
+     lpoke(base+$60070,(spr7y shl 16)+spr7x);
      end;
-lpoke($2060078,lpeek($206002c) );
+lpoke(base+$60078,lpeek(base+$6002c) );
 
 //box(100,100,300,40,0);
 //outtextxyz(100,100,inttostr(dpeek($2060030))+' '+inttostr(dpeek($2060032)),40,2,2);

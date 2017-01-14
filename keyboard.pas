@@ -2804,8 +2804,8 @@ var
  Report:PUSBKeyboardReport;
  Keyboard:PUSBKeyboardDevice;
 begin
- ThreadSetPriority(ThreadGetCurrent,7);
- threadsleep(0);
+// ThreadSetPriority(ThreadGetCurrent,7);
+// threadsleep(0);
  {}
  {Check Request}
  if Request = nil then Exit;

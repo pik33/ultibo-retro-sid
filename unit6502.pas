@@ -251,14 +251,14 @@ function read6502(address:integer):byte;
 
 begin
 address:=address and $FFFF;
-result:=peek($2000000+address); //ram[address and $FFFF];
+result:=peek(base+address); //ram[address and $FFFF];
 end;
 
 procedure write6502(address:integer; value:byte);
 
 begin
 address:=address and $FFFF;
-poke($2000000+address,value); //ram[address and $FFFF]:=value;
+poke(base+address,value); //ram[address and $FFFF]:=value;
 end;
 
 //a few general functions used by various other functions

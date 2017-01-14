@@ -27,8 +27,13 @@ uses
 
   retromalina,
   Unit6502,
-  umain;
+  umain, mp3;
+//  console,
+//  Syscalls;
 
+//{$linklib libmpg123}
+
+//function mpg123_init:integer; cdecl; external 'libmpg123' Name 'mpg123_init';
 
 type wavehead=packed record
     riff:integer;
@@ -75,7 +80,7 @@ var s,currentdir,currentdir2:string;
      mb:tmousedata;
      mi:cardinal;
      click, dblclick, dblcnt:integer;
-
+       d:double; e:integer;
 // ---- procedures
 
 procedure waveopen (var fh:integer);
@@ -219,9 +224,9 @@ repeat
   load+=1;
 until il<>1;
 fileseek(fh,0,fsfrombeginning);
-CleanDataCacheRange($2000000,65536);
-i:=lpeek($2060000);
-repeat until lpeek($2060000)>(i+4);
+CleanDataCacheRange(base,65536);
+i:=lpeek(base+$60000);
+repeat until lpeek(base+$60000)>(i+4);
 jsr6502(song,init);
 cia:=read6502($dc04)+256*read6502($dc05);
 outtextxyz(42,548+24,'cia: '+inttohex(read6502($dc04)+256*read6502($dc05),4),177,2,2);
@@ -362,7 +367,7 @@ while not DirectoryExists('C:\') do
   else
     begin
     outtextxyz(440,1060,'Error. No Ultibo folder found. Press Enter to reboot',157,2,2);
-    repeat until peek($2060028)=$13;
+    repeat until peek(base+$60028)=$13;
     systemrestart(0);
     end;
 
@@ -395,56 +400,42 @@ siddelay:=20000;
 setcurrentdir(workdir);
 
 initmachine;
-dpoke($206002c,960);
-dpoke($206002e,600);
-dpoke($2060032,128);
-poke($2100002,0);
-poke($2100006,0);
-poke($2100007,0);
-poke($2100008,1);
-lpoke($206000c,$002040);
-lpoke ($2060008,0);
-lpoke ($2060020,1792);
-lpoke ($2060024,1120);
+dpoke(base+$6002c,960);
+dpoke(base+$6002e,600);
+dpoke(base+$60032,128);
+poke(base+$100002,0);
+poke(base+$100006,0);
+poke(base+$100007,0);
+poke(base+$100008,1);
+lpoke(base+$6000c,$002040);
+lpoke (base+$60008,0);
+lpoke (base+$60020,1792);
+lpoke (base+$60024,1120);
 setataripallette(0);
-// A simple mandelbrot test
-{
-mandelbrot;
-startreportbuffer;
-repeat
-  begin
-  l:=lpeek($2060000);
-  repeat sleep(1) until lpeek($2060000)>l+1;
-  l:=lpeek($2010000+1020);
-  for j:=255 downto 2 do lpoke($2010000+4*j,lpeek($2010000+4*j-4)) ;
-  lpoke($2010000+4,l);
-  ch:=getkeyboardreport;
-  end;
-until ch[0]=1;
-}
+
 main1;
 dirlist(drive);
-poke($2100003,1);
-poke($2100004,1);
-poke($2100005,1);
+poke(base+$100003,1);
+poke(base+$100004,1);
+poke(base+$100005,1);
 pwmbeep;
-//ThreadSetPriority(ThreadGetCurrent,6);
+
 threadsleep(1);
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_0);
 threadsleep(1);
 for i:=0 to 255 do keyboardstatus[i]:=0;
 startreportbuffer;
-//lpoke($3F1010a0,$5a000006);
-//threadsleep(1);
-//lpoke($3F1010a4,$5a003000); // div 2
-//lpoke($3F1010a0,$5a000016); // set clock to pll D    16 plld
-lpoke($206fffc,440);
+
+lpoke(base+$6fffc,440);
 repeat
   main2;
+//  box(100,100,500,100,32);
+//outtextxyz(100,100,inttohex(dpeek($206002c),4),40,2,2);
+//outtextxyz(200,100,inttohex(dpeek($206002e),4),40,2,2);
+//outtextxyz(300,100,inttohex(dpeek($2060030),4),40,2,2);
+//outtextxyz(400,100,inttohex(dpeek($2060032),4),40,2,2);
+//  outtextxyz(300,100,floattostr(d),40,2,2);
 
-//  i:=(lpeek($2060000) div 120) mod 2 ;
-//  if i=0 then lpoke($3F1010a4,$5a002000) // div 2
-//    else
 
 
 
@@ -454,41 +445,39 @@ repeat
   if (ch[2]<>0) and (activekey>0) then inc(rptcnt);
   if ch[2]=0 then begin rptcnt:=0; activekey:=0; end;
   if rptcnt>26 then rptcnt:=24 ;
-  if (rptcnt=1) or (rptcnt=24) then poke($2060028,byte(translatescantochar(activekey,0)));
+  if (rptcnt=1) or (rptcnt=24) then poke(base+$60028,byte(translatescantochar(activekey,0)));
 
-// if peek($2060028)<>0 then begin box(100,100,100,100,0); outtextxyz(100,100,inttostr(peek($2060028)),40, 2,2); end;
 
-  if (peek($2060028)=0) and (dpeek($2060032)=127) then begin poke($2060028,23); dpoke ($2060032,128); end;
-  if (peek($2060028)=0) and (dpeek($2060032)=129) then begin poke($2060028,24);  dpoke ($2060032,128); end;
 
-  if (dblclick=0) and (peek($2060030)=1) then begin dblclick:=1; dblcnt:=0; end;
-  if (dblclick=1) and (peek($2060030)=0) then begin dblclick:=2; dblcnt:=0; end;
-  if (dblclick=2) and (peek($2060030)=1) then begin dblclick:=3; dblcnt:=0; end;
-  if (dblclick=3) and (peek($2060030)=0) then begin dblclick:=4; dblcnt:=0; end;
+  if (peek(base+$60028)=0) and (dpeek(base+$60032)=127) then begin poke(base+$60028,23); dpoke(base+$60032,128); end;
+  if (peek(base+$60028)=0) and (dpeek(base+$60032)=129) then begin poke(base+$60028,24); dpoke(base+$60032,128); end;
+
+  if (dblclick=0) and (peek(base+$60030)=1) then begin dblclick:=1; dblcnt:=0; end;
+  if (dblclick=1) and (peek(base+$60030)=0) then begin dblclick:=2; dblcnt:=0; end;
+  if (dblclick=2) and (peek(base+$60030)=1) then begin dblclick:=3; dblcnt:=0; end;
+  if (dblclick=3) and (peek(base+$60030)=0) then begin dblclick:=4; dblcnt:=0; end;
 
   inc(dblcnt); if dblcnt>10 then begin dblcnt:=10; dblclick:=0; end;
 
-  if (dblclick=4) and (peek($2060028)=0) and (dpeek($206002c)>960) then begin dblclick:=0; poke($2060028,13); end;
-  if (peek($2060030)=1) and (click=0) then click:=1;
-  if (peek($2060030)=0) then click:=0;
+  if (dblclick=4) and (peek(base+$60028)=0) and (dpeek(base+$6002c)>960) then begin dblclick:=0; poke(base+$60028,13); end;
+  if (peek(base+$60030)=1) and (click=0) then click:=1;
+  if (peek(base+$60030)=0) then click:=0;
 
 
-//  if pause1a then begin for i:=$200d400 to $200d400+25 do poke(i,0); end;
+  if peek(base+$60028)=ord('5') then begin dpoke (base+$60028,0); siddelay:=20000; songfreq:=50; skip:=0; end;
+  if peek(base+$60028)=ord('1') then begin dpoke (base+$60028,0); siddelay:=10000; songfreq:=100; skip:=0; end;
+  if peek(base+$60028)=ord('2') then begin dpoke (base+$60028,0); siddelay:=5000; songfreq:=200; skip:=0;end;
+  if peek(base+$60028)=ord('3') then begin dpoke (base+$60028,0); siddelay:=6666; songfreq:=150; skip:=0; end;
+  if peek(base+$60028)=ord('4') then begin dpoke (base+$60028,0); siddelay:=2500; songfreq:=400; skip:=0; end;
+  if peek(base+$60028)=ord('p') then begin dpoke (base+$60028,0); pause1a:=not pause1a; if pause1a then pauseaudio(1) else pauseaudio(0); end;
+  if peek(base+$60028)=1 then begin dpoke(base+$60028,0); if peek(base+$100003)=0 then poke (base+$100003,1) else poke (base+$100003,0); end;
+  if peek(base+$60028)=2 then begin dpoke(base+$60028,0); if peek(base+$100004)=0 then poke (base+$100004,1) else poke (base+$100004,0); end;
+  if peek(base+$60028)=3 then begin dpoke(base+$60028,0); if peek(base+$100005)=0 then poke (base+$100005,1) else poke (base+$100005,0); end;
 
-  if peek($2060028)=ord('5') then begin dpoke ($2060028,0); siddelay:=20000; songfreq:=50; skip:=0; end;
-  if peek($2060028)=ord('1') then begin dpoke ($2060028,0); siddelay:=10000; songfreq:=100; skip:=0; end;
-  if peek($2060028)=ord('2') then begin dpoke ($2060028,0); siddelay:=5000; songfreq:=200; skip:=0;end;
-  if peek($2060028)=ord('3') then begin dpoke ($2060028,0); siddelay:=6666; songfreq:=150; skip:=0; end;
-  if peek($2060028)=ord('4') then begin dpoke ($2060028,0); siddelay:=2500; songfreq:=400; skip:=0; end;
-  if peek($2060028)=ord('p') then begin dpoke ($2060028,0); pause1a:=not pause1a; if pause1a then pauseaudio(1) else pauseaudio(0); end;
-  if peek($2060028)=1 then begin dpoke($2060028,0); if peek($2100003)=0 then poke ($2100003,1) else poke ($2100003,0); end;
-  if peek($2060028)=2 then begin dpoke($2060028,0); if peek($2100004)=0 then poke ($2100004,1) else poke ($2100004,0); end;
-  if peek($2060028)=3 then begin dpoke($2060028,0); if peek($2100005)=0 then poke ($2100005,1) else poke ($2100005,0); end;
-
-  if (click=1) and (dpeek($206002c)>960) then
+  if (click=1) and (dpeek(base+$6002c)>960) then
     begin
     click:=2;
-    nsel:=(dpeek($206002e)-172) div 32;
+    nsel:=(dpeek(base+$6002e)-172) div 32;
     if (nsel<=ild) and (nsel>=0) then
       begin
       box(920,132+32*sel,840,32,34);
@@ -510,9 +499,9 @@ repeat
     end;
 
 
-  if peek($2060028)=23 then
+  if peek(base+$60028)=23 then
     begin
-    dpoke($2060028,0);
+    dpoke(base+$60028,0);
     if sel<ild then
       begin
       box(920,132+32*sel,840,32,34);
@@ -548,9 +537,12 @@ repeat
       end;
     end;
 
-  if peek($2060028)=24 then
+
+
+
+  if peek(base+$60028)=24 then
      begin
-      dpoke($2060028,0);
+      dpoke(base+$60028,0);
       if sel>0 then
         begin
         box(920,132+32*sel,840,32,34);
@@ -586,9 +578,9 @@ repeat
         end;
       end;
 
-     if peek($2060028)=43 then
+     if peek(base+$60028)=43 then
       begin
-      dpoke($2060028,0);
+      dpoke(base+$60028,0);
       if songs>0 then
         begin
         if song<songs-1 then
@@ -602,9 +594,9 @@ repeat
         end;
       end;
 
-     if peek($2060028)=45 then
+     if peek(base+$60028)=45 then
       begin
-      dpoke($2060028,0);
+      dpoke(base+$60028,0);
       if songs>0 then
         begin
         if song>0 then
@@ -618,30 +610,30 @@ repeat
         end;
       end;
 
-     if peek($2060028)=ord('f') then
+     if peek(base+$60028)=ord('f') then
       begin
-      dpoke($2060028,0);
+      dpoke(base+$60028,0);
       lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
       if filetype=3 then lpoke($3F20C010,275) else lpoke($3F20C010,265); // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
       if filetype=3 then lpoke($3F20C020,275) else lpoke($3F20C020,265);
-      lpoke($206fffc,432);
+      lpoke(base+$6fffc,432);
       lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
 
       end;
-     if peek($2060028)=ord('g') then
+     if peek(base+$60028)=ord('g') then
       begin
-      dpoke($2060028,0);
+      dpoke(base+$60028,0);
       lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
       if filetype=3 then lpoke($3F20C010,270) else lpoke($3F20C010,260); // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
       if filetype=3 then lpoke($3F20C020,270) else lpoke($3F20C020,260);
-      lpoke($206fffc,440);
+      lpoke(base+$6fffc,440);
       lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
 
       end;
 
-    if peek($2060028)=13 then
+    if peek(base+$60028)=13 then
       begin
-      dpoke($2060028,0);
+      dpoke(base+$60028,0);
       if filenames[sel+selstart,1]='(DIR)' then
         begin
         if copy(filenames[sel+selstart,0],2,1)<>':' then dirlist(currentdir2+filenames[sel+selstart,0]+'\')
@@ -653,12 +645,12 @@ repeat
         begin
         pause1a:=true;
         pauseaudio(1);
-        i:=lpeek($2060000);
-        repeat until lpeek($2060000)>i+4;
+        i:=lpeek(base+$60000);
+        repeat until lpeek(base+$60000)>i+4;
 
-        for i:=$200d400 to $200d420 do poke(i,0);
-        i:=lpeek($2060000);
-        repeat until lpeek($2060000)>(i+4);
+        for i:=$d400 to $d420 do poke(base+i,0);
+        i:=lpeek(base+$60000);
+        repeat until lpeek(base+$60000)>(i+4);
         if sfh>=0 then fileclose(sfh);
         sfh:=-1;
 
@@ -669,11 +661,11 @@ repeat
         siddata[$1e]:=$7FFFF8;
         siddata[$2e]:=$7FFFF8;
         lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
-        if lpeek($206fffc)=440 then lpoke($3F20C010,260) else lpoke($3F20C010,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
-        if lpeek($206fffc)=440 then lpoke($3F20C020,260) else lpoke($3F20C020,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+        if lpeek(base+$6fffc)=440 then lpoke($3F20C010,260) else lpoke($3F20C010,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+        if lpeek(base+$6fffc)=440 then lpoke($3F20C020,260) else lpoke($3F20C020,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
         lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
-        lpoke ($400000c,20*960);
-        lpoke ($400002c,20*960);
+        lpoke (base+$200000c,20*960);
+        lpoke (base+$200002c,20*960);
         songtime:=0;
 
         fn:= currentdir2+filenames[sel+selstart,0];
@@ -703,8 +695,8 @@ repeat
           begin
           reset6502;
           sidopen(sfh);
-          i:=lpeek($2060000);
-          repeat until lpeek($2060000)>(i+4);
+          i:=lpeek(base+$60000);
+          repeat until lpeek(base+$60000)>(i+4);
           if cia>0 then siddelay:={985248}1000000 div (50*round(19652/cia));
           filetype:=1;
           box(18,912,800,32,244);
@@ -729,12 +721,12 @@ repeat
           songs:=0;
           siddelay:=8707;
           //fileread(sfh,atitle[1],32);    fileread(sfh,atitle[1],12);
-          if lpeek($206fffc)<>440 then
+          if lpeek(base+$6fffc)<>440 then
             begin
             lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
             lpoke($3F20C010,275);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
             lpoke($3F20C020,275);
-            lpoke($206fffc,432);
+            lpoke(base+$6fffc,432);
             lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
             end
           else
@@ -742,11 +734,11 @@ repeat
             lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
             lpoke($3F20C010,270);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
             lpoke($3F20C020,270);
-            lpoke($206fffc,440);
+            lpoke(base+$6fffc,440);
             lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
             end;
-          lpoke ($400000c,42*1536);
-          lpoke ($400002c,42*1536);
+          lpoke (base+$200000c,42*1536);
+          lpoke (base+$200002c,42*1536);
           if spr6x=spr7x then begin sprx:=100; spr2x:=200; spr3x:=300;spr4x:=400; spr5x:=500; spr6x:=600; spr7x:=700; end;
           sleep(100);
           end
@@ -765,7 +757,7 @@ repeat
         if filetype<>2 then begin pause1a:=false; pauseaudio(0); end;
         end;
     end;
-  until (peek($2060028)=27) ;
+  until (peek(base+$60028)=27) ;
   pauseaudio(1);
   if sfh>0 then fileclose(sfh);
   setcurrentdir(workdir);
