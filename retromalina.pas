@@ -77,7 +77,7 @@ unit retromalina;
 
 interface
 
-uses sysutils,classes,unit6502,Platform,Framebuffer,keyboard,mouse,threads,GlobalConst,ultibo, retro;
+uses sysutils,classes,unit6502,Platform,Framebuffer,keyboard,mouse,threads,GlobalConst,ultibo, retro, heapmanager;
 
 const base=$2000000; // retromachine system area base
 
@@ -135,6 +135,15 @@ type Tsrcconvert=procedure(screen:pointer);
       Constructor Create(CreateSuspended : boolean);
      end;
 
+     TKeyboard= class(TThread)
+     private
+     protected
+       procedure Execute; override;
+     public
+      Constructor Create(CreateSuspended : boolean);
+     end;
+
+
      TSample=array[0..1] of smallint;
      TSample32=array[0..1] of integer;
 
@@ -182,6 +191,9 @@ var fh,filetype:integer;                // this needs cleaning...
     buf2:array[0..1919] of smallint;
     filebuffer:TFileBuffer;
     amouse:tmouse ;
+    akeyboard:tkeyboard ;
+    psystem:pointer;
+    dmactrl:cardinal;
 
 // prototypes
 
@@ -213,7 +225,15 @@ function sid(mode:integer):tsample32;
 procedure pwmbeep;
 procedure pauseaudio(mode:integer);   // instead of the real one
 procedure AudioCallback(b:integer);
-
+function getpixel(x,y:integer):integer; inline;
+function getkey:integer; inline;
+function mousex:integer; inline;
+function mousey:integer; inline;
+function mousek:integer; inline;
+function mousewheel:integer; inline;
+function click:boolean;
+function dblclick:boolean;
+procedure waitvbl;
 
 implementation
 
@@ -221,7 +241,7 @@ implementation
 
 procedure sprite(screen:pointer); forward;
 
-// ---- TAudio thread methods --------------------------------------------------
+// ---- TMouse thread methods --------------------------------------------------
 
 constructor TMouse.Create(CreateSuspended : boolean);
 
@@ -229,7 +249,6 @@ begin
 FreeOnTerminate := True;
 inherited Create(CreateSuspended);
 end;
-
 
 procedure TMouse.Execute;
 
@@ -256,6 +275,55 @@ begin
     dpoke(base+$60032,w);
     end;
 //  sleep(0);
+  until terminated;
+end;
+
+// ---- TKeyboard thread methods --------------------------------------------------
+
+constructor TKeyboard.Create(CreateSuspended : boolean);
+
+begin
+FreeOnTerminate := True;
+inherited Create(CreateSuspended);
+end;
+
+
+procedure TKeyboard.Execute;
+
+// At every vblank the thread tests if there is a report from the keyboard
+// If yes, the kbd codes are poked to the system variables
+// $60028 - translated code
+// $60029 - modifiers
+// $6002A - raw code
+
+const rptcnt:integer=0;
+      activekey:integer=0;
+      m:integer=0;
+      c:integer=0;
+
+var ch:TKeyboardReport;
+
+begin
+repeat
+  waitvbl;
+  ch:=getkeyboardreport;
+  if ch[0]<>255 then m:=ch[0];
+  if (ch[2]<>0) and (ch[2]<>255) then activekey:=ch[2]
+  else if (ch[0]<>0) and (ch[0]<>255) then activekey:=256+ch[0];
+  if (ch[2]<>0) and (activekey>0) then inc(rptcnt)
+  else if (ch[0]<>0) and (activekey>0) then inc(rptcnt);
+  if (ch[2]=0) and (ch[0]=0) then begin rptcnt:=0; activekey:=0; end;
+  if rptcnt>26 then rptcnt:=24 ;
+  if (rptcnt=1) or (rptcnt=24) then
+    begin
+    if (activekey<256) and ((m and $22)<>0) then c:=byte(translatescantochar(activekey,1))
+    else if (activekey<256) and ((m and $42)=$40) then c:=byte(translatescantochar(activekey,2))
+    else if (activekey<256) and ((m and $42)=$42) then c:=byte(translatescantochar(activekey,3))
+    else if (activekey<256) and (m=0) then c:=byte(translatescantochar(activekey,0));
+    poke(base+$60028,c);
+    poke(base+$60029,m);
+    poke(base+$6002a,activekey);
+    end;
   until terminated;
 end;
 
@@ -373,7 +441,7 @@ threadsleep(1);
   repeat sleep(0); a:= lpeek($3F007600) until (a and 2) <>0 ;
   if (a and 2)<>0 then
     begin
-    if lpeek($3f00761c)=base+$c2000000 then audiocallback(base+$5a000)
+    if lpeek($3f00761c)=dmactrl {base+$c2000000} then audiocallback(base+$5a000)
                                   else audiocallback(base+$5c000);
     lpoke($3F007600,$00000003);
 
@@ -472,6 +540,9 @@ var a,i:integer;
 
 begin
 
+ // dmactrl:=$C4000000;
+  dmactrl:=$c0000000+cardinal(GetAlignedMem(64,32));
+  psystem:=getmem($2000000);
 { The ugly hack not needed now
 
 for i:=16 to 8191 do  // make the memory executable, shareable, rw, cacheable, writeback
@@ -536,6 +607,8 @@ filebuffer:=Tfilebuffer.create(true);
 filebuffer.start;
 amouse:=tmouse.create(true);
 amouse.start;
+akeyboard:=tkeyboard.create(true);
+akeyboard.start;
 end;
 
 
@@ -557,6 +630,14 @@ function gettime:int64;
 
 begin
 result:=clockgettotal;
+end;
+
+
+procedure waitvbl;
+
+begin
+repeat sleep(1) until vblank1=0;
+repeat sleep(1) until vblank1=1;
 end;
 
 //  ---------------------------------------------------------------------
@@ -882,12 +963,75 @@ end;
 //   rev. 20170111
 //  ---------------------------------------------------------------------
 
+
+
+function getkey:integer; inline;
+
+begin
+result:=lpeek(base+$60028);
+lpoke(base+$60028,0);
+end;
+
+function mousex:integer; inline;
+
+begin
+result:=dpeek(base+$6002c)-64;
+end;
+
+
+function mousey:integer; inline;
+
+begin
+result:=dpeek(base+$6002e)-40;
+end;
+
+
+function mousek:integer; inline;
+
+begin
+result:=peek(base+$60030);
+end;
+
+function mousewheel:integer; inline;
+
+begin
+result:=peek(base+$60032);
+dpoke(base+$60032,128);
+end;
+
+function click:boolean; inline;
+
+begin
+end;
+
+
+function dblclick:boolean; inline;
+
+begin
+end;
+
+
 procedure putpixel(x,y,color:integer); inline;
 
 var adr:integer;
 
 begin
 adr:=lpeek(base+$60004)+x+1792*y; if adr<lpeek(base+$60004)+$FFFFFF then poke(adr,color);
+end;
+
+
+//  ---------------------------------------------------------------------
+//   getpixel (x,y)
+//   asm procedure - get color pixel on screen at position (x,y)
+//   rev. 20170111
+//  ---------------------------------------------------------------------
+
+function getpixel(x,y:integer):integer; inline;
+
+var adr:integer;
+
+begin
+adr:=lpeek(base+$60004)+x+1792*y; if adr<lpeek(base+$60004)+$FFFFFF then result:=peek(adr);
 end;
 
 
@@ -2342,14 +2486,14 @@ ctrlblock[1]:=base+$c0070000;
 ctrlblock[2]:=$7E20C018;
 ctrlblock[3]:=21*960; //7680;
 ctrlblock[4]:=$0;
-ctrlblock[5]:=base+$c2000020;
+ctrlblock[5]:=dmactrl+$20; // base+$c2000020;
 ctrlblock[6]:=$0;
 ctrlblock[7]:=$0;
-for i:=0 to 7 do lpoke(base+$2000000+4*i,ctrlblock[i]);
-ctrlblock[5]:=base+$c2000000;
+for i:=0 to 7 do lpoke(dmactrl-$C0000000+4*i,ctrlblock[i]);
+ctrlblock[5]:=dmactrl; //base+$c2000000;
 ctrlblock[1]:=base+$c00a0000;
-for i:=0 to 7 do lpoke(base+$2000020+4*i,ctrlblock[i]);
-CleanDataCacheRange(base+$2000000,$10000);
+for i:=0 to 7 do lpoke(dmactrl-$C0000000+$20+4*i,ctrlblock[i]);
+CleanDataCacheRange(dmactrl-$C0000000,256); //(base+$2000000,$10000);
 sleep(1);
 
 
@@ -2363,7 +2507,7 @@ lpoke($3F20C020,260);      // pwm 2 range
 lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
 lpoke($3F20C008,$80000307); // pwm dma enable
 lpoke($3F007ff0,pinteger($3F007FF0)^ or %1000000); // dma 06 enable
-lpoke($3F007604,base+$c2000000);
+lpoke($3F007604,dmactrl); //base+$c2000000);
 lpoke($3F007600,3);
 
 

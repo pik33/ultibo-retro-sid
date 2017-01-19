@@ -249,264 +249,264 @@ const
 
  // ----- the table uncommented and modified by pik33 @21061123 ----------------
 
- USB_HID_BOOT_USAGE_ID:array[0..255] of array[0..1] of Char = (
-    {0}   (#0, #0),       {Reserved (no event indicated)}
-    {1}   (#0, #0),       {Keyboard ErrorRollOver}
-    {2}   (#0, #0),       {Keyboard POSTFail}
-    {3}   (#0, #0),       {Keyboard ErrorUndefined}
-    {4}   ('a', 'A'),     {Keyboard a or A}
-    {5}   ('b', 'B'),     {Keyboard b or B}
-    {6}   ('c', 'C'),     {Keyboard c or C}
-    {7}   ('d', 'D'),     {Keyboard d or D}
-    {8}   ('e', 'E'),     {Keyboard e or E}
-    {9}   ('f', 'F'),     {Keyboard f or F}
-    {10}  ('g', 'G'),     {Keyboard g or G}
-    {11}  ('h', 'H'),     {Keyboard h or H}
-    {12}  ('i', 'I'),     {Keyboard i or I}
-    {13}  ('j', 'J'),     {Keyboard j or J}
-    {14}  ('k', 'K'),     {Keyboard k or K}
-    {15}  ('l', 'L'),     {Keyboard l or L}
-    {16}  ('m', 'M'),     {Keyboard m or M}
-    {17}  ('n', 'N'),     {Keyboard n or N}
-    {18}  ('o', 'O'),     {Keyboard o or O}
-    {19}  ('p', 'P'),     {Keyboard p or P}
-    {20}  ('q', 'Q'),     {Keyboard q or Q}
-    {21}  ('r', 'R'),     {Keyboard r or R}
-    {22}  ('s', 'S'),     {Keyboard s or S}
-    {23}  ('t', 'T'),     {Keyboard t or T}
-    {24}  ('u', 'U'),     {Keyboard u or U}
-    {25}  ('v', 'V'),     {Keyboard v or V}
-    {26}  ('w', 'W'),     {Keyboard w or W}
-    {27}  ('x', 'X'),     {Keyboard x or X}
-    {28}  ('y', 'Y'),     {Keyboard y or Y}
-    {29}  ('z', 'Z'),     {Keyboard z or Z}
-    {30}  ('1', '!'),     {Keyboard 1 or !}
-    {31}  ('2', '@'),     {Keyboard 2 or @}
-    {32}  ('3', '#'),     {Keyboard 3 or #}
-    {33}  ('4', '$'),     {Keyboard 4 or $}
-    {34}  ('5', '%'),     {Keyboard 5 or %}
-    {35}  ('6', '^'),     {Keyboard 6 or ^}
-    {36}  ('7', '&'),     {Keyboard 7 or &}
-    {37}  ('8', '*'),     {Keyboard 8 or *}
-    {38}  ('9', '('),     {Keyboard 9 or (}
-    {39}  ('0', ')'),     {Keyboard 0 or )}
-    {40}  (#13, #13),     {Keyboard Enter)}
-    {41}  (#27, #27),     {Keyboard Escape}
-    {42}  (#8, #8),       {Keyboard Backspace}
-    {43}  (#9, #9),       {Keyboard Tab}       
-    {44}  (' ', ' '),     {Keyboard Spacebar}  
-    {45}  ('-', '_'),     {Keyboard - or _}
-    {46}  ('=', '+'),     {Keyboard = or +}
-    {47}  ('[', '{'),     {Keyboard [ or Left Brace}
-    {48}  (']', '}'),     {Keyboard ] or Right Brace}
-    {49}  ('\', '|'),     {Keyboard \ or |}
-    {50}  ('#', '~'),     {Keyboard Non-US # and ~}
-    {51}  (';', ':'),     {Keyboard ; or :}
-    {52}  ('''', '"'),    {Keyboard ' or "}
-    {53}  ('`', '~'),     {Keyboard ` or ~}
-    {54}  (',', '<'),     {Keyboard , or <}
-    {55}  ('.', '>'),     {Keyboard . or >}
-    {56}  ('/', '?'),     {Keyboard / or ?}
-    {57}  (#0, #0),       {Keyboard Caps Lock}
-    {58}  (#1, #0),       {Keyboard F1}
-    {59}  (#2, #0),       {Keyboard F2}
-    {60}  (#3, #0),       {Keyboard F3}
-    {61}  (#0, #0),       {Keyboard F4}
-    {62}  (#0, #0),       {Keyboard F5}
-    {63}  (#0, #0),       {Keyboard F6}
-    {64}  (#0, #0),       {Keyboard F7}
-    {65}  (#0, #0),       {Keyboard F8}
-    {66}  (#0, #0),       {Keyboard F9}
-    {67}  (#0, #0),       {Keyboard F10}
-    {68}  (#0, #0),       {Keyboard F11}
-    {69}  (#0, #0),       {Keyboard F12}
-    {70}  (#0, #0),       {Keyboard Print Screen}
-    {71}  (#0, #0),       {Keyboard Scroll Lock}
-    {72}  (#0, #0),       {Keyboard Pause}
-    {73}  (#0, #0),       {Keyboard Insert}
-    {74}  (#0, #0),       {Keyboard Home}
-    {75}  (#0, #0),       {Keyboard PageUp}
-    {76}  (#127, #127),   {Keyboard Delete}
-    {77}  (#0, #0),       {Keyboard End}
-    {78}  (#0, #0),       {Keyboard PageDn}
-    {79}  (#0, #0),       {Keyboard Right Arrow}
-    {80}  (#0, #0),       {Keyboard Left Arrow}
-    {81}  (#23, #0),       {Keyboard Down Arrow}
-    {82}  (#24, #0),       {Keyboard Up Arrow}
-    {83}  (#0, #0),       {Keyboard Num Lock}
-    {84}  ('/', '/'),     {Keypad /}                 
-    {85}  ('*', '*'),     {Keypad *}                 
-    {86}  ('-', '-'),     {Keypad -}                 
-    {87}  ('+', '+'),     {Keypad +}                
-    {88}  (#13,#13),      {Keypad Enter}             
-    {89}  ('1', '1'),     {Keypad 1 and End}         
-    {90}  ('2', '2'),     {Keypad 2 and Down Arrow}  
-    {91}  ('3', '3'),     {Keypad 3 and PageDn}                       
-    {92}  ('4', '4'),     {Keypad 4 and Left Arrow}
-    {93}  ('5', '5'),     {Keypad 5}
-    {94}  ('6', '6'),     {Keypad 6 and Right Arrow}
-    {95}  ('7', '7'),     {Keypad 7 and Home}
-    {96}  ('8', '8'),     {Keypad 8 and Up Arrow}
-    {97}  ('9', '9'),     {Keypad 9 and PageUp}
-    {98}  ('0', '0'),     {Keypad 0 and Insert}
-    {99}  ('.', #127),    {Keypad . and Delete}
-    {100} ('\', '|'),     {Keyboard Non-US \ and |}
-    {101} (#0, #0),       {Keyboard Application}
-    {102} (#0, #0),       {Keyboard Power}
-    {103} ('=', '='),     {Keypad =}
-    {104} (#0, #0),       {Keyboard F13}
-    {105} (#0, #0),       {Keyboard F14}
-    {106} (#0, #0),       {Keyboard F15}
-    {107} (#0, #0),       {Keyboard F16}
-    {108} (#0, #0),       {Keyboard F17}
-    {109} (#0, #0),       {Keyboard F18}
-    {110} (#0, #0),       {Keyboard F19}
-    {111} (#0, #0),       {Keyboard F20}
-    {112} (#0, #0),       {Keyboard F21}
-    {113} (#0, #0),       {Keyboard F22}
-    {114} (#0, #0),       {Keyboard F23}
-    {115} (#0, #0),       {Keyboard F24}
-    {116} (#0, #0),       {Keyboard Execute}
-    {117} (#0, #0),       {Keyboard Help}
-    {118} (#0, #0),       {Keyboard Menu}
-    {119} (#0, #0),       {Keyboard Select}
-    {120} (#0, #0),       {Keyboard Stop}
-    {121} (#0, #0),       {Keyboard Again}
-    {122} (#0, #0),       {Keyboard Undo}
-    {123} (#0, #0),       {Keyboard Cut}
-    {124} (#0, #0),       {Keyboard Copy}
-    {125} (#0, #0),       {Keyboard Paste}
-    {126} (#0, #0),       {Keyboard Find}
-    {127} (#0, #0),       {Keyboard Mute}
-    {128} (#0, #0),       {Keyboard Volume Up}
-    {129} (#0, #0),       {Keyboard Volume Down}
-    {130} (#0, #0),       {Keyboard Locking Caps Lock}
-    {131} (#0, #0),       {Keyboard Locking Num Lock}
-    {132} (#0, #0),       {Keyboard Locking Scroll Lock}
-    {133} (',', ','),     {Keypad Comma}
-    {134} (#0, #0),       {Keypad Equal Sign}
-    {135} (#0, #0),       {Keyboard International1}
-    {136} (#0, #0),       {Keyboard International2}
-    {137} (#0, #0),       {Keyboard International3}
-    {138} (#0, #0),       {Keyboard International4}
-    {139} (#0, #0),       {Keyboard International5}
-    {140} (#0, #0),       {Keyboard International6}
-    {141} (#0, #0),       {Keyboard International7}
-    {142} (#0, #0),       {Keyboard International8}
-    {143} (#0, #0),       {Keyboard International9}
-    {144} (#0, #0),       {Keyboard LANG1}
-    {145} (#0, #0),       {Keyboard LANG2}
-    {146} (#0, #0),       {Keyboard LANG3}
-    {147} (#0, #0),       {Keyboard LANG4}
-    {148} (#0, #0),       {Keyboard LANG5}
-    {149} (#0, #0),       {Keyboard LANG6}
-    {150} (#0, #0),       {Keyboard LANG7}
-    {151} (#0, #0),       {Keyboard LANG8}
-    {152} (#0, #0),       {Keyboard LANG9}
-    {153} (#0, #0),       {Keyboard Alternate Erase}
-    {154} (#0, #0),       {Keyboard SysReq/Attention}
-    {155} (#0, #0),       {Keyboard Cancel}
-    {156} (#0, #0),       {Keyboard Clear}
-    {157} (#0, #0),       {Keyboard Prior}
-    {158} (#0, #0),       {Keyboard Return}
-    {159} (#0, #0),       {Keyboard Separator}
-    {160} (#0, #0),       {Keyboard Out}
-    {161} (#0, #0),       {Keyboard Oper}
-    {162} (#0, #0),       {Keyboard Clear/Again}
-    {163} (#0, #0),       {Keyboard CrSel/Props}
-    {164} (#0, #0),       {Keyboard ExSel}
-    {165} (#0, #0),       {Reserved}
-    {166} (#0, #0),       {Reserved}
-    {167} (#0, #0),       {Reserved}
-    {168} (#0, #0),       {Reserved}
-    {169} (#0, #0),       {Reserved}
-    {170} (#0, #0),       {Reserved}
-    {171} (#0, #0),       {Reserved}
-    {172} (#0, #0),       {Reserved}
-    {173} (#0, #0),       {Reserved}
-    {174} (#0, #0),       {Reserved}
-    {175} (#0, #0),       {Reserved}
-    {176} (#0, #0),       {Keypad 00}
-    {177} (#0, #0),       {Keypad 000}
-    {178} (#0, #0),       {Thousands Separator}
-    {179} (#0, #0),       {Decimal Separator}
-    {180} (#0, #0),       {Currency Unit}
-    {181} (#0, #0),       {Currenct Sub-unit}
-    {182} (#0, #0),       {Keypad (}
-    {183} (#0, #0),       {Keypad )}
-    {184} (#0, #0),       {Keypad Left Brace}
-    {185} (#0, #0),       {Keypad Right Brace}
-    {186} (#0, #0),       {Keypad Tab}
-    {187} (#0, #0),       {Keypad Backspace}
-    {188} (#0, #0),       {Keypad A}
-    {189} (#0, #0),       {Keypad B}
-    {190} (#0, #0),       {Keypad C}
-    {191} (#0, #0),       {Keypad D}
-    {192} (#0, #0),       {Keypad E}
-    {193} (#0, #0),       {Keypad F}
-    {194} (#0, #0),       {Keypad XOR}
-    {195} (#0, #0),       {Keypad ^}
-    {196} (#0, #0),       {Keypad %}
-    {197} (#0, #0),       {Keypad <}
-    {198} (#0, #0),       {Keypad >}
-    {199} (#0, #0),       {Keypad &}
-    {200} (#0, #0),       {Keypad &&}
-    {201} (#0, #0),       {Keypad |}
-    {202} (#0, #0),       {Keypad ||}
-    {203} (#0, #0),       {Keypad :}
-    {204} (#0, #0),       {Keypad #}
-    {205} (#0, #0),       {Keypad Space}
-    {206} (#0, #0),       {Keypad @}
-    {207} (#0, #0),       {Keypad !}
-    {208} (#0, #0),       {Keypad Memory Store}
-    {209} (#0, #0),       {Keypad Memory Recall}
-    {210} (#0, #0),       {Keypad Memory Clear}
-    {211} (#0, #0),       {Keypad Memory Add}
-    {212} (#0, #0),       {Keypad Memory Subtract}
-    {213} (#0, #0),       {Keypad Memory Multiply}
-    {214} (#0, #0),       {Keypad Memory Divide}
-    {215} (#0, #0),       {Keypad +/-}
-    {216} (#0, #0),       {Keypad Clear}
-    {217} (#0, #0),       {Keypad Clear Entry}
-    {218} (#0, #0),       {Keypad Binary}
-    {219} (#0, #0),       {Keypad Octal}
-    {220} (#0, #0),       {Keypad Decimal}
-    {221} (#0, #0),       {Keypad Hexadecimal}
-    {222} (#0, #0),       {Reserved}
-    {223} (#0, #0),       {Reserved}
-    {224} (#0, #0),       {Keyboard LeftControl}
-    {225} (#0, #0),       {Keyboard LeftShift}
-    {226} (#0, #0),       {Keyboard LeftAlt}
-    {227} (#0, #0),       {Keyboard Left GUI}
-    {228} (#0, #0),       {Keyboard RightControl}
-    {229} (#0, #0),       {Keyboard RightShift}
-    {230} (#0, #0),       {Keyboard RightAlt}
-    {231} (#0, #0),       {Keyboard Right GUI}
-    {232} (#0, #0),       {Reserved}
-    {233} (#0, #0),       {Reserved}
-    {234} (#0, #0),       {Reserved}
-    {235} (#0, #0),       {Reserved}
-    {236} (#0, #0),       {Reserved}
-    {237} (#0, #0),       {Reserved}
-    {238} (#0, #0),       {Reserved}
-    {239} (#0, #0),       {Reserved}
-    {240} (#0, #0),       {Reserved}
-    {241} (#0, #0),       {Reserved}
-    {242} (#0, #0),       {Reserved}
-    {243} (#0, #0),       {Reserved}
-    {244} (#0, #0),       {Reserved}
-    {245} (#0, #0),       {Reserved}
-    {246} (#0, #0),       {Reserved}
-    {247} (#0, #0),       {Reserved}
-    {248} (#0, #0),       {Reserved}
-    {249} (#0, #0),       {Reserved}
-    {250} (#0, #0),       {Reserved}
-    {251} (#0, #0),       {Reserved}
-    {252} (#0, #0),       {Reserved}
-    {253} (#0, #0),       {Reserved}
-    {254} (#0, #0),       {Reserved}
-    {255} (#0, #0)        {Reserved (256 to 65535 Reserved)}
-  );
+ USB_HID_BOOT_USAGE_ID:array[0..255] of array[0..3] of Char = (
+     {0}   (#0, #0, #0, #0),       {Reserved (no event indicated)}
+     {1}   (#0, #0, #0, #0),       {Keyboard ErrorRollOver}
+     {2}   (#0, #0, #0, #0),       {Keyboard POSTFail}
+     {3}   (#0, #0, #0, #0),       {Keyboard ErrorUndefined}
+     {4}   ('a', 'A', #23, #14),     {Keyboard a or A}
+     {5}   ('b', 'B', #0, #0),      {Keyboard b or B}
+     {6}   ('c', 'C', #25, #16),     {Keyboard c or C}
+     {7}   ('d', 'D', #0, #0),       {Keyboard d or D}
+     {8}   ('e', 'E', #24, #15),     {Keyboard e or E}
+     {9}   ('f', 'F', #0, #0),     {Keyboard f or F}
+     {10}  ('g', 'G', #0, #0),     {Keyboard g or G}
+     {11}  ('h', 'H', #0, #0),     {Keyboard h or H}
+     {12}  ('i', 'I', #0, #0),     {Keyboard i or I}
+     {13}  ('j', 'J', #0, #0),     {Keyboard j or J}
+     {14}  ('k', 'K', #0, #0),     {Keyboard k or K}
+     {15}  ('l', 'L', #31, #22),     {Keyboard l or L}
+     {16}  ('m', 'M', #0, #0),     {Keyboard m or M}
+     {17}  ('n', 'N', #26, #17),     {Keyboard n or N}
+     {18}  ('o', 'O', #30, #21),     {Keyboard o or O}
+     {19}  ('p', 'P', #0, #0),     {Keyboard p or P}
+     {20}  ('q', 'Q', #0, #0),     {Keyboard q or Q}
+     {21}  ('r', 'R', #0, #0),     {Keyboard r or R}
+     {22}  ('s', 'S', #27, #18),     {Keyboard s or S}
+     {23}  ('t', 'T', #0, #0),     {Keyboard t or T}
+     {24}  ('u', 'U', #0, #0),     {Keyboard u or U}
+     {25}  ('v', 'V', #0, #0),     {Keyboard v or V}
+     {26}  ('w', 'W', #0, #0),     {Keyboard w or W}
+     {27}  ('x', 'X', #28, #19),     {Keyboard x or X}
+     {28}  ('y', 'Y', #0, #0),     {Keyboard y or Y}
+     {29}  ('z', 'Z', #29, #20),     {Keyboard z or Z}
+     {30}  ('1', '!', #4, #0),     {Keyboard 1 or !}
+     {31}  ('2', '@', #5, #0),     {Keyboard 2 or @}
+     {32}  ('3', '#', #6, #0),     {Keyboard 3 or #}
+     {33}  ('4', '$', #7, #0),     {Keyboard 4 or $}
+     {34}  ('5', '%', #8, #0),     {Keyboard 5 or %}
+     {35}  ('6', '^', #9, #0),     {Keyboard 6 or ^}
+     {36}  ('7', '&', #10, #0),     {Keyboard 7 or &}
+     {37}  ('8', '*', #11, #0),     {Keyboard 8 or *}
+     {38}  ('9', '(', #12, #0),     {Keyboard 9 or (}
+     {39}  ('0', ')', #13, #0),     {Keyboard 0 or )}
+     {40}  (#141, #141, #0, #0),     {Keyboard Enter)}
+     {41}  (#155, #155, #0, #0),     {Keyboard Escape}
+     {42}  (#136, #136, #0, #0),       {Keyboard Backspace}
+     {43}  (#137, #137, #0, #0),       {Keyboard Tab}
+     {44}  (' ', ' ', #0, #0),     {Keyboard Spacebar}
+     {45}  ('-', '_', #0, #0),     {Keyboard - or _}
+     {46}  ('=', '+', #0, #0),     {Keyboard = or +}
+     {47}  ('[', '{', #0, #0),     {Keyboard [ or Left Brace}
+     {48}  (']', '}', #0, #0),     {Keyboard ] or Right Brace}
+     {49}  ('\', '|', #0, #0),     {Keyboard \ or |}
+     {50}  ('#', '~', #0, #0),     {Keyboard Non-US # and ~}
+     {51}  (';', ':', #0, #0),     {Keyboard ; or :}
+     {52}  ('''', '"', #0, #0),    {Keyboard ' or "}
+     {53}  ('`', '~', #3, #0),     {Keyboard ` or ~}
+     {54}  (',', '<', #0, #0),     {Keyboard , or <}
+     {55}  ('.', '>', #0, #0),     {Keyboard . or >}
+     {56}  ('/', '?', #0, #0),     {Keyboard / or ?}
+     {57}  (#0, #0, #0, #0),       {Keyboard Caps Lock}
+     {58}  (#186, #0, #0, #0),       {Keyboard F1}
+     {59}  (#187, #0, #0, #0),       {Keyboard F2}
+     {60}  (#188, #0, #0, #0),       {Keyboard F3}
+     {61}  (#189, #0, #0, #0),       {Keyboard F4}
+     {62}  (#190, #0, #0, #0),       {Keyboard F5}
+     {63}  (#191, #0, #0, #0),       {Keyboard F6}
+     {64}  (#192, #0, #0, #0),       {Keyboard F7}
+     {65}  (#193, #0, #0, #0),       {Keyboard F8}
+     {66}  (#194, #0, #0, #0),       {Keyboard F9}
+     {67}  (#195, #0, #0, #0),       {Keyboard F10}
+     {68}  (#196, #0, #0, #0),       {Keyboard F11}
+     {69}  (#197, #0, #0, #0),       {Keyboard F12}
+     {70}  (#198, #0, #0, #0),       {Keyboard Print Screen}
+     {71}  (#199, #0, #0, #0),       {Keyboard Scroll Lock}
+     {72}  (#200, #0, #0, #0),       {Keyboard Pause}
+     {73}  (#201, #0, #0, #0),       {Keyboard Insert}
+     {74}  (#202, #0, #0, #0),       {Keyboard Home}
+     {75}  (#203, #0, #0, #0),       {Keyboard PageUp}
+     {76}  (#127, #127, #0, #0),   {Keyboard Delete}
+     {77}  (#204, #0, #0, #0),       {Keyboard End}
+     {78}  (#205, #0, #0, #0),       {Keyboard PageDn}
+     {79}  (#206, #0, #0, #0),       {Keyboard Right Arrow}
+     {80}  (#207, #0, #0, #0),       {Keyboard Left Arrow}
+     {81}  (#208, #0, #0, #0),       {Keyboard Down Arrow}
+     {82}  (#209, #0, #0, #0),       {Keyboard Up Arrow}
+     {83}  (#210, #0, #0, #0),       {Keyboard Num Lock}
+     {84}  ('/', '/', #0, #0),     {Keypad /}
+     {85}  ('*', '*', #0, #0),     {Keypad *}
+     {86}  ('-', '-', #0, #0),     {Keypad -}
+     {87}  ('+', '+', #0, #0),     {Keypad +}
+     {88}  (#141,#141, #0, #0),      {Keypad Enter}
+     {89}  ('1', '1', #0, #0),     {Keypad 1 and End}
+     {90}  ('2', '2', #0, #0),     {Keypad 2 and Down Arrow}
+     {91}  ('3', '3', #0, #0),     {Keypad 3 and PageDn}
+     {92}  ('4', '4', #0, #0),     {Keypad 4 and Left Arrow}
+     {93}  ('5', '5', #0, #0),     {Keypad 5}
+     {94}  ('6', '6', #0, #0),     {Keypad 6 and Right Arrow}
+     {95}  ('7', '7', #0, #0),     {Keypad 7 and Home}
+     {96}  ('8', '8', #0, #0),     {Keypad 8 and Up Arrow}
+     {97}  ('9', '9', #0, #0),     {Keypad 9 and PageUp}
+     {98}  ('0', '0', #0, #0),     {Keypad 0 and Insert}
+     {99}  ('.', #127, #0, #0),    {Keypad . and Delete}
+     {100} ('\', '|', #0, #0),     {Keyboard Non-US \ and |}
+     {101} (#0, #0, #0, #0),       {Keyboard Application}
+     {102} (#0, #0, #0, #0),       {Keyboard Power}
+     {103} ('=', '=', #0, #0),     {Keypad =}
+     {104} (#0, #0, #0, #0),       {Keyboard F13}
+     {105} (#0, #0, #0, #0),       {Keyboard F14}
+     {106} (#0, #0, #0, #0),       {Keyboard F15}
+     {107} (#0, #0, #0, #0),       {Keyboard F16}
+     {108} (#0, #0, #0, #0),       {Keyboard F17}
+     {109} (#0, #0, #0, #0),       {Keyboard F18}
+     {110} (#0, #0, #0, #0),       {Keyboard F19}
+     {111} (#0, #0, #0, #0),       {Keyboard F20}
+     {112} (#0, #0, #0, #0),       {Keyboard F21}
+     {113} (#0, #0, #0, #0),       {Keyboard F22}
+     {114} (#0, #0, #0, #0),       {Keyboard F23}
+     {115} (#0, #0, #0, #0),       {Keyboard F24}
+     {116} (#0, #0, #0, #0),       {Keyboard Execute}
+     {117} (#0, #0, #0, #0),       {Keyboard Help}
+     {118} (#0, #0, #0, #0),       {Keyboard Menu}
+     {119} (#0, #0, #0, #0),       {Keyboard Select}
+     {120} (#0, #0, #0, #0),       {Keyboard Stop}
+     {121} (#0, #0, #0, #0),       {Keyboard Again}
+     {122} (#0, #0, #0, #0),       {Keyboard Undo}
+     {123} (#0, #0, #0, #0),       {Keyboard Cut}
+     {124} (#0, #0, #0, #0),       {Keyboard Copy}
+     {125} (#0, #0, #0, #0),       {Keyboard Paste}
+     {126} (#0, #0, #0, #0),       {Keyboard Find}
+     {127} (#0, #0, #0, #0),       {Keyboard Mute}
+     {128} (#0, #0, #0, #0),       {Keyboard Volume Up}
+     {129} (#0, #0, #0, #0),       {Keyboard Volume Down}
+     {130} (#0, #0, #0, #0),       {Keyboard Locking Caps Lock}
+     {131} (#0, #0, #0, #0),       {Keyboard Locking Num Lock}
+     {132} (#0, #0, #0, #0),       {Keyboard Locking Scroll Lock}
+     {133} (',', ',', #0, #0),     {Keypad Comma}
+     {134} (#0, #0, #0, #0),       {Keypad Equal Sign}
+     {135} (#0, #0, #0, #0),       {Keyboard International1}
+     {136} (#0, #0, #0, #0),       {Keyboard International2}
+     {137} (#0, #0, #0, #0),       {Keyboard International3}
+     {138} (#0, #0, #0, #0),       {Keyboard International4}
+     {139} (#0, #0, #0, #0),       {Keyboard International5}
+     {140} (#0, #0, #0, #0),       {Keyboard International6}
+     {141} (#0, #0, #0, #0),       {Keyboard International7}
+     {142} (#0, #0, #0, #0),       {Keyboard International8}
+     {143} (#0, #0, #0, #0),       {Keyboard International9}
+     {144} (#0, #0, #0, #0),       {Keyboard LANG1}
+     {145} (#0, #0, #0, #0),       {Keyboard LANG2}
+     {146} (#0, #0, #0, #0),       {Keyboard LANG3}
+     {147} (#0, #0, #0, #0),       {Keyboard LANG4}
+     {148} (#0, #0, #0, #0),       {Keyboard LANG5}
+     {149} (#0, #0, #0, #0),       {Keyboard LANG6}
+     {150} (#0, #0, #0, #0),       {Keyboard LANG7}
+     {151} (#0, #0, #0, #0),       {Keyboard LANG8}
+     {152} (#0, #0, #0, #0),       {Keyboard LANG9}
+     {153} (#0, #0, #0, #0),       {Keyboard Alternate Erase}
+     {154} (#0, #0, #0, #0),       {Keyboard SysReq/Attention}
+     {155} (#0, #0, #0, #0),       {Keyboard Cancel}
+     {156} (#0, #0, #0, #0),       {Keyboard Clear}
+     {157} (#0, #0, #0, #0),       {Keyboard Prior}
+     {158} (#0, #0, #0, #0),       {Keyboard Return}
+     {159} (#0, #0, #0, #0),       {Keyboard Separator}
+     {160} (#0, #0, #0, #0),       {Keyboard Out}
+     {161} (#0, #0, #0, #0),       {Keyboard Oper}
+     {162} (#0, #0, #0, #0),       {Keyboard Clear/Again}
+     {163} (#0, #0, #0, #0),       {Keyboard CrSel/Props}
+     {164} (#0, #0, #0, #0),       {Keyboard ExSel}
+     {165} (#0, #0, #0, #0),       {Reserved}
+     {166} (#0, #0, #0, #0),       {Reserved}
+     {167} (#0, #0, #0, #0),       {Reserved}
+     {168} (#0, #0, #0, #0),       {Reserved}
+     {169} (#0, #0, #0, #0),       {Reserved}
+     {170} (#0, #0, #0, #0),       {Reserved}
+     {171} (#0, #0, #0, #0),       {Reserved}
+     {172} (#0, #0, #0, #0),       {Reserved}
+     {173} (#0, #0, #0, #0),       {Reserved}
+     {174} (#0, #0, #0, #0),       {Reserved}
+     {175} (#0, #0, #0, #0),       {Reserved}
+     {176} (#0, #0, #0, #0),       {Keypad 00}
+     {177} (#0, #0, #0, #0),       {Keypad 000}
+     {178} (#0, #0, #0, #0),       {Thousands Separator}
+     {179} (#0, #0, #0, #0),       {Decimal Separator}
+     {180} (#0, #0, #0, #0),       {Currency Unit}
+     {181} (#0, #0, #0, #0),       {Currenct Sub-unit}
+     {182} (#0, #0, #0, #0),       {Keypad (}
+     {183} (#0, #0, #0, #0),       {Keypad )}
+     {184} (#0, #0, #0, #0),       {Keypad Left Brace}
+     {185} (#0, #0, #0, #0),       {Keypad Right Brace}
+     {186} (#0, #0, #0, #0),       {Keypad Tab}
+     {187} (#0, #0, #0, #0),       {Keypad Backspace}
+     {188} (#0, #0, #0, #0),       {Keypad A}
+     {189} (#0, #0, #0, #0),       {Keypad B}
+     {190} (#0, #0, #0, #0),       {Keypad C}
+     {191} (#0, #0, #0, #0),       {Keypad D}
+     {192} (#0, #0, #0, #0),       {Keypad E}
+     {193} (#0, #0, #0, #0),       {Keypad F}
+     {194} (#0, #0, #0, #0),       {Keypad XOR}
+     {195} (#0, #0, #0, #0),       {Keypad ^}
+     {196} (#0, #0, #0, #0),       {Keypad %}
+     {197} (#0, #0, #0, #0),       {Keypad <}
+     {198} (#0, #0, #0, #0),       {Keypad >}
+     {199} (#0, #0, #0, #0),       {Keypad &}
+     {200} (#0, #0, #0, #0),       {Keypad &&}
+     {201} (#0, #0, #0, #0),       {Keypad |}
+     {202} (#0, #0, #0, #0),       {Keypad ||}
+     {203} (#0, #0, #0, #0),       {Keypad :}
+     {204} (#0, #0, #0, #0),       {Keypad #}
+     {205} (#0, #0, #0, #0),       {Keypad Space}
+     {206} (#0, #0, #0, #0),       {Keypad @}
+     {207} (#0, #0, #0, #0),       {Keypad !}
+     {208} (#0, #0, #0, #0),       {Keypad Memory Store}
+     {209} (#0, #0, #0, #0),       {Keypad Memory Recall}
+     {210} (#0, #0, #0, #0),       {Keypad Memory Clear}
+     {211} (#0, #0, #0, #0),       {Keypad Memory Add}
+     {212} (#0, #0, #0, #0),       {Keypad Memory Subtract}
+     {213} (#0, #0, #0, #0),       {Keypad Memory Multiply}
+     {214} (#0, #0, #0, #0),       {Keypad Memory Divide}
+     {215} (#0, #0, #0, #0),       {Keypad +/-}
+     {216} (#0, #0, #0, #0),       {Keypad Clear}
+     {217} (#0, #0, #0, #0),       {Keypad Clear Entry}
+     {218} (#0, #0, #0, #0),       {Keypad Binary}
+     {219} (#0, #0, #0, #0),       {Keypad Octal}
+     {220} (#0, #0, #0, #0),       {Keypad Decimal}
+     {221} (#0, #0, #0, #0),       {Keypad Hexadecimal}
+     {222} (#0, #0, #0, #0),       {Reserved}
+     {223} (#0, #0, #0, #0),       {Reserved}
+     {224} (#0, #0, #0, #0),       {Keyboard LeftControl}
+     {225} (#0, #0, #0, #0),       {Keyboard LeftShift}
+     {226} (#0, #0, #0, #0),       {Keyboard LeftAlt}
+     {227} (#0, #0, #0, #0),       {Keyboard Left GUI}
+     {228} (#0, #0, #0, #0),       {Keyboard RightControl}
+     {229} (#0, #0, #0, #0),       {Keyboard RightShift}
+     {230} (#0, #0, #0, #0),       {Keyboard RightAlt}
+     {231} (#0, #0, #0, #0),       {Keyboard Right GUI}
+     {232} (#0, #0, #0, #0),       {Reserved}
+     {233} (#0, #0, #0, #0),       {Reserved}
+     {234} (#0, #0, #0, #0),       {Reserved}
+     {235} (#0, #0, #0, #0),       {Reserved}
+     {236} (#0, #0, #0, #0),       {Reserved}
+     {237} (#0, #0, #0, #0),       {Reserved}
+     {238} (#0, #0, #0, #0),       {Reserved}
+     {239} (#0, #0, #0, #0),       {Reserved}
+     {240} (#0, #0, #0, #0),       {Reserved}
+     {241} (#0, #0, #0, #0),       {Reserved}
+     {242} (#0, #0, #0, #0),       {Reserved}
+     {243} (#0, #0, #0, #0),       {Reserved}
+     {244} (#0, #0, #0, #0),       {Reserved}
+     {245} (#0, #0, #0, #0),       {Reserved}
+     {246} (#0, #0, #0, #0),       {Reserved}
+     {247} (#0, #0, #0, #0),       {Reserved}
+     {248} (#0, #0, #0, #0),       {Reserved}
+     {249} (#0, #0, #0, #0),       {Reserved}
+     {250} (#0, #0, #0, #0),       {Reserved}
+     {251} (#0, #0, #0, #0),       {Reserved}
+     {252} (#0, #0, #0, #0),       {Reserved}
+     {253} (#0, #0, #0, #0),       {Reserved}
+     {254} (#0, #0, #0, #0),       {Reserved}
+     {255} (#0, #0, #0, #0)        {Reserved (256 to 65535 Reserved)}
+   );
 
 // ------------------- end of patch  -------------------------------------------
 
@@ -741,7 +741,10 @@ function translatescantochar(scan,shift:byte):char;
 
 begin
 if shift=0 then result:=USB_HID_BOOT_USAGE_ID[scan,0]
-else result:=USB_HID_BOOT_USAGE_ID[scan,1];
+else if shift=1 then result:=USB_HID_BOOT_USAGE_ID[scan,1]
+else if shift=2 then result:=USB_HID_BOOT_USAGE_ID[scan,2]
+else if shift=3 then result:=USB_HID_BOOT_USAGE_ID[scan,3]
+else result:=USB_HID_BOOT_USAGE_ID[scan,0];
 end;
 
 // --------- end of patch ------------------------------------------------------

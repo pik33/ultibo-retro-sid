@@ -4,9 +4,12 @@ unit umain;
 
 interface
 
-uses sysutils,classes,retromalina,platform,retro;
+uses sysutils,classes,retromalina,platform,retro,cwindows;
 
-const ver='The retromachine player v. 0.17u --- 2017.01.11';
+const ver='The retromachine player v. 0.18u --- 2017.01.19';
+
+type bmppixel=array[0..2] of byte;
+
 var test:integer ;
     licznik:integer=0;
     songname:string;
@@ -31,10 +34,21 @@ var test:integer ;
     song:word=0;
       songs:word=0;
           tbb:array[0..15] of integer;
+        cfs:cfselector=nil;
+
+   bmphead:array[0..53] of byte=(
+        $42,$4d,$36,$e0,$5b,$00,$00,$00,$00,$00,$36,$00,$00,$00,$28,$00,
+        $00,$00,$00,$07,$00,$00,$60,$04,$00,$00,$01,$00,$18,$00,$00,$00,
+        $00,$00,$00,$e0,$5b,$00,$23,$2e,$00,$00,$23,$2e,$00,$00,$00,$00,
+        $00,$00,$00,$00,$00,$00);
+   bmpbuf:array[0..2007039] of bmppixel absolute $20000000;
+   bmpi:integer;
+   bmpp:bmppixel absolute bmpi;
 
 procedure main1;
 procedure main2;
 procedure mandelbrot;
+procedure writebmp;
 
 implementation
 
@@ -92,7 +106,7 @@ lpoke(base+$6006c,$00020002);
 lpoke(base+$60070,$00381380);
 lpoke(base+$60074,$00020002);
 lpoke(base+$60078,$00401400);
-lpoke(base+$6007c,$00020002);
+lpoke(base+$6007c,$00010001);
 
 
 // --------- main program start
@@ -211,12 +225,12 @@ var a,aaa,c1,ii,iii,il,i,cc:integer;
 //    rect:tsdl_rect;
     clock:string;
 
-
 begin
 
 clock:=timetostr(now);
 k:=lpeek(base+$60000);
-repeat sleep(1) until lpeek(base+$60000)<>k;
+waitvbl;
+
 lpoke(base+$60080,$12050000+4096*((k mod 32) div 2));
 lpoke(base+$60084,$12060000+4096*((k mod 32) div 2));
 lpoke(base+$60088,$12070000+4096*((k mod 32) div 2));
@@ -224,6 +238,7 @@ lpoke(base+$6008c,$12080000+4096*((k mod 32) div 2));
 lpoke(base+$60090,$12090000+4096*((k mod 32) div 2));
 lpoke(base+$60094,$120a0000+4096*((k mod 32) div 2));
 lpoke(base+$60098,$120b0000+4096*((k mod 32) div 2));
+
 c:=c+1; c1:=c mod 60;
 if time6502>0 then c6+=1;
 ss:=(songtime div 1000000) mod 60;
@@ -391,10 +406,35 @@ lpoke(base+$60078,lpeek(base+$6002c) );
 
 //box(100,100,300,40,0);
 //outtextxyz(100,100,inttostr(dpeek($2060030))+' '+inttostr(dpeek($2060032)),40,2,2);
-
+//if (lpeek(base+$60000)>lpeek(base)+10) and (cfs<>nil) then cfs.checkmouse;
 
 end;
 
+
+procedure writebmp;
+
+var fh,i,j,k,idx:integer;
+    b:byte;
+
+
+
+begin
+if fileexists('d:\dump.bmp') then deletefile('d:\dump.bmp');
+fh:=filecreate('d:\dump.bmp');
+filewrite(fh,bmphead[0],54);
+
+k:=0;
+for i:=1119 downto 0 do
+  for j:=0 to 1791 do
+   begin
+   idx:=peek($30000000+(1792*i+j));
+   bmpi:=lpeek(base+$10000+4*idx);
+   bmpbuf[k]:=bmpp;
+   k+=1;
+   end;
+filewrite(fh,bmpbuf,6021120);
+fileclose (fh);
+end;
 
 procedure mandelbrot;
 
