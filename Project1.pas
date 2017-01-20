@@ -80,7 +80,7 @@ var s,currentdir,currentdir2:string;
      drive:string;
      mb:tmousedata;
      mi:cardinal;
-     click, dblclick, dblcnt, clickcnt:integer;
+ //    click, dblcnt, clickcnt:integer;
        d:double; e:integer;
      key:integer;
     wheel:integer;
@@ -371,7 +371,7 @@ while not DirectoryExists('C:\') do
   else
     begin
     outtextxyz(440,1060,'Error. No Ultibo folder found. Press Enter to reboot',157,2,2);
-    repeat until getkey=$13;
+    repeat until readkey=$13;
     systemrestart(0);
     end;
 
@@ -433,50 +433,46 @@ startreportbuffer;
 lpoke(base+$6fffc,440);
 repeat
   main2;
-  outtextxyz(100,100,inttohex(dmactrl,8),40,2,2);
-  key:=getkey and $FF;
-  wheel:=mousewheel;
+//  if click then box(100,100,200,100,32) else box(100,100,200,100,40);
 
 
-  if (key=0) and (wheel=127) then begin key:=208;  end;
-  if (key=0) and (wheel=129) then begin key:=209;  end;
-//  box(100,100,200,100,33); outtextxyz(100,100,inttostr(wheel)+' '+inttostr(key),40,2,2);
-  if (dblclick=0) and (mousek=1) then begin dblclick:=1; dblcnt:=0; end;
-  if (dblclick=1) and (mousek=0) then begin dblclick:=2; dblcnt:=0; end;
-  if (dblclick=2) and (mousek=1) then begin dblclick:=3; dblcnt:=0; end;
-  if (dblclick=3) and (mousek=0) then begin dblclick:=4; dblcnt:=0; end;
-
-  inc(dblcnt); if dblcnt>10 then begin dblcnt:=10; dblclick:=0; end;
-
-  if (dblclick=4) and (key=0) and (mousex>896) then begin dblclick:=0; key:=141; end;
-
-  if (mousek=1) and (click=0) then begin click:=1; clickcnt:=0; end;
-  inc(clickcnt); if clickcnt>10 then  begin clickcnt:=10; click:=0; end;
-  if (mousek=0) then click:=0;
-
-  if (click=1) and (mousex>896) then
+  if cfs=nil then
     begin
-    click:=2;
-    nsel:=(mousey-132) div 32;
-    if (nsel<=ild) and (nsel>=0) then
+    key:=readkey and $FF;
+    wheel:=mousewheel;
+
+    if (key=0) and (wheel=127) then begin key:=208;  end;
+    if (key=0) and (wheel=129) then begin key:=209;  end;
+
+    if (dblclick) and (key=0) and (mousex>896) then begin key:=141; end;
+
+    if (click) and (mousex>896) then
       begin
-      box(920,132+32*sel,840,32,34);
-      if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
-      if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
-      if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
-      for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-      if filenames[sel+selstart,1]<>'(DIR)'then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
-      if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
-      sel:=nsel;
-      box(920,132+32*sel,840,32,36);
-      if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
-      if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
-      if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
-      for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-      if filenames[sel+selstart,1]<>'(DIR)' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
-      if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
+
+      nsel:=(mousey-132) div 32;
+      if (nsel<=ild) and (nsel>=0) then
+        begin
+        box(920,132+32*sel,840,32,34);
+        if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
+        if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
+        if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
+        for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+        if filenames[sel+selstart,1]<>'(DIR)'then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
+        if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
+        sel:=nsel;
+        box(920,132+32*sel,840,32,36);
+        if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
+        if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
+        if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
+        for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+        if filenames[sel+selstart,1]<>'(DIR)' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
+        if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
+        end;
       end;
     end;
+
+  if cfs<>nil then begin if cfs.done then begin cfs.destroy; cfs:=nil; end; end;
+  if cfs<>nil then begin if cfs.needdestroy then begin cfs.destroy; cfs:=nil; end; end;
 
   if key=ord('5') then begin siddelay:=20000; songfreq:=50; skip:=0; end
   else if key=ord('1') then begin siddelay:=10000; songfreq:=100; skip:=0; end
@@ -493,11 +489,12 @@ repeat
     writebmp;
     end
 
-  else if key=ord('t') then
-    begin
-    lpoke(base,lpeek(base+$60000));
-    cfs:=cfselector.create(900,200,400,600,368,500,168,33,'Test okna','d:\','lalala');
-    end
+ else if key=ord('t') then
+   begin
+
+   if cfs=nil then  begin cfs:=cfselector.create(900,200,508,492,508,492,141,128,'File selector','C:\',''); key:=0; end;
+
+   end
 
   else if key=208 then
     begin
@@ -636,9 +633,9 @@ repeat
         begin
         pause1a:=true;
         pauseaudio(1);
-        for i:=1 to 4 do waitvbl;
+        sleep(20);
         for i:=$d400 to $d420 do poke(base+i,0);
-        for i:=1 to 4 do waitvbl;
+   //     for i:=1 to 4 do waitvbl;
         if sfh>=0 then fileclose(sfh);
         sfh:=-1;
 
@@ -647,13 +644,6 @@ repeat
         siddata[$0e]:=$7FFFF8;
         siddata[$1e]:=$7FFFF8;
         siddata[$2e]:=$7FFFF8;
-        lpoke($3F20C000,$0); // pwm off
-        if lpeek(base+$6fffc)=440 then lpoke($3F20C010,260) else lpoke($3F20C010,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
-        if lpeek(base+$6fffc)=440 then lpoke($3F20C020,260) else lpoke($3F20C020,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
-        lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
-        lpoke (dmactrl+$c-$C0000000,20*960);
-        lpoke (dmactrl+$2c-$C0000000,20*960);
-        CleanDataCacheRange(dmactrl-$C0000000,256);
         songtime:=0;
 
         fn:= currentdir2+filenames[sel+selstart,0];
@@ -677,6 +667,14 @@ repeat
           outtextxyz(18,164,'title: '+atitle,188,2,2);
           box(18,912,800,32,244);
           outtextxyz(18,912,'SIDCog DMP file, '+inttostr(songfreq)+' Hz',250,2,2);
+          lpoke($3F20C000,$0); // pwm off
+        if lpeek(base+$6fffc)=440 then lpoke($3F20C010,260) else lpoke($3F20C010,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+        if lpeek(base+$6fffc)=440 then lpoke($3F20C020,260) else lpoke($3F20C020,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+        lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
+        lpoke (dmactrl+$c-$C0000000,20*960);
+        lpoke (dmactrl+$2c-$C0000000,20*960);
+        CleanDataCacheRange(dmactrl-$C0000000,256);
+
           songs:=0;
           end
         else if (buf[0]=ord('P')) and (buf[1]=ord('S')) and (buf[2]=ord('I')) and (buf[3]=ord('D')) then
@@ -688,6 +686,14 @@ repeat
           filetype:=1;
           box(18,912,800,32,244);
           outtextxyz(18,912,'PSID file, '+inttostr(1000000 div siddelay)+' Hz',250,2,2);
+                  lpoke($3F20C000,$0); // pwm off
+        if lpeek(base+$6fffc)=440 then lpoke($3F20C010,260) else lpoke($3F20C010,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+        if lpeek(base+$6fffc)=440 then lpoke($3F20C020,260) else lpoke($3F20C020,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+        lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
+        lpoke (dmactrl+$c-$C0000000,20*960);
+        lpoke (dmactrl+$2c-$C0000000,20*960);
+        CleanDataCacheRange(dmactrl-$C0000000,256);
+
           fileclose(sfh);
           end
         else if (buf[0]=ord('R')) and (buf[1]=ord('S')) and (buf[2]=ord('I')) and (buf[3]=ord('D')) then
@@ -727,8 +733,11 @@ repeat
           lpoke (dmactrl+$c-$C0000000,42*1536);
           lpoke (dmactrl+$2c-$C0000000,42*1536);
           CleanDataCacheRange(dmactrl-$C0000000,256);
+          lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
           if spr6x=spr7x then begin sprx:=100; spr2x:=200; spr3x:=300;spr4x:=400; spr5x:=500; spr6x:=600; spr7x:=700; end;
-          sleep(100);
+         sleep(20);
+
+         //repeat threadsleep(0) until (filebuffer.m<32768);
           end
         else
           begin
@@ -737,6 +746,14 @@ repeat
           outtextxyz(18,132,'type: unknown, 50 Hz SDMP assumed',188,2,2);
           box(18,912,800,32,244);
           outtextxyz(18,912,'SIDCog DMP file, 50 Hz',250,2,2);
+                  lpoke($3F20C000,$0); // pwm off
+        if lpeek(base+$6fffc)=440 then lpoke($3F20C010,260) else lpoke($3F20C010,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+        if lpeek(base+$6fffc)=440 then lpoke($3F20C020,260) else lpoke($3F20C020,265);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+        lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
+        lpoke (dmactrl+$c-$C0000000,20*960);
+        lpoke (dmactrl+$2c-$C0000000,20*960);
+        CleanDataCacheRange(dmactrl-$C0000000,256);
+
           songs:=0;
           end;
         songname:=s;
@@ -746,7 +763,7 @@ repeat
         end;
     end;
 
-  until (key=155) ;
+  until mousek=3; //(key=155) ;
   pauseaudio(1);
   if sfh>0 then fileclose(sfh);
   setcurrentdir(workdir);

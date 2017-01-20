@@ -406,7 +406,7 @@ lpoke(base+$60078,lpeek(base+$6002c) );
 
 //box(100,100,300,40,0);
 //outtextxyz(100,100,inttostr(dpeek($2060030))+' '+inttostr(dpeek($2060032)),40,2,2);
-//if (lpeek(base+$60000)>lpeek(base)+10) and (cfs<>nil) then cfs.checkmouse;
+if (cfs<>nil) then cfs.checkmouse;
 
 end;
 

@@ -8,6 +8,7 @@ uses sysutils,classes,retromalina,math;
 
 type cwindow=class;    // forward declaration
 
+
 type cbutton=class(TObject)
   x,y,l,h,c1,c2,clicked:integer;
   s:string;
@@ -37,6 +38,27 @@ type cbutton=class(TObject)
 
   end;
 
+{
+
+type cmenuitem=class (TObject)
+  x,y,l,h,c1,c2,level,clicked:integer;
+  visible,highlighted,selected,radiobutton:boolean;
+  s:string;
+  next,last,nextlevel:cmenuitem;
+  background:pointer;
+  granny:cwindow;
+  procedure show;
+  procedure hide;
+  procedure select;
+  procedure unselect;
+  procedure draw;
+  procedure highlight;
+  procedure unhighlight;
+  function append(aname:string):cmenuitem;
+  constructor create(ac1,ac2:integer; aname:string; g:cmenu);
+  function appendnewlevel(aname:string):cmenuitem;
+  end;
+ }
 type cwindow=class(tobject)
 
   x,y,l,h:integer;
@@ -126,16 +148,15 @@ var
    avall:int64=0;
    avsid:int64=0;
    ttttt,ttt:int64;
-    qq:integer;
- //   songfreq:integer;
-    pause:boolean=false;
-    framecount:integer;
-    testwindow:cwindow;
-    testbutton:TObject;
+   qq:integer;
+   pause:boolean=false;
+   framecount:integer;
+   testwindow:cwindow;
+   testbutton:TObject;
 
-     open:cbutton;
+    open:cbutton;
 
-//    buttons:array[0..100] of cbutton;
+
     sls,stb,plb,over,scolor,start,range,sbutton:cbutton;
     temp:cbutton;
     wbutton,wstart,wsamples:cbutton;
@@ -144,11 +165,43 @@ var
     widespec,haaar, psk,gm,anal,synt:cbutton;
 
 
-
 implementation
+   {
+ type cmenuitem=class (TObject)
+  x,y,l,h,c1,c2,level,clicked:integer;
+  visible,highlighted,selected,radiobutton:boolean;
+  s:string;
+  next,last,nextlevel:cmenuitem;
+  background:pointer;
+  granny:cwindow;
+  procedure show;
+  procedure hide;
+  procedure select;
+  procedure unselect;
+  procedure draw;
+  procedure highlight;
+  procedure unhighlight;
+  function append(aname:string):cmenuitem;
+  function appendnewlevel(aname:string):cmenuitem;
 
+  end;
 
+constructor cmenuitem.create(ac1,ac2,alevel:integer; aname:string; g:cmenu);
 
+begin
+inherited create;
+c1:=ac1; c2:=ac2; s:=aname;
+al:=length(s)*16; //todo:font size
+ah:=40; //todo:font size
+background:=getmem(4*al*ah);
+granny:=g;
+level:=alevel;
+visible:=false; highlighted:=false; selected:=false;
+if level=0 then visible:=true;
+next:=nil; last:=nil;
+self.show
+end;
+  }
 constructor cmodalwindow.create(ax,ay,al,ah,alw,ahw,ac1,ac2:integer; atitle:string);
 
 begin
@@ -329,9 +382,9 @@ retromalina.box(x,y,l,24,c4);
 retromalina.box(x,y,4,h,c4);
 retromalina.box(x+l-4,y,4,h,c4);
 retromalina.box(x,y+h-4,l,4,c4);
-for i:=0 to 15 do for j:=0 to 15 do if lpeek($84000+4*j+64*i)=0 then retromalina.putpixel(x+l-20+j,y+1+i,256+36) else retromalina.putpixel(x+l-20+j,y+1+i,256+15);
-for i:=0 to 15 do for j:=0 to 15 do if lpeek($85000+4*j+64*i)=0 then retromalina.putpixel(x+l-38+j,y+1+i,256+0) else retromalina.putpixel(x+l-38+j,y+1+i,c4);
-for i:=0 to 15 do for j:=0 to 15 do if lpeek($86000+4*j+64*i)=0 then retromalina.putpixel(x+l-54+j,y+1+i,256+0) else retromalina.putpixel(x+l-54+j,y+1+i,c4);
+//for i:=0 to 15 do for j:=0 to 15 do if lpeek($84000+4*j+64*i)=0 then retromalina.putpixel(x+l-20+j,y+1+i,36) else retromalina.putpixel(x+l-20+j,y+1+i,15);
+//for i:=0 to 15 do for j:=0 to 15 do if lpeek($85000+4*j+64*i)=0 then retromalina.putpixel(x+l-38+j,y+1+i,0) else retromalina.putpixel(x+l-38+j,y+1+i,c4);
+//for i:=0 to 15 do for j:=0 to 15 do if lpeek($86000+4*j+64*i)=0 then retromalina.putpixel(x+l-54+j,y+1+i,0) else retromalina.putpixel(x+l-54+j,y+1+i,c4);
 retromalina.box(x+l-20,y+24,16,h-44,c5);
 retromalina.box(x+4,y+h-20,l-24,16,c5);
 retromalina.box(x+l-20,y+h-20,16,16,c6);
@@ -351,7 +404,7 @@ begin
 p:=foreground;
 for i:=0 to h-45 do
   for j:=0 to l-25 do
-    retromalina.putpixel(x+4+j,y+24+i,(p+j+i*lw)^);
+    if ((y+24+i)<1200) and (x+4+j<1792) then retromalina.putpixel(x+4+j,y+24+i,(p+j+i*lw)^);
 end;
 
 
@@ -364,30 +417,24 @@ var i,j,mmx,mmy,mx,my:integer;
 
 begin
 
-mx:=dpeek($6002c)-64*peek($70002);
-my:=dpeek($6002e)-40*peek($70002);
+mx:=mousex;
+my:=mousey;
 
 
 if (my>y) and (my<y+16) and (mx>x+l-20) and (mx<x+l-5) then
-  begin      {
-  for i:=0 to 15 do for j:=0 to 15 do if lpeek($84000+4*j+64*i)=0 then retromalina.putpixel(x+l-20+j,y+1+i,256+39) else retromalina.putpixel(x+l-20+j,y+1+i,256+15);    }
-  if (peek($60030)=1) then needdestroy:=true;
-  end
-else
- { for i:=0 to 15 do for j:=0 to 15 do if lpeek($84000+4*j+64*i)=0 then retromalina.putpixel(x+l-20+j,y+1+i,256+36) else retromalina.putpixel(x+l-20+j,y+1+i,256+15)};
+  begin
+  if mousek=1 then needdestroy:=true;
+  end;
 
-//if not selected then goto p999;
-//lpoke ($6000c,$FFFFFF);
 
-//if (my>y) and (my<y+16) and (mx>x+l-20) and (mx<x+l-5) then begin self.destroy; goto p999;end;
-if movable and not cm and ((my>y) and (my<y+h) and (mx>x) and (mx<x+l) and (peek($60030)=1)) then
+if movable and not cm and ((my>y) and (my<y+h) and (mx>x) and (mx<x+l) and (mousek=1)) then
   begin
   cm:=true;
   wmy:=my-y;
   wmx:=mx-x;
-  poke($60030,0);
+ // poke($60030,0);
   end;
-if peek($60032)=0 then cm:=false;
+if mousek=0 then cm:=false;
 
 if cm then
   begin
@@ -714,7 +761,7 @@ try
 
 if directoryexists(s) then     begin
                          filenames[ilf,0]:=s;
-                         filenames[ilf,1]:='        [DIR]';
+                         filenames[ilf,1]:='        (DIR)';
                          ilf+=1;
                        end;
     end;
@@ -749,7 +796,7 @@ sysutils.findclose(sr);
 if ilf<26 then ild:=ilf else ild:=26;
 box(2,6,480,16,c1);
 sel:=0;
-box(2,6+16*sel,480,16,256+232);
+box(2,6+16*sel,480,16,232);
 for i:=0 to ild do
   begin
   s:=filenames[i,0];
@@ -775,23 +822,22 @@ label p999;
 var mmx,mmy,mx,my,i,j,ll:integer;
     s:string;
     d:char;
+    key,wheel:integer;
+
 
 begin
-
 mx:=mousex;
 my:=mousey;
 
-// check if mouse click, then select a new entry
+key:=readkey and $FF; wheel:=mousewheel;
+
 if (my>y) and (my<y+16) and (mx>x+l-20) and (mx<x+l-5) then
   begin
-  for i:=0 to 15 do for j:=0 to 15 do if lpeek($84000+4*j+64*i)=0 then retromalina.putpixel(x+l-20+j,y+1+i,256+39) else retromalina.putpixel(x+l-20+j,y+1+i,256+15);
-  if (peek(base+$60030)=1) then needdestroy:=true;
-  end
-else
-  for i:=0 to 15 do for j:=0 to 15 do if lpeek($84000+4*j+64*i)=0 then retromalina.putpixel(x+l-20+j,y+1+i,256+36) else retromalina.putpixel(x+l-20+j,y+1+i,256+15);
+  if mousek=1 then needdestroy:=true;
+  end;
 
 
-if (peek(base+$60030)=1) and (mx>x+2) and (mx<x+482) and (my>y+30) and (my<y+462) then
+if (mousek=1) and (mx>x+2) and (mx<x+482) and (my>y+30) and (my<y+462) then
   begin
   i:=(my-30-y) div 16;
   box(2,6+16*sel,480,16,c1);
@@ -800,29 +846,29 @@ if (peek(base+$60030)=1) and (mx>x+2) and (mx<x+482) and (my>y+30) and (my<y+462
   for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
   outtextxy(8,6+16*sel,s,130);
   s:=filenames[sel+selstart,1];
-  if s<>'        [DIR]' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
-  if s<>'        [DIR]' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
+  if s<>'        (DIR)' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
+  if s<>'        (DIR)' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
   outtextxy(376,6+16*sel,s,130);
   sel:=i;
-  box(2,6+16*sel,480,16,256+232);
+  box(2,6+16*sel,480,16,232);
   ll:=length(filenames[sel+selstart,0])-4;
   if ll>36 then s:=copy(filenames[sel+selstart,0],1,45) else s:=filenames[sel+selstart,0];
   for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
   outtextxy(8,6+16*sel,s,130);
   s:=filenames[sel+selstart,1];
-  if s<>'        [DIR]' then filename:=currentdir2+filenames[sel+selstart,0];
-  if s<>'        [DIR]' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
-  if s<>'        [DIR]' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
+  if s<>'        (DIR)' then filename:=currentdir2+filenames[sel+selstart,0];
+  if s<>'        (DIR)' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
+  if s<>'        (DIR)' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
   outtextxy(376,6+16*sel,s,130);
-  if peek(base+$60033)=2 then poke($60028,13); // insert enter when doubleclick
+//  if doubleclick then poke(base+$60028,128+13); // insert enter when doubleclick
   redrawclient;
   end;
 
 // if directory double clicked, change it
 
-if (peek(base+$60028)=13) and (filenames[sel+selstart,1]='        [DIR]') then
+if (key=128+13) or dblclick and (filenames[sel+selstart,1]='        (DIR)') then
   begin
-  poke(base+$60028,0);
+//  poke(base+$60028,0);
   s:=filenames[sel+selstart,0];
   if copy(s,length(s),1)<>'\' then
     begin
@@ -847,7 +893,7 @@ if (peek(base+$60028)=13) and (filenames[sel+selstart,1]='        [DIR]') then
 
      begin
                          filenames[ilf,0]:=s;
-                         filenames[ilf,1]:='        [DIR]';
+                         filenames[ilf,1]:='        (DIR)';
                          ilf+=1;
                        end;
 
@@ -865,7 +911,7 @@ end;
     if (sr.attr and faDirectory) = faDirectory then
       begin
       filenames[ilf,0]:=sr.name;
-      filenames[ilf,1]:='        [DIR]';
+      filenames[ilf,1]:='        (DIR)';
       ilf+=1;
       end;
     until (findnext(sr)<>0) or (ilf=1000);
@@ -881,7 +927,7 @@ end;
   ilf-=1;
   cls;
   if ilf<26 then ild:=ilf else ild:=26;
-  box(2,6+16*sel,480,16,256+232);
+  box(2,6+16*sel,480,16,232);
   for i:=0 to ild do
     begin
     ll:=length(filenames[i])-4;
@@ -890,8 +936,8 @@ end;
     s:=copy(s,1,45);
     if i>0 then outtextxy(8,6+16*i,s,130) else outtextxy(8,6+16*i,s,130);
     s:=filenames[i,1];
-    if s<>'        [DIR]' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
-    if s<>'        [DIR]' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
+    if s<>'        (DIR)' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
+    if s<>'        (DIR)' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
     if i>0 then outtextxy(376,6+16*i,s,130) else outtextxy(376,6+16*i,s,130);
     end;
   filename:='';
@@ -901,7 +947,7 @@ end;
     drawdecoration;
   end;
 
-if (peek($60028)=13) and (filenames[sel+selstart,1]<>'        [DIR]') then
+if ((dblclick) or (key=128+13)) and (filenames[sel+selstart,1]<>'        (DIR)') then
   begin
   filename:=currentdir2+filenames[sel+selstart,0];
   done:=true;
@@ -909,32 +955,30 @@ if (peek($60028)=13) and (filenames[sel+selstart,1]<>'        [DIR]') then
 // down arrow pressed or wheel down
 
 
-  if (dpeek($60028)=16465) or (peek($60031)=255) then
+  if (key=208) or (wheel=127) then
     begin
-    dpoke($60028,0);
-    poke($60031,0);
-    if sel<ild then
+     if sel<ild then
       begin
-      box(2,6+16*sel,480,16,141);
+      box(2,6+16*sel,480,16,c1);
       ll:=length(filenames[sel+selstart,0])-4;
       if ll>36 then s:=copy(filenames[sel+selstart,0],1,45) else s:=filenames[sel+selstart,0];
       for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
       outtextxy(8,6+16*sel,s,130);
       s:=filenames[sel+selstart,1];
-      if s<>'        [DIR]' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
-      if s<>'        [DIR]' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3); ;
+      if s<>'        (DIR)' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
+      if s<>'        (DIR)' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3); ;
       outtextxy(376,6+16*sel,s,130);
 
       sel+=1;
-      box(2,6+16*sel,480,16,256+232);
+      box(2,6+16*sel,480,16,232);
       ll:=length(filenames[sel+selstart,0])-4;
       if l>36 then s:=copy(filenames[sel+selstart,0],1,45) else s:=filenames[sel+selstart,0];
       for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
       outtextxy(8,6+16*sel,s,130);
       s:=filenames[sel+selstart,1];
-              if s<>'        [DIR]' then filename:=currentdir2+filenames[sel+selstart,0];
-              if s<>'        [DIR]' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
-              if s<>'        [DIR]' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
+              if s<>'        (DIR)' then filename:=currentdir2+filenames[sel+selstart,0];
+              if s<>'        (DIR)' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
+              if s<>'        (DIR)' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
 
       outtextxy(376,6+16*sel,s,130);
       end
@@ -942,7 +986,7 @@ if (peek($60028)=13) and (filenames[sel+selstart,1]<>'        [DIR]') then
       begin
       selstart+=1;
       cls;
-      box(2,6+16*sel,480,16,256+232);
+      box(2,6+16*sel,480,16,232);
       for i:=0 to ild do
         begin
         ll:=length(filenames[i+selstart,0])-4;
@@ -950,9 +994,9 @@ if (peek($60028)=13) and (filenames[sel+selstart,1]<>'        [DIR]') then
         for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
         if i<ild then outtextxy(8,6+16*i,s,130) else  outtextxy(8,6+16*i,s,130);
         s:=filenames[i+selstart,1];
-        if s<>'        [DIR]' then filename:=currentdir2+filenames[sel+selstart,0];
-        if s<>'        [DIR]' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
-        if s<>'        [DIR]' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
+        if s<>'        (DIR)' then filename:=currentdir2+filenames[sel+selstart,0];
+        if s<>'        (DIR)' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
+        if s<>'        (DIR)' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
 
         if i<ild then outtextxy(376,6+16*i,s,130) else outtextxy(376,6+16*i,s,130);
         end;
@@ -962,31 +1006,29 @@ if (peek($60028)=13) and (filenames[sel+selstart,1]<>'        [DIR]') then
 
   // up arrow pressed or wheel up
 
-  if (dpeek($60028)=16466) or (peek($60031)=1) then
+  if (dpeek($60028)=209) or (wheel=129) then
     begin
-    dpoke($60028,0);
-    poke($60031,0);
     if sel>0 then
       begin
-      box(2,6+16*sel,480,16,141);
+      box(2,6+16*sel,480,16,c1);
       ll:=length(filenames[sel+selstart,0])-4;
       if ll>36 then s:=copy(filenames[sel+selstart,0],1,45) else  s:=filenames[sel+selstart,0];
       for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
       outtextxy(8,6+16*sel,s,130);
       s:=filenames[sel+selstart,1];
-      if s<>'        [DIR]' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
-      if s<>'        [DIR]' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
+      if s<>'        (DIR)' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
+      if s<>'        (DIR)' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
       outtextxy(376,6+16*sel,s,130);
 
       sel-=1;
-      box(2,6+16*sel,480,16,256+232);
+      box(2,6+16*sel,480,16,232);
       ll:=length(filenames[sel+selstart,0])-4;
       if ll>36 then s:=copy(filenames[sel+selstart,0],1,45) else s:=filenames[sel+selstart,0];
       for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
       outtextxy(8,6+16*sel,s,130);
       s:=filenames[sel+selstart,1];
-      if s<>'        [DIR]' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
-      if s<>'        [DIR]' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
+      if s<>'        (DIR)' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
+      if s<>'        (DIR)' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
 
 
       outtextxy(376,6+16*sel,s,130);
@@ -997,7 +1039,7 @@ if (peek($60028)=13) and (filenames[sel+selstart,1]<>'        [DIR]') then
       begin
       selstart-=1;
       cls;
-      box(2,6+16*sel,480,16,256+32);
+      box(2,6+16*sel,480,16,c1);
       for i:=0 to ild do
         begin
         ll:=length(filenames[i+selstart,0])-4;
@@ -1005,9 +1047,9 @@ if (peek($60028)=13) and (filenames[sel+selstart,1]<>'        [DIR]') then
         for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
         if i>0 then outtextxy(8,6+16*i,s,130) else  outtextxy(8,6+16*i,s,130);
         s:=filenames[i+selstart,1];
-        if s<>'        [DIR]' then filename:=currentdir2+filenames[sel+selstart,0];
-        if s<>'        [DIR]' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
-        if s<>'        [DIR]' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
+        if s<>'        (DIR)' then filename:=currentdir2+filenames[sel+selstart,0];
+        if s<>'        (DIR)' then if length(s)<10 then for j:=10 downto length(s)+1 do s:=' '+s;
+        if s<>'        (DIR)' then s:=copy(s,1,1)+' '+copy(s,2,3)+' '+copy(s,5,3)+' '+copy(s,8,3);
 
         if i>0 then outtextxy(376,6+16*i,s,130) else outtextxy(376,6+16*i,s,130);
         end;
@@ -1017,24 +1059,21 @@ if (peek($60028)=13) and (filenames[sel+selstart,1]<>'        [DIR]') then
 
     end;
 
+  if movable and not cm and ((my>y) and (my<y+20) and (mx>x) and (mx<x+l) and (mousek=1)) then
+    begin
+    cm:=true;
+    wmy:=my-y;
+    wmx:=mx-x;
+ // poke($60030,0);
+    end;
+  if mousek=0 then cm:=false;
 
-
-if not cm and ((my>y) and (my<y+h) and (mx>x) and (mx<x+l) and (peek($2060030)=1)) then
-  begin
-  cm:=true;
-  wmy:=my-y;
-  wmx:=mx-x;
-//  poke($60030,0);
-  end;
-if peek($20032)=0 then cm:=false;
-
-if cm then
-  begin
-//  poke($60030,0);
-  mmx:=mx-wmx;
-  mmy:=my-wmy;
-  {if (mmx<>x) and (mmy<>y)then }self.move(mmx,mmy);
-  end;
+  if cm then
+    begin
+    mmx:=mx-wmx;
+    mmy:=my-wmy;
+    if movable then self.move(mmx,mmy);
+    end;
 
 checkmouse:=cm;
 

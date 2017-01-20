@@ -4,7 +4,7 @@ DoExitAsm ()
 DoExitLink ()
 { echo "An error occurred while linking $1"; exit 1; }
 echo Assembling project1
-/usr/bin/arm-none-eabi-as -march=armv7-a -mfpu=vfpv3 -o /home/pi/ultibo-retro-sid/lib/arm-ultibo/Project1.o  /home/pi/ultibo-retro-sid/lib/arm-ultibo/Project1.s
+/usr/bin/arm-none-eabi-as -mfloat-abi=hard -meabi=5 -march=armv7-a -mfpu=vfpv3 -o /home/pi/ultibo-retro-sid/lib/arm-ultibo/Project1.o  /home/pi/ultibo-retro-sid/lib/arm-ultibo/Project1.s
 if [ $? != 0 ]; then DoExitAsm project1; fi
 echo Linking Project1
 OFS=$IFS

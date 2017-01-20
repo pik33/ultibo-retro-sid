@@ -113,12 +113,13 @@ type Tsrcconvert=procedure(screen:pointer);
      pocz:integer;
      koniec:integer;
      il,fh,newfh:integer;
-     empty,full:boolean;
      newfilename:string;
      needclear:boolean;
      protected
        procedure Execute; override;
      public
+      m:integer;
+      empty,full:boolean;
       Constructor Create(CreateSuspended : boolean);
       function getdata(b,ii:integer):integer;
       procedure setfile(nfh:integer);
@@ -227,6 +228,7 @@ procedure pauseaudio(mode:integer);   // instead of the real one
 procedure AudioCallback(b:integer);
 function getpixel(x,y:integer):integer; inline;
 function getkey:integer; inline;
+function readkey:integer; inline;
 function mousex:integer; inline;
 function mousey:integer; inline;
 function mousek:integer; inline;
@@ -268,11 +270,11 @@ begin
     if y<40 then y:=40;
     if y>1159 then y:=1159;
     dpoke(base+$6002e,y);
-    dpoke(base+$60030,mb.Buttons);
-    w:=dpeek(base+$60032)+mb.OffsetWheel;
+    poke(base+$60030,mb.Buttons);
+    w:=peek(base+$60032)+mb.OffsetWheel;
     if w<127 then w:=127;
     if w>129 then w:=129;
-    dpoke(base+$60032,w);
+    poke(base+$60032,w);
     end;
 //  sleep(0);
   until terminated;
@@ -300,12 +302,31 @@ const rptcnt:integer=0;
       activekey:integer=0;
       m:integer=0;
       c:integer=0;
+      dblclick:integer=0;
+      dblcnt:integer=0;
+      clickcnt:integer=0;
+      click:integer=0;
 
 var ch:TKeyboardReport;
 
 begin
 repeat
   waitvbl;
+  if peek(base+$60033)=2 then begin dblclick:=0; dblcnt:=0; poke(base+$60033,0); end;
+  if (dblclick=0) and (mousek=1) then begin dblclick:=1; dblcnt:=0; end;
+  if (dblclick=1) and (mousek=0) then begin dblclick:=2; dblcnt:=0; end;
+  if (dblclick=2) and (mousek=1) then begin dblclick:=3; dblcnt:=0; end;
+  if (dblclick=3) and (mousek=0) then begin dblclick:=4; dblcnt:=0; end;
+
+  inc(dblcnt); if dblcnt>10 then begin dblcnt:=10; dblclick:=0; end;
+  if dblclick=4 then poke(base+$60033,1) else poke(base+$60033,0);
+
+  if peek(base+$60031)=2 then begin click:=2; clickcnt:=10; end;
+  if (mousek=1) and (click=0) then begin click:=1; clickcnt:=0; end;
+  inc(clickcnt); if clickcnt>10 then  begin clickcnt:=10; click:=2; end;
+  if (mousek=0) then click:=0;
+  if click=1 then poke (base+$60031,1) else poke (base+$60031,0);
+
   ch:=getkeyboardreport;
   if ch[0]<>255 then m:=ch[0];
   if (ch[2]<>0) and (ch[2]<>255) then activekey:=ch[2]
@@ -335,6 +356,7 @@ constructor TFileBuffer.Create(CreateSuspended : boolean);
 begin
 FreeOnTerminate := True;
 inherited Create(CreateSuspended);
+self.m:=131072;
 self.pocz:=0;
 self.koniec:=0;
 self.fh:=-1;
@@ -347,19 +369,19 @@ end;
 
 procedure TFileBuffer.Execute;
 
-var i,m:integer;
+var i:integer;
 
 begin
 
 repeat
-if self.needclear then begin self.koniec:=0; self.pocz:=0; self.needclear:=false; self.empty:=true; end;
+if self.needclear then begin self.koniec:=0; self.pocz:=0; self.needclear:=false; self.empty:=true; self.m:=131072; for i:=0 to 131071 do buf[i]:=0; end;
 if self.fh>0 then
   begin
-  if self.koniec>=self.pocz then m:=131072-self.koniec+self.pocz-1 else m:=self.pocz-self.koniec-1;
-  if  (m>=32768) then
+  if self.koniec>=self.pocz then self.m:=131072-self.koniec+self.pocz-1 else self.m:=self.pocz-self.koniec-1;
+  if  (self.m>=32768) then
     begin
     self.il:=fileread(self.fh,self.tempbuf[0],32768);
-    if self.il>0 then self.empty:=false;
+
     for i:=0 to il-1 do self.buf[(i+self.koniec) and $1FFFF]:=self.tempbuf[i] ;
     self.koniec:=(self.koniec+self.il) and $1FFFF;
 
@@ -371,11 +393,13 @@ if self.fh>0 then
         self.fh:=self.newfh; self.newfh:=-1;
         end;
       end;
+    if self.m<3*32768 then self.empty:=false;
     end;
   end
 else
   begin
-  if self.newfh>0 then fh:=self.newfh;
+  self.full:=true;
+  if self.newfh>0 then begin fh:=self.newfh; self.newfh:=-1; end;
   end;
 sleep(1);
 until terminated;
@@ -401,7 +425,10 @@ if not self.empty then
     if self.pocz=self.koniec then self.empty:=true;
     end
   else
+    begin
+    for i:=0 to ii-1 do poke(b+i,0);
     result:=0;
+    end;
   end;
 end;
 
@@ -542,7 +569,7 @@ begin
 
  // dmactrl:=$C4000000;
   dmactrl:=$c0000000+cardinal(GetAlignedMem(64,32));
-  psystem:=getmem($2000000);
+  psystem:=getmem($1000000);
 { The ugly hack not needed now
 
 for i:=16 to 8191 do  // make the memory executable, shareable, rw, cacheable, writeback
@@ -965,11 +992,17 @@ end;
 
 
 
-function getkey:integer; inline;
+function readkey:integer; inline;
 
 begin
 result:=lpeek(base+$60028);
 lpoke(base+$60028,0);
+end;
+
+function getkey:integer; inline;
+
+begin
+result:=lpeek(base+$60028);
 end;
 
 function mousex:integer; inline;
@@ -996,27 +1029,36 @@ function mousewheel:integer; inline;
 
 begin
 result:=peek(base+$60032);
-dpoke(base+$60032,128);
+poke(base+$60032,128);
 end;
 
 function click:boolean; inline;
 
 begin
+if peek(base+$60031)=1 then  result:=true else result:=false;
+if peek(base+$60031)=1 then  poke(base+$60031,2)
+
 end;
 
 
 function dblclick:boolean; inline;
 
 begin
+if peek(base+$60033)=1 then result:=true else result:=false;
+if peek(base+$60033)=1 then poke(base+$60033,2)
 end;
 
 
 procedure putpixel(x,y,color:integer); inline;
 
+label p999;
+
 var adr:integer;
 
 begin
-adr:=lpeek(base+$60004)+x+1792*y; if adr<lpeek(base+$60004)+$FFFFFF then poke(adr,color);
+if (x<0) or (x>=1792) or (y<0) or (y>1120) then goto p999;
+adr:=lpeek(base+$60004)+x+1792*y; poke(adr,color);
+p999:
 end;
 
 
@@ -1031,7 +1073,11 @@ function getpixel(x,y:integer):integer; inline;
 var adr:integer;
 
 begin
-adr:=lpeek(base+$60004)+x+1792*y; if adr<lpeek(base+$60004)+$FFFFFF then result:=peek(adr);
+  if (x<0) or (x>=1792) or (y<0) or (y>1120) then result:=0
+else
+  begin
+  adr:=lpeek(base+$60004)+x+1792*y; result:=peek(adr);
+  end;
 end;
 
 
@@ -1044,19 +1090,20 @@ end;
 
 procedure box(x,y,l,h,c:integer);
 
-label p1;
+label p1,p999;
 
 var adr,i,j,screenptr:integer;
 
 begin
 
 screenptr:=lpeek(base+$60004);
-if x<0 then x:=0;
-if x>1792 then x:=1792;
-if y<0 then y:=0;
-if y>1120 then y:=1120;
-if x+l>1792 then l:=1792-x-1;
-if y+h>1120 then h:=1120-y-1 ;
+
+if x<0 then begin l:=l+x; x:=0; if l<1 then goto p999; end;
+if x>1791 then goto p999;
+if y<0 then begin h:=h+y; y:=0; if h<1 then goto p999; end;
+if y>1119 then goto p999;
+if x+l>1791 then l:=1792-x;
+if y+h>1119 then h:=1120-y;
 for j:=y to y+h-1 do begin
 
     asm
@@ -1078,7 +1125,7 @@ p1: strb r1,[r0]
     end;
 
   end;
-
+p999:
 end;
 
 //  ---------------------------------------------------------------------
@@ -2388,9 +2435,10 @@ if filetype=3 then
       for i:=0 to 1535 do buf2[i]:=0;
       pauseaudio(1);
       noiseshaper2(b);
-      poke(base+$60028,23);
       repeat until peek(base+$60028)=0;
-      poke(base+$60028,13);
+      poke(base+$60028,208);
+      repeat until peek(base+$60028)=0;
+      poke(base+$60028,141);
       end;
     end;
   end
@@ -2521,6 +2569,7 @@ if mode=1 then
   begin
   pause1:=true;
   sleep(5);
+  for i:=0 to 767 do buf2[i]:=0;
   for i:=base+$5a000 to base+$5dfff do if (i mod 4) = 0 then lpoke(i,0);
   CleanDataCacheRange(base+$5a000,16384);
   for i:=base+$70000 to base+$cffff do if (i mod 4) = 0 then lpoke(i,128);
