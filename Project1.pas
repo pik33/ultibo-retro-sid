@@ -434,7 +434,7 @@ lpoke(base+$6fffc,440);
 repeat
   main2;
 //  if click then box(100,100,200,100,32) else box(100,100,200,100,40);
-
+// outtextxyz(100,100,inttohex(integer(psystem),8),40,2,2);
 
   if cfs=nil then
     begin
@@ -480,13 +480,21 @@ repeat
   else if key=ord('3') then begin siddelay:=6666; songfreq:=150; skip:=0; end
   else if key=ord('4') then begin siddelay:=2500; songfreq:=400; skip:=0; end
   else if key=ord('p') then begin pause1a:=not pause1a; if pause1a then pauseaudio(1) else pauseaudio(0); end
-  else if key=1 then begin if peek(base+$100003)=0 then poke (base+$100003,1) else poke (base+$100003,0); end
-  else if key=2 then begin if peek(base+$100004)=0 then poke (base+$100004,1) else poke (base+$100004,0); end
-  else if key=3 then begin if peek(base+$100005)=0 then poke (base+$100005,1) else poke (base+$100005,0); end
+  else if key=186 then begin if peek(base+$100003)=0 then poke (base+$100003,1) else poke (base+$100003,0); end
+  else if key=187 then begin if peek(base+$100004)=0 then poke (base+$100004,1) else poke (base+$100004,0); end
+  else if key=188 then begin if peek(base+$100005)=0 then poke (base+$100005,1) else poke (base+$100005,0); end
 
   else if key=ord('b') then
     begin
     writebmp;
+    end
+  else if key=ord('q') then
+    begin
+    volume-=1; if volume<0 then volume:=0;
+    end
+  else if key=ord('a') then
+    begin
+   volume+=1; if volume>38 then volume:=38;
     end
 
  else if key=ord('t') then
@@ -633,7 +641,7 @@ repeat
         begin
         pause1a:=true;
         pauseaudio(1);
-        sleep(20);
+        sleep(36);
         for i:=$d400 to $d420 do poke(base+i,0);
    //     for i:=1 to 4 do waitvbl;
         if sfh>=0 then fileclose(sfh);
@@ -735,7 +743,7 @@ repeat
           CleanDataCacheRange(dmactrl-$C0000000,256);
           lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
           if spr6x=spr7x then begin sprx:=100; spr2x:=200; spr3x:=300;spr4x:=400; spr5x:=500; spr6x:=600; spr7x:=700; end;
-         sleep(20);
+         sleep(36);
 
          //repeat threadsleep(0) until (filebuffer.m<32768);
           end
@@ -763,7 +771,7 @@ repeat
         end;
     end;
 
-  until mousek=3; //(key=155) ;
+  until (mousek=3) or (key=155) ;
   pauseaudio(1);
   if sfh>0 then fileclose(sfh);
   setcurrentdir(workdir);

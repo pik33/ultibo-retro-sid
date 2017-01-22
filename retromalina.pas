@@ -1,66 +1,71 @@
 // *****************************************************************************
 // The retromachine unit for Raspberry Pi/Ultibo
-// Ultibo v. 0.03 - 2016.11.19
+// Ultibo v. 0.18 - 2017.01.22
 // Piotr Kardasz
 // pik33@o2.pl
 // www.eksperymenty.edu.pl
 // GPL 2.0 or higher
 // uses combinedwaveforms.bin by Johannes Ahlebrand - MIT licensed
 //******************************************************************************
-
+//
 // --- ALPHA, don't complain !!!
-
+//
 // Retromachine memory map @bytes FOR ULTIBO
-
-//    0000_0000  -  01FF_FFFF - reserved for Ultibo core
-//    0200_0000  -  0200_FFFF - 6502 area
-//                                          0200_D400  -  0200_D418 SID
-
-// ------ Retromachine virtual data and hardware registers
-
-//    0201_0000  -  0204_FFFF pallette banks; 65536 entries
-//    0205_0000  -  0205_0FFF 8x16 font;        128 chars
-//    0205_1000  -  0205_1FFF 8x8 font x2;      128 chars
-//    0205_2000  -  0205_9FFF static sprite defs 8x4k
-//    0205_A000  -  0205_DFFF 16kB area for audio buffer
-//    0205_E000  -  0205_FFFF reserved
-//    0206_0000  -  0206_FFFF virtual hardware regs area
-//    0207_0000  -  020C_FFFF long audio buffer for noise shaper
-//    020D_0000  -  02FF_FFFF low memory area / system procedures and variables
-
-//    0300_0000  -  2FFF_FFFF program area - 754974719 bytes free
-//    3000_0000  -  30FF_FFFF virtual framebuffer area
-
+//
+// 0000_0000  -  heap_start (about 0190_0000) - Ultibo area
+// Heap start -  2EFF_FFFF retromachine program area, about 720 MB
+//
+// BASE=$2F00_0000 - this can change or become dynamic
+//
+// 2F00_0000  -  2F00_FFFF - 6502 area
+//    2F00_D400  -  2F00_D418 SID
+//
+// 2F01_0000  -  2F05_FFFF - system data area
+//    2F01_0000  -  2F04_FFFF pallette banks; 65536 entries
+//    2F05_0000  -  2F05_1FFF font definition; 256 char @8x16 px
+//    2F05_2000  -  2F05_9FFF static sprite defs 8x4k
+//    2F05_A000  -  2F05_BFFF 8kB area for audio buffer
+//    2F05_C000  -  2F05_FFFF reserved
+//
+// 2F06_0000  -  2F06_FFFF virtual hardware regs area
+//    2F06_0000 - frame counter
+//    2F06_0004 - display start
+//    2F06_0008 - current graphics mode   ----TODO
+//      2F06_0009 - bytes per pixel
+//    2F06_000C - border color
+//    2F06_0010 - pallette bank           ----TODO
+//    2F06_0014 - horizontal pallette selector: bit 31 on, 30..20 add to $60010, 11:0 pixel num. ----TODO
+//    2F06_0018 - display list start addr  ----TODO
+//                DL entry: 00xx_YYLLL_MM - display LLL lines in mode MM
+//                            xx: 00 - do nothing
+//                                01 - raster interrupt
+//                                10 - set pallette bank YY
+//                                11 - set horizontal scroll at YY
+//                          10xx_AAAAAAA - set display address to xxAAAAAAA
+//                          11xx_AAAAAAA - goto address xxAAAAAAA
+//    2F06_001C - horizontal scroll right register ----TODO
+//    2F06_0020 - x res
+//    2F06_0024 - y res
+//    2F06_0028 - KBD. 28 - ASCII 29 modifiers, 2A raw code 2B reserved
+//    2F06_002C - mouse. 6002c,d x 6002e,f y
+//    2F06_0030 - mouse keys, 2F06_0032 - mouse wheel; 127 up 129 down
+//    2F06_0034 - current dl position ----TODO
+//    2F06_0040 - 2F06_007C sprite control long 0 31..16 y pos  15..0 x pos
+//                                         long 1 30..16 y zoom 15..0 x zoom
+//    2F06_0080 - 206009C dynamic sprite data pointer
+//    2F06_00A0 - text cursor position
+//    2F06_00A4 - 2F06_FFFF - reserved
+//
+//    2F07_0000  -  2F0C_FFFF - long audio buffer for noise shaper
+//    2F0D_0000  -  2FFF_FFFF - retromachine system area
+//    3000_0000  -  30FF_FFFF - virtual framebuffer area
 //    3100_0000  -  3AFF_FFFF - Ultibo system memory area
 //    3B00_0000  -  3EFF_FFFF - GPU memory
 //    3F00_0000  -  3FFF_FFFF - RPi real hardware registers
 
-// ----- Virtual hardware registers
 
-// 2060000 - frame counter
-// 2060004 - display start
-// TODO 2060008 - current graphics mode
-// TODO 2060009 - bytes per pixel
-// 206000C - border color
-// TODO 2060010 - pallette bank
-// TODO 2060014 - horizontal pallette selector  bit 31 on, 30..20 add to $18004, 11:0 pixel num.
-// TODO 2060018 - display list start addr
-//                 DL entry: 0_LLLLL_MM - display LLLLL lines in mode MM
-//                           1_AAAAAAA - set display address to AAAAAAA
-//                           F_AAAAAAA - goto address AAAAAAA
-// TODO 206001C - horizontal scroll right register
-// 2060020 - x res
-// 2060024 - y res
-// TODO 2060028 - KBD. 28 - ASCII/scan. 29,2A modifiers, 2B 1 if key pressed 2 if special
-// 206002C - mouse. 6002c,d x 6002e,f y
-// 2060030 - mouse keys, 2060032 - mouse wheel
-// TODO 2060034 - current dl position
-// 2060040 - 206007C sprite control long 0 31..16 y pos  15..0 x pos
-//                               long 1 30..16 y zoom 15..0 x zoom 31 mode
-// TODO 2060080 - 206009C dynamic sprite data pointer
-// 20600A0 - text cursor position
-
-// TODO planned retromachine graphic modes: 00..15 Propeller retromachine compatible
+// TODO planned retromachine graphic modes:
+// 00..15 Propeller retromachine compatible
 // 16 - 1792x1120 @ 8bpp
 // 17 - 896x560 @ 8 bpp
 // 18 - 448x280 @ 8 bpp
@@ -79,9 +84,11 @@ interface
 
 uses sysutils,classes,unit6502,Platform,Framebuffer,keyboard,mouse,threads,GlobalConst,ultibo, retro, heapmanager;
 
-const base=$2000000; // retromachine system area base
+const base=$2F000000; // retromachine system area base
 
-type Tsrcconvert=procedure(screen:pointer);
+//type Tsrcconvert=procedure(screen:pointer);
+
+type
 
      // Retromachine main thread
 
@@ -102,7 +109,6 @@ type Tsrcconvert=procedure(screen:pointer);
      public
       Constructor Create(CreateSuspended : boolean);
      end;
-
 
      // File buffer thread
 
@@ -180,7 +186,7 @@ var fh,filetype:integer;                // this needs cleaning...
     scrfh:integer;
     running:integer=0;
     p4:^integer;
-    scrconvert:Tsrcconvert;
+ //   scrconvert:Tsrcconvert;
     fb:pframebufferdevice;
     FramebufferProperties:TFramebufferProperties;
     kbd:array[0..15] of TKeyboarddata;
@@ -193,8 +199,9 @@ var fh,filetype:integer;                // this needs cleaning...
     filebuffer:TFileBuffer;
     amouse:tmouse ;
     akeyboard:tkeyboard ;
-    psystem:pointer;
+    psystem,psystem2:pointer;
     dmactrl:cardinal;
+    volume:integer=0;
 
 // prototypes
 
@@ -569,7 +576,6 @@ begin
 
  // dmactrl:=$C4000000;
   dmactrl:=$c0000000+cardinal(GetAlignedMem(64,32));
-  psystem:=getmem($1000000);
 { The ugly hack not needed now
 
 for i:=16 to 8191 do  // make the memory executable, shareable, rw, cacheable, writeback
@@ -2287,16 +2293,16 @@ if bufaddr=base+$5a000 then
 
       i1l+=slpeek(base+$5a000+8*i);
       i2l+=i1l;
-      topl:=i2l div 256;
-      fbl:=topl * 256;
+      topl:=i2l div 65536;
+      fbl:=topl * 65536;
       i1l-=fbl;
       i2l-=fbl;
       slpoke (base+$70000+168*i+8*j, 130+topl);
 
       i1r+=slpeek(base+$5a000+8*i+4);
       i2r+=i1r;
-      topr:=i2r div 256;
-      fbr:=topr * 256;
+      topr:=i2r div 65536;
+      fbr:=topr * 65536;
       i1r-=fbr;
       i2r-=fbr;
       slpoke (base+$70000+168*i+8*j+4, 130+topr);
@@ -2313,16 +2319,16 @@ else
       begin
       i1l+=slpeek(base+$5c000+8*i);
        i2l+=i1l;
-       topl:=i2l div 256;
-       fbl:=topl * 256;
+       topl:=i2l div 65536;
+       fbl:=topl * 65536;
        i1l-=fbl;
        i2l-=fbl;
        slpoke (base+$a0000+168*i+8*j, 130+topl);
 
        i1r+=slpeek(base+$5c000+8*i+4);
        i2r+=i1r;
-       topr:=i2r div 256;
-       fbr:=topr * 256;
+       topr:=i2r div 65536;
+       fbr:=topr * 65536;
        i1r-=fbr;
        i2r-=fbr;
        slpoke (base+$a0000+168*i+8*j+4, 130+topr);
@@ -2348,16 +2354,16 @@ if bufaddr=base+$5a000 then
       begin
       i1l+=slpeek(base+$5a000+8*i);
       i2l+=i1l;
-      topl:=i2l div 256;
-      fbl:=topl * 256;
+      topl:=i2l div 65536;
+      fbl:=topl * 65536;
       i1l-=fbl;
       i2l-=fbl;
       slpoke (base+$70000+160*i+8*j, 130+topl);
 
       i1r+=slpeek(base+$5a000+8*i+4);
       i2r+=i1r;
-      topr:=i2r div 256;
-      fbr:=topr * 256;
+      topr:=i2r div 65536;
+      fbr:=topr * 65536;
       i1r-=fbr;
       i2r-=fbr;
       slpoke (base+$70000+160*i+8*j+4, 130+topr);
@@ -2373,16 +2379,16 @@ else
       begin
       i1l+=slpeek(base+$5c000+8*i);
        i2l+=i1l;
-       topl:=i2l div 256;
-       fbl:=topl * 256;
+       topl:=i2l div 65536;
+       fbl:=topl * 65536;
        i1l-=fbl;
        i2l-=fbl;
        slpoke (base+$a0000+160*i+8*j, 130+topl);
 
        i1r+=slpeek(base+$5c000+8*i+4);
        i2r+=i1r;
-       topr:=i2r div 256;
-       fbr:=topr * 256;
+       topr:=i2r div 65536;
+       fbr:=topr * 65536;
        i1r-=fbr;
        i2r-=fbr;
        slpoke (base+$a0000+160*i+8*j+4, 130+topr);
@@ -2398,7 +2404,7 @@ procedure AudioCallback(b:integer);
 
 label p999;
 
-var audio2:pcardinal;
+var audio2:pinteger;
     s:tsample32;
     ttt:int64;
     k,i,il:integer;
@@ -2409,7 +2415,7 @@ const bb:integer=0;
 
 
 begin
-audio2:=pcardinal(b);
+audio2:=pinteger(b);
 ttt:=clockgettotal;
 if pause1=true then goto p999;
 k:=0;
@@ -2418,7 +2424,7 @@ if filetype=3 then
   begin
   if sfh>-1 then
     begin
-    for i:=0 to 767 do audio2[i]:=buf2[i] ;
+    for i:=0 to 767 do audio2[i]:=buf2[i] * dbtable[volume];
     for i:=0 to 767 do scope[i]:=buf2[i]+buf2[i+1];
     timer1+=siddelay;
     songtime+=siddelay;
@@ -2496,13 +2502,13 @@ else
   if filetype<>3 then
     begin
     s:=sid(1);
-    audio2[0]:=s[0];
-    audio2[1]:=s[1];
+    audio2[0]:=s[0] * dbtable[volume];
+    audio2[1]:=s[1] * dbtable[volume];
     for i:=1 to 119 do
       begin
       s:=sid(0);
-      audio2[2*i]:=s[0];
-      audio2[2*i+1]:=s[1];
+      audio2[2*i]:=s[0] * dbtable[volume];
+      audio2[2*i+1]:=s[1] * dbtable[volume];
       end;
     noiseshaper(b);
     end

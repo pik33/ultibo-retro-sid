@@ -6,7 +6,7 @@ interface
 
 uses sysutils,classes,retromalina,platform,retro,cwindows;
 
-const ver='The retromachine player v. 0.18u --- 2017.01.19';
+const ver='The retromachine player v. 0.19u --- 2017.01.22';
 
 type bmppixel=array[0..2] of byte;
 
@@ -137,11 +137,14 @@ avall:=0;
 avsid:=0;
 rainbow;
 i:=lpeek(base+$60004);
-outtextxyz(24,1019,'A retromachine SID player by pik33 --- inspired by Johannes Ahlebrand''s Parallax Propeller SIDCog --- F1,F2,F3',89,2,2);
-blit(i,10,1011,i+$800000,10,1011,1771,48,1792,1792);
+outtextxyz(24,1019,'A retromachine SID and WAV player by pik33 --- inspired by Johannes Ahlebrand''s Parallax Propeller SIDCog ---',89,2,2);
+blit(i,10,1011,i+$800000,10,911,1771,48,1792,1792);
 rainbow;
-outtextxyz(24,1019,'- channels 1..3 on/off; 1-100 Hz, 2-200 Hz, 3-150 Hz, 4-400 Hz, 5-50 Hz; P - pause; up/down/enter - select --- ',89,2,2);
-blit(i,10,1011,i+$800000,10,1059,1771,48,1792,1792);
+outtextxyz(24,1019,' F1,F2,F3 - channels 1..3 on/off; 1-100 Hz, 2-200 Hz, 3-150 Hz, 4-400 Hz, 5-50 Hz; P - pause; up/down/enter - ',89,2,2);
+blit(i,10,1011,i+$800000,10,959,1771,48,1792,1792);
+rainbow;
+outtextxyz(24,1019,'select; F-432 Hz; G-440 Hz; Q-volume up; A-volume down; + - next subsong; - - previous subsong; ESC-reboot -- ',89,2,2);
+blit(i,10,1011,i+$800000,10,1007,1771,48,1792,1792);
 box2(10,800,894,848,246);
 box2(10,851,894,1008,244);
 outtextxyz(320,808,'Now playing',250,2,2);
@@ -218,7 +221,7 @@ end;
 
 procedure main2;
 
-var a,aaa,c1,ii,iii,il,i,cc:integer;
+var v,a,aaa,c1,ii,iii,il,i,cc:integer;
     buf:array[0..24] of byte;
     qqq,mm,hh,ss:int64;
     mms,hhs,sss,kwas:string;
@@ -271,9 +274,13 @@ if sidcount<>0 then
   if filetype<>3 then outtextxyz(656,1070,'SID '+inttostr(avall)+' us',233,2,2)
   else begin if sidtime>1000 then outtextxyz(656,1070,'wav '+inttostr(avall)+' us',233,2,2); end;
   end;
-outtextxyz(880,1070,'6502 '+floattostrf((av6502/16),fffixed,4,1)+' us',124,2,2);
-outtextxyz(1140,1070,inttostr(lpeek(base+$6fffc)),200,2,2);
-outtextxyz(1280,1070,clock,220,2,2);
+outtextxyz(864,1070,'6502 '+floattostrf((av6502/16),fffixed,4,1)+' us',124,2,2);
+outtextxyz(1088,1070,inttostr(lpeek(base+$6fffc)),200,2,2);
+v:=-volume; if volume=33 then v:=-34;  if volume=34 then v:=-36;
+if volume=35 then v:=-38; if volume=36 then v:=-42;if volume=37 then v:=-47;
+if volume<38 then outtextxyz(1168,1070,inttostr(v)+' dB',24,2,2)
+else outtextxyz(1184,1070,'Mute',24,2,2);
+outtextxyz(1284,1070,clock,220,2,2);
 if peek(base+$100003)=1 then outtextxyz(1540,1070,inttostr(peek(base+$d404)shr 4),108,2,2);
 if peek(base+$100004)=1 then outtextxyz(1580,1070,inttostr(peek(base+$d40b)shr 4),200,2,2);
 if peek(base+$100005)=1 then outtextxyz(1620,1070,inttostr(peek(base+$d412)shr 4),40,2,2);
@@ -292,12 +299,19 @@ outtextxyz(1462,1050,'.',ii,2,2);
 
 for i:=64 to 88 do lpoke(base+$10000+4*i,lpeek(base+$10000+2048+4*((c div 2) mod 256)+4*i) and $FFFFFF);
 if (c mod 32)=0 then lpoke(base+$10000+4*89,lpeek(base+$10000+2048+(4*(c div 64) mod 256)) and $FFFFFF);
-cc:=(2*c) mod 3544 ;
+cc:=(2*c) mod 5316 ;
 a:=lpeek(base+$60004);
-if cc<1772 then blit(a+$800000,10+(cc),1011,a,12,1011,1771-(cc),48,1792,1792);
-if cc<1772 then blit(a+$800000,10,1059,a,11+1771-(cc),1011,(cc),48,1792,1792);
-if cc>=1772 then blit (a+$800000,10,1011,a,11+3543-(cc),1011,(cc-1772),48,1792,1792);
-if cc>=1772 then blit(a+$800000,10+(cc-1772),1059,a,12,1011,1771-(cc-1772),48,1792,1792);
+
+if cc<1772 then blit(a+$800000,10+(cc),911,a,12,1011,1771-(cc),48,1792,1792);
+if cc<1772 then blit(a+$800000,10,959,a,11+1771-(cc),1011,(cc),48,1792,1792);
+
+if (cc>=1772) and (cc<3544) then blit (a+$800000,10,1007,a,11+3543-(cc),1011,(cc-1772),48,1792,1792);
+if (cc>=1772) and (cc<3544) then blit (a+$800000,10+(cc-1772),959,a,12,1011,1771-(cc-1772),48,1792,1792);
+
+if (cc>=3544) then blit (a+$800000,10,911,a,11+5316-(cc),1011,(cc-3544),48,1792,1792);
+if (cc>=3544) then blit (a+$800000,10+(cc-3544),1007,a,12,1011,1771-(cc-3544),48,1792,1792);
+
+
 box2(10,610,894,797,178);
 box2(10,700,894,701,140);
 box2(10,636,894,637,140);
