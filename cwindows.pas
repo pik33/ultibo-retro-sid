@@ -829,7 +829,7 @@ begin
 mx:=mousex;
 my:=mousey;
 
-key:=readkey and $FF; wheel:=mousewheel;
+key:=readkey and $FF; wheel:=readwheel;
 
 if (my>y) and (my<y+16) and (mx>x+l-20) and (mx<x+l-5) then
   begin
@@ -955,7 +955,7 @@ if ((dblclick) or (key=128+13)) and (filenames[sel+selstart,1]<>'        (DIR)')
 // down arrow pressed or wheel down
 
 
-  if (key=208) or (wheel=127) then
+  if (key=208) or (wheel=-1) then
     begin
      if sel<ild then
       begin
@@ -1006,7 +1006,7 @@ if ((dblclick) or (key=128+13)) and (filenames[sel+selstart,1]<>'        (DIR)')
 
   // up arrow pressed or wheel up
 
-  if (dpeek($60028)=209) or (wheel=129) then
+  if (dpeek($60028)=209) or (wheel=1) then
     begin
     if sel>0 then
       begin

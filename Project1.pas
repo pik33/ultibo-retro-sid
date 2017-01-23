@@ -415,14 +415,14 @@ lpoke(base+$6000c,$002040);
 lpoke (base+$60008,0);
 lpoke (base+$60020,1792);
 lpoke (base+$60024,1120);
-setataripallette(0);
+
 
 main1;
 dirlist(drive);
 poke(base+$100003,1);
 poke(base+$100004,1);
 poke(base+$100005,1);
-pwmbeep;
+initaudio;
 
 threadsleep(1);
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_0);
@@ -439,10 +439,10 @@ repeat
   if cfs=nil then
     begin
     key:=readkey and $FF;
-    wheel:=mousewheel;
+    wheel:=readwheel;
 
-    if (key=0) and (wheel=127) then begin key:=208;  end;
-    if (key=0) and (wheel=129) then begin key:=209;  end;
+    if (key=0) and (wheel=-1) then begin key:=208;  end;
+    if (key=0) and (wheel=1) then begin key:=209;  end;
 
     if (dblclick) and (key=0) and (mousex>896) then begin key:=141; end;
 
@@ -641,7 +641,7 @@ repeat
         begin
         pause1a:=true;
         pauseaudio(1);
-        sleep(36);
+        sleep(54);
         for i:=$d400 to $d420 do poke(base+i,0);
    //     for i:=1 to 4 do waitvbl;
         if sfh>=0 then fileclose(sfh);
@@ -743,7 +743,7 @@ repeat
           CleanDataCacheRange(dmactrl-$C0000000,256);
           lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
           if spr6x=spr7x then begin sprx:=100; spr2x:=200; spr3x:=300;spr4x:=400; spr5x:=500; spr6x:=600; spr7x:=700; end;
-         sleep(36);
+         sleep(54);
 
          //repeat threadsleep(0) until (filebuffer.m<32768);
           end

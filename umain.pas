@@ -114,10 +114,10 @@ lpoke(base+$6007c,$00010001);
 lpoke (base+$60008,0);
 lpoke (base+$60020,1792);
 lpoke (base+$60024,1120);
-setataripallette(0);
-setataripallette(1);
-setataripallette(2);
-setataripallette(3);
+setpallette(ataripallette,0);
+setpallette(ataripallette,1);
+setpallette(ataripallette,2);
+setpallette(ataripallette,3);
 cls(146);
 outtextxyz(128,16,ver,154,4,2);
 box2(8,64,1784,1112,0);
@@ -358,13 +358,13 @@ else
      if (sqr(spr5x-spr6x)+sqr(spr5y-spr6y))<=4096 then begin i:=spr5dx; spr5dx:=spr6dx; spr6dx:=i; i:=spr5dy; spr5dy:=spr6dy; spr6dy:=i; end;
      if (sqr(spr5x-spr7x)+sqr(spr5y-spr7y))<=4096 then begin i:=spr5dx; spr5dx:=spr7dx; spr7dx:=i; i:=spr5dy; spr5dy:=spr7dy; spr7dy:=i; end;
      if (sqr(spr6x-spr7x)+sqr(spr6y-spr7y))<=4096 then begin i:=spr6dx; spr6dx:=spr7dx; spr7dx:=i; i:=spr6dy; spr6dy:=spr7dy; spr7dy:=i; end;
-     if (sqr(32+spr7x-dpeek(base+$6002c))+sqr(32+spr7y-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  spr7dx:=-spr7dx; spr7dy:=-spr7dy;  end;
-     if (sqr(32+spr6x-dpeek(base+$6002c))+sqr(32+spr6y-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  spr6dx:=-spr6dx; spr6dy:=-spr6dy;  end;
-     if (sqr(32+spr5x-dpeek(base+$6002c))+sqr(32+spr5y-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  spr5dx:=-spr5dx; spr5dy:=-spr5dy;  end;
-     if (sqr(32+spr4x-dpeek(base+$6002c))+sqr(32+spr4y-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  spr4dx:=-spr4dx; spr4dy:=-spr4dy;  end;
-     if (sqr(32+spr3x-dpeek(base+$6002c))+sqr(32+spr3y-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  spr3dx:=-spr3dx; spr3dy:=-spr3dy;  end;
-     if (sqr(32+spr2x-dpeek(base+$6002c))+sqr(32+spr2y-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  spr2dx:=-spr2dx; spr2dy:=-spr2dy;  end;
-     if (sqr(32+sprx-dpeek(base+$6002c))+sqr(32+spry-dpeek(base+$6002e))<=1024) and (peek(base+$60030)=1) then begin  sprdx:=-sprdx; sprdy:=-sprdy; end;
+     if (sqr(32+spr7x-mousex-64)+sqr(32+spr7y-dpeek(base+$6002e)-40)<=1024) and (peek(base+$60030)=1) then begin  spr7dx:=-spr7dx; spr7dy:=-spr7dy;  end;
+     if (sqr(32+spr6x-mousex-64)+sqr(32+spr6y-dpeek(base+$6002e)-40)<=1024) and (peek(base+$60030)=1) then begin  spr6dx:=-spr6dx; spr6dy:=-spr6dy;  end;
+     if (sqr(32+spr5x-mousex-64)+sqr(32+spr5y-dpeek(base+$6002e)-40)<=1024) and (peek(base+$60030)=1) then begin  spr5dx:=-spr5dx; spr5dy:=-spr5dy;  end;
+     if (sqr(32+spr4x-mousex-64)+sqr(32+spr4y-dpeek(base+$6002e)-40)<=1024) and (peek(base+$60030)=1) then begin  spr4dx:=-spr4dx; spr4dy:=-spr4dy;  end;
+     if (sqr(32+spr3x-mousex-64)+sqr(32+spr3y-dpeek(base+$6002e)-40)<=1024) and (peek(base+$60030)=1) then begin  spr3dx:=-spr3dx; spr3dy:=-spr3dy;  end;
+     if (sqr(32+spr2x-mousex-64)+sqr(32+spr2y-dpeek(base+$6002e)-40)<=1024) and (peek(base+$60030)=1) then begin  spr2dx:=-spr2dx; spr2dy:=-spr2dy;  end;
+     if (sqr(32+sprx-mousex-64)+sqr(32+spry-dpeek(base+$6002e)-40)<=1024) and (peek(base+$60030)=1) then begin  sprdx:=-sprdx; sprdy:=-sprdy; end;
 
      sprx+=sprdx;
      spry+=sprdy;
@@ -416,7 +416,7 @@ else
      if spr7y<=40 then spr7dy:=abs(spr7dy);
      lpoke(base+$60070,(spr7y shl 16)+spr7x);
      end;
-lpoke(base+$60078,lpeek(base+$6002c) );
+lpoke(base+$60078,lpeek(base+$6002c)+$00280040 );
 
 //box(100,100,300,40,0);
 //outtextxyz(100,100,inttostr(dpeek($2060030))+' '+inttostr(dpeek($2060032)),40,2,2);
@@ -429,7 +429,6 @@ procedure writebmp;
 
 var fh,i,j,k,idx:integer;
     b:byte;
-
 
 
 begin
@@ -446,7 +445,7 @@ for i:=1119 downto 0 do
    bmpbuf[k]:=bmpp;
    k+=1;
    end;
-filewrite(fh,bmpbuf,6021120);
+for i:=0 to 1469 do begin filewrite(fh,bmpbuf[1024*i],4096); sleep(1); end;// filewrite(fh,bmpbuf,6021120);
 fileclose (fh);
 end;
 
