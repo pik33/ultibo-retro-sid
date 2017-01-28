@@ -28,7 +28,7 @@ uses
   retromalina,
   cwindows,
   Unit6502,
-  umain, mp3;
+  umain, mp3, simpleaudio;
 //  console,
 //  Syscalls;
 
@@ -36,21 +36,7 @@ uses
 
 //function mpg123_init:integer; cdecl; external 'libmpg123' Name 'mpg123_init';
 
-type wavehead=packed record
-    riff:integer;
-    size:cardinal;
-    wave:integer;
-    fmt:integer;
-    fmtl:integer;
-    pcm:smallint;
-    channels:smallint;
-    srate:integer;
-    brate:integer;
-    bytesps:smallint;
-    bps:smallint;
-    data:integer;
-    datasize:cardinal;
-  end;
+
 
 label p999;
 var s,currentdir,currentdir2:string;
@@ -84,6 +70,7 @@ var s,currentdir,currentdir2:string;
        d:double; e:integer;
      key:integer;
     wheel:integer;
+    t,tt,ttt:int64;
 
 // ---- procedures
 
@@ -91,7 +78,7 @@ procedure waveopen (var fh:integer);
 
 label p999;
 
-var head:wavehead;
+var
     i,k:integer;
     s:string;
     head_datasize:int64;
@@ -431,8 +418,9 @@ for i:=0 to 255 do keyboardstatus[i]:=0;
 startreportbuffer;
 
 lpoke(base+$6fffc,440);
+
 repeat
-  main2;
+main2;
 //  if click then box(100,100,200,100,32) else box(100,100,200,100,40);
 // outtextxyz(100,100,inttohex(integer(psystem),8),40,2,2);
 
@@ -494,7 +482,7 @@ repeat
     end
   else if key=ord('a') then
     begin
-   volume+=1; if volume>38 then volume:=38;
+   volume+=1; if volume>62 then volume:=62;
     end
 
  else if key=ord('t') then
@@ -608,11 +596,21 @@ repeat
         end;
       end
 
+     else if key=207 then
+       begin
+       filebuffer.seek(-1760000)
+       end
+     else if key=206 then
+       begin
+       filebuffer.seek(1760000)
+       end
+
+
      else if key=ord('f') then
       begin
       lpoke($3F20C000,$0); // pwm off
-      if filetype=3 then lpoke($3F20C010,275) else lpoke($3F20C010,265); // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
-      if filetype=3 then lpoke($3F20C020,275) else lpoke($3F20C020,265);
+      if (filetype=3) and (head.srate=44100) then lpoke($3F20C010,275) else lpoke($3F20C010,265); // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+      if (filetype=3) and (head.srate=44100) then lpoke($3F20C020,275) else lpoke($3F20C020,265);
       lpoke(base+$6fffc,432);
       lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
       end
@@ -620,8 +618,8 @@ repeat
     else if key=ord('g') then
       begin
       lpoke($3F20C000,$0); // pwm off
-      if filetype=3 then lpoke($3F20C010,270) else lpoke($3F20C010,260); // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
-      if filetype=3 then lpoke($3F20C020,270) else lpoke($3F20C020,260);
+      if (filetype=3) and (head.srate=44100) then lpoke($3F20C010,270) else lpoke($3F20C010,260); // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+      if (filetype=3) and (head.srate=44100) then lpoke($3F20C020,270) else lpoke($3F20C020,260);
       lpoke(base+$6fffc,440);
       lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
 
@@ -720,26 +718,34 @@ repeat
        //   box(18,132,800,600,178);
        //   outtextxyz(18,132,'type: wave file',44,2,2);
           songs:=0;
-          siddelay:=8707;
+          if head.srate=44000 then siddelay:=8707 else siddelay:=2000;
           //fileread(sfh,atitle[1],32);    fileread(sfh,atitle[1],12);
+          if head.srate=96000 then i:=10 else i:=0;
           if lpeek(base+$6fffc)<>440 then
             begin
             lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
-            lpoke($3F20C010,275);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
-            lpoke($3F20C020,275);
+            lpoke($3F20C010,275-i);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+            lpoke($3F20C020,275-i);
             lpoke(base+$6fffc,432);
             lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
             end
           else
             begin
             lpoke($3F20C000,$0); // pwm contr0l - enable, clear fifo, use fifo
-            lpoke($3F20C010,270);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
-            lpoke($3F20C020,270);
+            lpoke($3F20C010,270-i);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
+            lpoke($3F20C020,270-i);
             lpoke(base+$6fffc,440);
             lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
             end;
+          if head.srate=44100 then begin
           lpoke (dmactrl+$c-$C0000000,42*1536);
           lpoke (dmactrl+$2c-$C0000000,42*1536);
+          end
+          else
+          begin
+           lpoke (dmactrl+$c-$C0000000,10*1536);
+          lpoke (dmactrl+$2c-$C0000000,10*1536);
+          end;
           CleanDataCacheRange(dmactrl-$C0000000,256);
           lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
           if spr6x=spr7x then begin sprx:=100; spr2x:=200; spr3x:=300;spr4x:=400; spr5x:=500; spr6x:=600; spr7x:=700; end;

@@ -24,7 +24,7 @@
 //    2F01_0000  -  2F04_FFFF pallette banks; 65536 entries
 //    2F05_0000  -  2F05_1FFF font definition; 256 char @8x16 px
 //    2F05_2000  -  2F05_9FFF static sprite defs 8x4k
-//    2F05_A000  -  2F05_BFFF 8kB area for audio buffer
+//    2F05_A000  -  2F05_BFFF 8kB area for 16-bit audio buffer
 //    2F05_C000  -  2F05_C03F audio DMA ctrl block
 //    2F05_C040  -  2F05_FFFF reserved
 //
@@ -55,9 +55,15 @@
 //                                         long 1 30..16 y zoom 15..0 x zoom
 //    2F06_0080 - 206009C dynamic sprite data pointer
 //    2F06_00A0 - text cursor position
-//    2F06_00A4 - 2F06_FFFF - reserved
+//    2F06_00A4 - text color
+//    2F06_00A8 - background color
+//    2F06_00AC - text size and pitch
+//    2F06_00B0 - 2F06_00C0 - reserved
+//    2F06_00C0 - 2F06_00FF - audio DMA ctrl blocks, 2x32 bytes
 //
-//    2F07_0000  -  2F0C_FFFF - long audio buffer for noise shaper
+//    2F06_0100 - 2F06_FFFF - reserved
+//
+//    2F07_0000 - 2F08_FFFF - 2x64k long audio buffer for noise shaper
 //    2F0D_0000  -  2FFF_FFFF - retromachine system area
 //    3000_0000  -  30FF_FFFF - virtual framebuffer area
 //    3100_0000  -  3AFF_FFFF - Ultibo system memory area
@@ -83,9 +89,11 @@ unit retromalina;
 
 interface
 
-uses sysutils,classes,unit6502,Platform,Framebuffer,keyboard,mouse,threads,GlobalConst,ultibo, retro, heapmanager;
+uses sysutils,classes,unit6502,Platform,Framebuffer,keyboard,mouse,
+     threads,GlobalConst,ultibo,retro,simpleaudio;
 
-const base=$2F000000; // retromachine system area base
+const base=          $2F000000;     // retromachine system area base
+      nocache=       $C0000000;     // cache off address addition
 
 const _pallette=        $10000;
       _systemfont=      $50000;
@@ -140,6 +148,10 @@ const _pallette=        $10000;
       _sprite6ptr=      $60098;
       _sprite7ptr=      $6009C;
       _textcursor=      $600A0;
+      _textcolor=       $600A4;
+      _bkcolor=         $600A8;
+      _textsize=        $600AC;
+      _audiodma=        $600C0;
 
 
 type
@@ -175,6 +187,7 @@ type
      il,fh,newfh:integer;
      newfilename:string;
      needclear:boolean;
+     seekamount:integer;
      protected
        procedure Execute; override;
      public
@@ -184,6 +197,7 @@ type
       function getdata(b,ii:integer):integer;
       procedure setfile(nfh:integer);
       procedure clear;
+      procedure seek(amount:integer);
      end;
 
      // mouse thread
@@ -204,9 +218,25 @@ type
       Constructor Create(CreateSuspended : boolean);
      end;
 
+type wavehead=packed record
+    riff:integer;
+    size:cardinal;
+    wave:integer;
+    fmt:integer;
+    fmtl:integer;
+    pcm:smallint;
+    channels:smallint;
+    srate:integer;
+    brate:integer;
+    bytesps:smallint;
+    bps:smallint;
+    data:integer;
+    datasize:cardinal;
+  end;
 
      TSample=array[0..1] of smallint;
      TSample32=array[0..1] of integer;
+
 
 var fh,filetype:integer;                // this needs cleaning...
     sfh:integer;                        // SID file handler
@@ -248,13 +278,16 @@ var fh,filetype:integer;                // this needs cleaning...
     i1r,i2r,fbr,topr:integer;
 
     buf2:array[0..1919] of smallint;
+    buf2f:array[0..959] of single absolute buf2;
     filebuffer:TFileBuffer;
     amouse:tmouse ;
     akeyboard:tkeyboard ;
     psystem,psystem2:pointer;
-    dmactrl:cardinal;
+
     volume:integer=0;
     textcursoron:boolean=false;
+    head:wavehead;
+
 
 // system variables
 
@@ -336,6 +369,13 @@ var fh,filetype:integer;                // this needs cleaning...
 
     textcursorx:     word     absolute _textcursor;
     textcursory:     word     absolute _textcursor+2;
+    textcolor:       cardinal absolute _textcolor;
+    bkcolor:         cardinal absolute _bkcolor;
+    textsizex:       byte     absolute _textsize;
+    textsizey:       byte     absolute _textsize+1;
+    textpitch:       byte     absolute _textsize+2;
+    audiodma1:       array[0..7] of cardinal absolute _audiodma;
+    audiodma2:       array[0..7] of cardinal absolute _audiodma+32;
 
 
 // prototypes
@@ -371,7 +411,7 @@ procedure outtextxys(x,y:integer; t:string;c,s:integer);
 procedure outtextxyzs(x,y:integer; t:string;c,xz,yz,s:integer);
 procedure scrollup;
 function sid(mode:integer):tsample32;
-procedure initaudio;
+//procedure initaudio;
 procedure pauseaudio(mode:integer);   // instead of the real one
 procedure AudioCallback(b:integer);
 function getpixel(x,y:integer):integer; inline;
@@ -380,9 +420,11 @@ function readkey:integer; inline;
 function click:boolean;
 function dblclick:boolean;
 procedure waitvbl;
-procedure makeexecutable(addr:integer);
+procedure removeramlimits(addr:integer);
 function readwheel: shortint; inline;
 procedure unhidecolor(c,bank:cardinal);
+procedure noiseshaper(bufaddr,outbuf,oversample,len:integer);
+
 
 implementation
 
@@ -521,6 +563,7 @@ self.il:=0;
 self.newfilename:='';
 self.empty:=true; self.full:=false;
 self.needclear:=false;
+self.seekamount:=0;
 end;
 
 procedure TFileBuffer.Execute;
@@ -531,6 +574,7 @@ begin
 
 repeat
 if self.needclear then begin self.koniec:=0; self.pocz:=0; self.needclear:=false; self.empty:=true; self.m:=131072; for i:=0 to 131071 do buf[i]:=0; end;
+if (self.seekamount<>0) and (self.fh>0) then begin fileseek(fh,10000000,fsFromCurrent); seekamount:=0; end;
 if self.fh>0 then
   begin
   if self.koniec>=self.pocz then self.m:=131072-self.koniec+self.pocz-1 else self.m:=self.pocz-self.koniec-1;
@@ -560,6 +604,12 @@ else
 sleep(1);
 until terminated;
 
+end;
+
+procedure TFileBuffer.seek(amount:integer);
+
+begin
+seekamount:=amount;
 end;
 
 function TFileBuffer.getdata(b,ii:integer):integer;
@@ -718,12 +768,14 @@ var a,i,j,k:integer;
 
 begin
 
-dmactrl:=$c0000000+cardinal(GetAlignedMem(64,32));
+//dmactrl:=nocache+cardinal(GetAlignedMem(64,32));
 
 for i:=base to base+$FFFFF do poke(i,0); // clean all system area
 displaystart:=$30000000;                 // vitual framebuffer address
 framecnt:=0;                             // frame counter
 
+removeramlimits(integer(@noiseshaper));    // noiseshaper needs rwx ram
+//for i:=1 to 8191 do removeramlimits(4096*i);
 // init sid variables
 
 for i:=0 to 127 do siddata[i]:=0;
@@ -1002,7 +1054,7 @@ end;
 
 // ------  Helper procedures
 
-procedure makeexecutable(addr:integer);
+procedure removeramlimits(addr:integer);
 
 var Entry:TPageTableEntry;
 
@@ -2624,127 +2676,136 @@ if scj>959 then if (oldsc<0) and (sc>0) then scj:=0 else scj:=959;
 //sid[1]:=sid1l;
 end;
 
-procedure noiseshaper2(bufaddr:integer);
 
-var i,j:integer;
+procedure noiseshaper1(bufaddr,outbuf,oversample,len:integer);
 
-// -- rev 20170111
+label p101,p102,p999,i1l,i1r,i2l,i2r;
 
-begin
-if bufaddr=base+$5a000 then
-  begin
-  for i:=0 to 767 do
-    begin
-    for j:=0 to 20 do
-      begin
-
-      i1l+=slpeek(base+$5a000+8*i);
-      i2l+=i1l;
-      topl:=i2l div 65536;
-      fbl:=topl * 65536;
-      i1l-=fbl;
-      i2l-=fbl;
-      slpoke (base+$70000+168*i+8*j, 130+topl);
-
-      i1r+=slpeek(base+$5a000+8*i+4);
-      i2r+=i1r;
-      topr:=i2r div 65536;
-      fbr:=topr * 65536;
-      i1r-=fbr;
-      i2r-=fbr;
-      slpoke (base+$70000+168*i+8*j+4, 130+topr);
-
-      end;
-    end;
-    CleanDataCacheRange(base+$70000,$10000);
-  end
-else
-  begin
-  for i:=0 to 767 do
-    begin
-    for j:=0 to 20 do
-      begin
-      i1l+=slpeek(base+$5c000+8*i);
-       i2l+=i1l;
-       topl:=i2l div 65536;
-       fbl:=topl * 65536;
-       i1l-=fbl;
-       i2l-=fbl;
-       slpoke (base+$a0000+168*i+8*j, 130+topl);
-
-       i1r+=slpeek(base+$5c000+8*i+4);
-       i2r+=i1r;
-       topr:=i2r div 65536;
-       fbr:=topr * 65536;
-       i1r-=fbr;
-       i2r-=fbr;
-       slpoke (base+$a0000+168*i+8*j+4, 130+topr);
-      end;
-    end;
-    CleanDataCacheRange(base+$a0000,$10000);
-  end;
-end;
-
-
-procedure noiseshaper(bufaddr:integer);
-
-var i,j:integer;
-
-// -- rev 20170111
+// -- rev 20170126
 
 begin
-if bufaddr=base+$5a000 then
-  begin
-  for i:=0 to 119 do
-    begin
-    for j:=0 to 19 do
-      begin
-      i1l+=slpeek(base+$5a000+8*i);
-      i2l+=i1l;
-      topl:=i2l div 65536;
-      fbl:=topl * 65536;
-      i1l-=fbl;
-      i2l-=fbl;
-      slpoke (base+$70000+160*i+8*j, 130+topl);
+                        asm
+                        push {r0-r10,r12,r14}
+                        ldr r3,i1l            // init integerators
+                        ldr r4,i1r
+                        ldr r7,i2l
+                        ldr r8,i2r
+                        ldr r5,bufaddr        // init buffers addresses
+                        ldr r2,outbuf
+                        ldr r14,oversample    // yes, lr used here, I am short of regs :(
+                        ldr r0,len            // outer loop counter
 
-      i1r+=slpeek(base+$5a000+8*i+4);
-      i2r+=i1r;
-      topr:=i2r div 65536;
-      fbr:=topr * 65536;
-      i1r-=fbr;
-      i2r-=fbr;
-      slpoke (base+$70000+160*i+8*j+4, 130+topr);
-      end;
-    end;
-  CleanDataCacheRange(base+$70000,$10000);
-  end
-else
-  begin
-  for i:=0 to 119 do
-    begin
-    for j:=0 to 19 do
-      begin
-      i1l+=slpeek(base+$5c000+8*i);
-       i2l+=i1l;
-       topl:=i2l div 65536;
-       fbl:=topl * 65536;
-       i1l-=fbl;
-       i2l-=fbl;
-       slpoke (base+$a0000+160*i+8*j, 130+topl);
+ p102:                  mov r1,r14            // inner loop counter
+                        ldr r6,[r5],#4        // new input value left
+                        ldr r12,[r5],#4       // new input value right
 
-       i1r+=slpeek(base+$5c000+8*i+4);
-       i2r+=i1r;
-       topr:=i2r div 65536;
-       fbr:=topr * 65536;
-       i1r-=fbr;
-       i2r-=fbr;
-       slpoke (base+$a0000+160*i+8*j+4, 130+topr);
-      end;
-    end;
-    CleanDataCacheRange(base+$a0000,$10000);
-  end;
+ p101:                  add r3,r6             // inner loop: do oversampling
+                        add r4,r12
+                        add r7,r3
+                        add r8,r4
+                        mov r9,r7,asr #27
+                        mov r10,r9,lsl #27
+                        sub r3,r10
+                        sub r7,r10
+                        add r9,#1            // kill the negative bug :) :)
+                        lsr r9,#1
+
+                        lsl r9,#8
+
+                        str r9,[r2],#4
+                        mov r9,r8,asr #27
+                        mov r10,r9,lsl #27
+                        sub r4,r10
+                        sub r8,r10
+                        add r9,#1
+                        lsr r9,#1
+
+                        lsl r9,#8
+
+                        str r9,[r2],#4
+                        subs r1,#1
+                        bne p101
+                        subs r0,#1
+                        bne p102
+
+                        str r3,i1l
+                        str r4,i1r
+                        str r7,i2l
+                        str r8,i2r
+
+                        b p999
+
+i1l:                    .long 0
+i1r:                    .long 0
+i2l:                    .long 0
+i2r:                    .long 0
+
+p999:                   pop {r0-r10,r12,r14}
+                        end;
+
+CleanDataCacheRange(outbuf,$10000);
 end;
 
+procedure noiseshaper(bufaddr,outbuf,oversample,len:integer);
+
+label p101,p102,p999,i1l,i1r,i2l,i2r;
+
+// -- rev 20170126
+
+begin
+                        asm
+                        push {r0-r10,r12,r14}
+                        ldr r3,i1l            // init integerators
+                        ldr r4,i1r
+                        ldr r7,i2l
+                        ldr r8,i2r
+                        ldr r5,bufaddr        // init buffers addresses
+                        ldr r2,outbuf
+                        ldr r14,oversample    // yes, lr used here, I am short of regs :(
+                        ldr r0,len            // outer loop counter
+
+ p102:                  mov r1,r14            // inner loop counter
+                        ldr r6,[r5],#4        // new input value left
+                        ldr r12,[r5],#4       // new input value right
+
+ p101:                  add r3,r6             // inner loop: do oversampling
+                        add r4,r12
+                        add r7,r3
+                        add r8,r4
+                        mov r9,r7,asr #20
+                        mov r10,r9,lsl #20
+                        sub r3,r10
+                        sub r7,r10
+                        add r9,#1            // kill the negative bug :) :)
+                        str r9,[r2],#4
+                        mov r9,r8,asr #20
+                        mov r10,r9,lsl #20
+                        sub r4,r10
+                        sub r8,r10
+                        add r9,#1
+                        str r9,[r2],#4
+                        subs r1,#1
+                        bne p101
+                        subs r0,#1
+                        bne p102
+
+                        str r3,i1l
+                        str r4,i1r
+                        str r7,i2l
+                        str r8,i2r
+
+                        b p999
+
+i1l:                    .long 0
+i1r:                    .long 0
+i2l:                    .long 0
+i2r:                    .long 0
+
+p999:                   pop {r0-r10,r12,r14}
+                        end;
+
+CleanDataCacheRange(outbuf,$10000);
+end;
 
 
 procedure AudioCallback(b:integer);
@@ -2754,7 +2815,7 @@ label p999;
 var audio2:pinteger;
     s:tsample32;
     ttt:int64;
-    k,i,il:integer;
+    outbuf, k,i,il:integer;
     buf:array[0..25] of byte;
 
 const aa:integer=0;
@@ -2771,12 +2832,6 @@ if filetype=3 then
   begin
   if sfh>-1 then
     begin
-    for i:=0 to 767 do audio2[i]:=buf2[i] * dbtable[volume];
-    for i:=0 to 767 do scope[i]:=buf2[i]+buf2[i+1];
-    timer1+=siddelay;
-    songtime+=siddelay;
-    noiseshaper2(b);
-    //    il:=fileread(sfh,buf2[0],1536);
     il:=filebuffer.getdata(integer(@buf2[0]),1536);
     if il<>1536 then
       begin
@@ -2785,14 +2840,32 @@ if filetype=3 then
       songtime:=0;
       pause1:=true;
       timer1:=-1;
-      for i:=0 to 1535 do buf2[i]:=0;
+      for i:=il to 1535 do buf2[i]:=0;
+      // wypelnij reszte bufora!!!!!
       pauseaudio(1);
-      noiseshaper2(b);
+      if b=base+$5a000 then outbuf:=base+$70000 else outbuf:=base+$a0000;
+      if head.srate=44100 then noiseshaper(b,outbuf,21,768)
+      else if head.srate=96000 then noiseshaper(b, outbuf, 10,384);
       repeat until peek(base+$60028)=0;
       poke(base+$60028,208);
       repeat until peek(base+$60028)=0;
       poke(base+$60028,141);
       end;
+    if head.srate=44100 then begin
+    for i:=0 to 767 do audio2[i]:=(buf2[i]*dbtable[volume])+$8000000;
+    for i:=0 to 767 do scope[i]:=buf2[i]+buf2[i+1];
+    end
+      else     if head.srate=96000 then begin
+    for i:=0 to 383 do audio2[i]:=round((buf2f[i]*dbtable[volume]*32768))+$8000000;
+    for i:=0 to 383 do scope[i]:=round(32768*(buf2f[i]+buf2f[i+1]));
+    end ;
+
+    timer1+=siddelay;
+    songtime+=siddelay;
+    if b=base+$5a000 then outbuf:=base+$70000 else outbuf:=base+$a0000;
+    if head.srate=44100 then noiseshaper(b,outbuf,21,768)
+    else if head.srate=96000 then noiseshaper(b,outbuf,10,384);
+    //    il:=fileread(sfh,buf2[0],1536);
     end;
   end
 else
@@ -2849,15 +2922,16 @@ else
   if filetype<>3 then
     begin
     s:=sid(1);
-    audio2[0]:=s[0] * dbtable[volume];
-    audio2[1]:=s[1] * dbtable[volume];
+    audio2[0]:=(s[0] *dbtable[volume])+$8000000;
+    audio2[1]:=(s[1] *dbtable[volume])+$8000000;
     for i:=1 to 119 do
       begin
       s:=sid(0);
-      audio2[2*i]:=s[0] * dbtable[volume];
-      audio2[2*i+1]:=s[1] * dbtable[volume];
+      audio2[2*i]:=(s[0] * dbtable[volume])+$8000000;
+      audio2[2*i+1]:=(s[1] *dbtable[volume])+$8000000;
       end;
-    noiseshaper(b);
+    if b=base+$5a000 then outbuf:=base+$70000 else outbuf:=base+$a0000;
+    noiseshaper(b,outbuf,20,120)
     end
   else
     begin
@@ -2875,45 +2949,7 @@ end;
 
 
 
-procedure initaudio;
 
-var i:integer;
-    ctrlblock:array[0..7] of cardinal;
-
-begin
-
-ctrlblock[0]:=$00050140; //transfer info
-ctrlblock[1]:=base+$c0070000;
-ctrlblock[2]:=$7E20C018;
-ctrlblock[3]:=21*960; //7680;
-ctrlblock[4]:=$0;
-ctrlblock[5]:=dmactrl+$20; // base+$c2000020;
-ctrlblock[6]:=$0;
-ctrlblock[7]:=$0;
-for i:=0 to 7 do lpoke(dmactrl-$C0000000+4*i,ctrlblock[i]);
-ctrlblock[5]:=dmactrl; //base+$c2000000;
-ctrlblock[1]:=base+$c00a0000;
-for i:=0 to 7 do lpoke(dmactrl-$C0000000+$20+4*i,ctrlblock[i]);
-CleanDataCacheRange(dmactrl-$C0000000,256); //(base+$2000000,$10000);
-sleep(1);
-
-
-//set gpio
-i:=pinteger($3F200010)^ and  %11111111111111000111111111111000;
-lpoke($3F200010, i or       %00000000000000100000000000000100); // gpio 40/45 as alt0
-lpoke($3F1010a0,$5a000016); // set clock to pll D    16 plld
-lpoke($3F1010a4,$5a002000); // div 2
-lpoke($3F20C010,260);      // 5208 for 48 kHz pwm 1 range  12bit 48 khz 2083
-lpoke($3F20C020,260);      // pwm 2 range
-lpoke($3F20C000,$0000a1e1); // pwm contr0l - enable, clear fifo, use fifo
-lpoke($3F20C008,$80000307); // pwm dma enable
-lpoke($3F007ff0,pinteger($3F007FF0)^ or %100000000000000); // dma 06 enable
-lpoke($3F007e04,dmactrl); //base+$c2000000);
-lpoke($3F007e00,3);
-
-
-
-end;
 
 procedure pauseaudio(mode:integer);
 

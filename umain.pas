@@ -272,13 +272,13 @@ outtextxyz(400,1070,'sprites '+inttostr(avspt)+' us',186,2,2);
 if sidcount<>0 then
   begin
   if filetype<>3 then outtextxyz(656,1070,'SID '+inttostr(avall)+' us',233,2,2)
-  else begin if sidtime>1000 then outtextxyz(656,1070,'wav '+inttostr(avall)+' us',233,2,2); end;
+  else begin if sidtime>100 then outtextxyz(656,1070,'wav '+inttostr(avall)+' us',233,2,2); end;
   end;
 outtextxyz(864,1070,'6502 '+floattostrf((av6502/16),fffixed,4,1)+' us',124,2,2);
 outtextxyz(1088,1070,inttostr(lpeek(base+$6fffc)),200,2,2);
-v:=-volume; if volume=33 then v:=-34;  if volume=34 then v:=-36;
-if volume=35 then v:=-38; if volume=36 then v:=-42;if volume=37 then v:=-47;
-if volume<38 then outtextxyz(1168,1070,inttostr(v)+' dB',24,2,2)
+v:=-volume; if volume=57 then v:=-58;  if volume=58 then v:=-60;
+if volume=59 then v:=-63; if volume=60 then v:=-66;if volume=61 then v:=-72;
+if volume<62 then outtextxyz(1168,1070,inttostr(v)+' dB',24,2,2)
 else outtextxyz(1184,1070,'Mute',24,2,2);
 outtextxyz(1284,1070,clock,220,2,2);
 if peek(base+$100003)=1 then outtextxyz(1540,1070,inttostr(peek(base+$d404)shr 4),108,2,2);
