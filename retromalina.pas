@@ -377,6 +377,8 @@ var fh,filetype:integer;                // this needs cleaning...
     audiodma1:       array[0..7] of cardinal absolute _audiodma;
     audiodma2:       array[0..7] of cardinal absolute _audiodma+32;
 
+ //   desired, obtained:TAudioSpec;
+    error:integer;
 
 // prototypes
 
@@ -423,7 +425,7 @@ procedure waitvbl;
 procedure removeramlimits(addr:integer);
 function readwheel: shortint; inline;
 procedure unhidecolor(c,bank:cardinal);
-procedure noiseshaper(bufaddr,outbuf,oversample,len:integer);
+function noiseshaper(bufaddr,outbuf,oversample,len:integer):integer;
 
 
 implementation
@@ -574,7 +576,7 @@ begin
 
 repeat
 if self.needclear then begin self.koniec:=0; self.pocz:=0; self.needclear:=false; self.empty:=true; self.m:=131072; for i:=0 to 131071 do buf[i]:=0; end;
-if (self.seekamount<>0) and (self.fh>0) then begin fileseek(fh,10000000,fsFromCurrent); seekamount:=0; end;
+//if (self.seekamount<>0) and (self.fh>0) then begin fileseek(fh,10000000,fsFromCurrent); seekamount:=0; end;
 if self.fh>0 then
   begin
   if self.koniec>=self.pocz then self.m:=131072-self.koniec+self.pocz-1 else self.m:=self.pocz-self.koniec-1;
@@ -674,7 +676,7 @@ threadsleep(1);
   repeat sleep(0); a:= lpeek($3F007e00) until (a and 2) <>0 ;
   if (a and 2)<>0 then
     begin
-    if lpeek($3f007e1c)=dmactrl {base+$c2000000} then audiocallback(base+$5a000)
+    if lpeek($3f007e1c)=nocache+ctrl1 {base+$c2000000} then audiocallback(base+$5a000)
                                   else audiocallback(base+$5c000);
     lpoke($3F007e00,$00000003);
 
@@ -750,6 +752,13 @@ until terminated;
 running:=0;
 end;
 
+// A dummy callback for audio unit testing
+
+procedure testcallback(userdata: Pointer; stream: PUInt8; len:Integer);
+
+begin
+end;
+
 // ---- Retromachine procedures ------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -818,7 +827,16 @@ thread:=tretro.create(true);
 thread.start;
 
 // start audio, mouse, kbd and file buffer threads
-pauseaudio(1);
+
+//desired.callback:=@testcallback;
+//desired.channels:=2;
+//desired.format:=AUDIO_S16;
+//desired.freq:=44100;
+//desired.samples:=384;
+//error:=openaudio(@desired,@obtained);
+
+
+//pauseaudio(1);
 thread3:=taudio.Create(true);
 thread3.start;
 filebuffer:=Tfilebuffer.create(true);
@@ -2746,7 +2764,7 @@ p999:                   pop {r0-r10,r12,r14}
 CleanDataCacheRange(outbuf,$10000);
 end;
 
-procedure noiseshaper(bufaddr,outbuf,oversample,len:integer);
+function noiseshaper(bufaddr,outbuf,oversample,len:integer):integer;
 
 label p101,p102,p999,i1l,i1r,i2l,i2r;
 
@@ -2793,6 +2811,7 @@ begin
                         str r4,i1r
                         str r7,i2l
                         str r8,i2r
+                        str r2,result
 
                         b p999
 
@@ -2840,12 +2859,12 @@ if filetype=3 then
       songtime:=0;
       pause1:=true;
       timer1:=-1;
-      for i:=il to 1535 do buf2[i]:=0;
+//      for i:=il to 1535 do buf2[i]:=0;
       // wypelnij reszte bufora!!!!!
-      pauseaudio(1);
-      if b=base+$5a000 then outbuf:=base+$70000 else outbuf:=base+$a0000;
-      if head.srate=44100 then noiseshaper(b,outbuf,21,768)
-      else if head.srate=96000 then noiseshaper(b, outbuf, 10,384);
+//      pauseaudio(1);
+      if b=base+$5a000 then outbuf:=dmabuf1 else outbuf:=dmabuf2;
+      if head.srate=44100 then noiseshaper(b,outbuf,21,384)  //21,768
+      else if head.srate=96000 then noiseshaper(b,outbuf,10,192);
       repeat until peek(base+$60028)=0;
       poke(base+$60028,208);
       repeat until peek(base+$60028)=0;
@@ -2862,10 +2881,10 @@ if filetype=3 then
 
     timer1+=siddelay;
     songtime+=siddelay;
-    if b=base+$5a000 then outbuf:=base+$70000 else outbuf:=base+$a0000;
-    if head.srate=44100 then noiseshaper(b,outbuf,21,768)
-    else if head.srate=96000 then noiseshaper(b,outbuf,10,384);
-    //    il:=fileread(sfh,buf2[0],1536);
+    if b=base+$5a000 then outbuf:=dmabuf1 else outbuf:=dmabuf2;
+    if head.srate=44100 then noiseshaper(b,outbuf,21,384)
+    else if head.srate=96000 then noiseshaper(b,outbuf,10,192);
+ //   il:=fileread(sfh,buf2[0],1536);
     end;
   end
 else
@@ -2910,7 +2929,7 @@ else
         times6502[15]:=clockgettotal-t6;
         t6:=0; for i:=0 to 15 do t6+=times6502[i];
         time6502:=t6-15;
-      //  CleanDataCacheRange($d400,32);
+        //CleanDataCacheRange($d400,32);
         timer1+=siddelay;
         songtime+=siddelay;
         end
@@ -2930,7 +2949,7 @@ else
       audio2[2*i]:=(s[0] * dbtable[volume])+$8000000;
       audio2[2*i+1]:=(s[1] *dbtable[volume])+$8000000;
       end;
-    if b=base+$5a000 then outbuf:=base+$70000 else outbuf:=base+$a0000;
+    if b=base+$5a000 then outbuf:=dmabuf1 else outbuf:=dmabuf2;;
     noiseshaper(b,outbuf,20,120)
     end
   else
@@ -2961,8 +2980,10 @@ if mode=1 then
   for i:=0 to 767 do buf2[i]:=0;
   for i:=base+$5a000 to base+$5dfff do if (i mod 4) = 0 then lpoke(i,0);
   CleanDataCacheRange(base+$5a000,16384);
-  for i:=base+$70000 to base+$cffff do if (i mod 4) = 0 then lpoke(i,128);
-  CleanDataCacheRange(base+$70000,$60000);
+ for i:=dmabuf1 to dmabuf1+$ffff do if (i mod 4) = 0 then lpoke(i,128);
+  CleanDataCacheRange(dmabuf1,$10000);
+ for i:=dmabuf2 to dmabuf2+$ffff do if (i mod 4) = 0 then lpoke(i,128);
+  CleanDataCacheRange(dmabuf2,$10000);
   sleep(5);
   end
 else

@@ -272,7 +272,7 @@ outtextxyz(400,1070,'sprites '+inttostr(avspt)+' us',186,2,2);
 if sidcount<>0 then
   begin
   if filetype<>3 then outtextxyz(656,1070,'SID '+inttostr(avall)+' us',233,2,2)
-  else begin if sidtime>100 then outtextxyz(656,1070,'wav '+inttostr(avall)+' us',233,2,2); end;
+  else begin if sidtime>10 then outtextxyz(656,1070,'wav '+inttostr(avall)+' us',233,2,2); end;
   end;
 outtextxyz(864,1070,'6502 '+floattostrf((av6502/16),fffixed,4,1)+' us',124,2,2);
 outtextxyz(1088,1070,inttostr(lpeek(base+$6fffc)),200,2,2);

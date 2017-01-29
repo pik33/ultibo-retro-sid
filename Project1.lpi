@@ -71,7 +71,7 @@
       <TargetCPU Value="arm"/>
       <TargetOS Value="ultibo"/>
       <Optimizations>
-        <OptimizationLevel Value="4"/>
+        <OptimizationLevel Value="3"/>
       </Optimizations>
     </CodeGeneration>
     <Linking>
