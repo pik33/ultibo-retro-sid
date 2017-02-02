@@ -6,8 +6,7 @@ interface
 
 uses sysutils,classes,retromalina,platform,retro,cwindows;
 
-const ver='The retromachine player v. 0.20u --- 2017.02.01';
-
+const ver='The retromachine player v. 0.19u --- 2017.01.22';
 
 type bmppixel=array[0..2] of byte;
 
@@ -45,7 +44,6 @@ var test:integer ;
    bmpbuf:array[0..2007039] of bmppixel absolute $20000000;
    bmpi:integer;
    bmpp:bmppixel absolute bmpi;
-   a1base:integer=440;
 
 procedure main1;
 procedure main2;
@@ -274,12 +272,13 @@ outtextxyz(400,1070,'sprites '+inttostr(avspt)+' us',186,2,2);
 if sidcount<>0 then
   begin
   if filetype<>3 then outtextxyz(656,1070,'SID '+inttostr(avall)+' us',233,2,2)
-  else begin if sidtime>10 then outtextxyz(656,1070,'wav '+inttostr(avall)+' us',233,2,2); end;
+  else begin if sidtime>100 then outtextxyz(656,1070,'wav '+inttostr(avall)+' us',233,2,2); end;
   end;
 outtextxyz(864,1070,'6502 '+floattostrf((av6502/16),fffixed,4,1)+' us',124,2,2);
-outtextxyz(1088,1070,inttostr(a1base),200,2,2);
-v:=-vol123;
-if vol123<73 then outtextxyz(1168,1070,inttostr(v)+' dB',24,2,2)
+outtextxyz(1088,1070,inttostr(lpeek(base+$6fffc)),200,2,2);
+v:=-volume; if volume=57 then v:=-58;  if volume=58 then v:=-60;
+if volume=59 then v:=-63; if volume=60 then v:=-66;if volume=61 then v:=-72;
+if volume<62 then outtextxyz(1168,1070,inttostr(v)+' dB',24,2,2)
 else outtextxyz(1184,1070,'Mute',24,2,2);
 outtextxyz(1284,1070,clock,220,2,2);
 if peek(base+$100003)=1 then outtextxyz(1540,1070,inttostr(peek(base+$d404)shr 4),108,2,2);
@@ -317,8 +316,8 @@ box2(10,610,894,797,178);
 box2(10,700,894,701,140);
 box2(10,636,894,637,140);
 box2(10,764,894,765,140);
-for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 768,2,2,190);
-
+if filetype<>3 then begin for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 768,2,2,190); end
+else begin for j:=0 to 767 do if abs(scope[j])<46000 then box(60+j,700-scope[j] div 768,2,2,190); end;
 
 if filetype<>3 then
   begin

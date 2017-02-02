@@ -244,7 +244,7 @@ var fh,filetype:integer;                // this needs cleaning...
     p2:^integer;
     tim,t,t2,t3,ts,t6,time6502:int64;
     vblank1:byte;
-    scope:array[0..1023] of integer;
+    scope:array[0..959] of integer;
     db:boolean=false;
     debug:integer;
     sidtime:int64=0;
@@ -284,13 +284,10 @@ var fh,filetype:integer;                // this needs cleaning...
     akeyboard:tkeyboard ;
     psystem,psystem2:pointer;
 
-    vol123:integer=0;
+    volume:integer=0;
     textcursoron:boolean=false;
     head:wavehead;
-    nextsong:integer=0;
 
-    oldsc:integer=0;
-    sc:integer=0;
 
 // system variables
 
@@ -380,8 +377,6 @@ var fh,filetype:integer;                // this needs cleaning...
     audiodma1:       array[0..7] of cardinal absolute _audiodma;
     audiodma2:       array[0..7] of cardinal absolute _audiodma+32;
 
-    desired, obtained:TAudioSpec;
-    error:integer;
 
 // prototypes
 
@@ -415,10 +410,10 @@ procedure outtextxyz(x,y:integer; t:string;c,xz,yz:integer);
 procedure outtextxys(x,y:integer; t:string;c,s:integer);
 procedure outtextxyzs(x,y:integer; t:string;c,xz,yz,s:integer);
 procedure scrollup;
-function sid(mode:integer):tsample;
+function sid(mode:integer):tsample32;
 //procedure initaudio;
-//procedure pauseaudio(mode:integer);   // instead of the real one
-procedure AudioCallback(userdata: Pointer; stream: PUInt8; len:Integer );
+procedure pauseaudio(mode:integer);   // instead of the real one
+procedure AudioCallback(b:integer);
 function getpixel(x,y:integer):integer; inline;
 function getkey:integer; inline;
 function readkey:integer; inline;
@@ -428,7 +423,7 @@ procedure waitvbl;
 procedure removeramlimits(addr:integer);
 function readwheel: shortint; inline;
 procedure unhidecolor(c,bank:cardinal);
-
+procedure noiseshaper(bufaddr,outbuf,oversample,len:integer);
 
 
 implementation
@@ -579,7 +574,7 @@ begin
 
 repeat
 if self.needclear then begin self.koniec:=0; self.pocz:=0; self.needclear:=false; self.empty:=true; self.m:=131072; for i:=0 to 131071 do buf[i]:=0; end;
-//if (self.seekamount<>0) and (self.fh>0) then begin fileseek(fh,10000000,fsFromCurrent); seekamount:=0; end;
+if (self.seekamount<>0) and (self.fh>0) then begin fileseek(fh,10000000,fsFromCurrent); seekamount:=0; end;
 if self.fh>0 then
   begin
   if self.koniec>=self.pocz then self.m:=131072-self.koniec+self.pocz-1 else self.m:=self.pocz-self.koniec-1;
@@ -679,9 +674,9 @@ threadsleep(1);
   repeat sleep(0); a:= lpeek($3F007e00) until (a and 2) <>0 ;
   if (a and 2)<>0 then
     begin
-//    if lpeek($3f007e1c)=nocache+ctrl1_adr {base+$c2000000} then audiocallback(base+$5a000)
-//                                  else audiocallback(base+$5c000);
-//    lpoke($3F007e00,$00000003);
+    if lpeek($3f007e1c)=dmactrl {base+$c2000000} then audiocallback(base+$5a000)
+                                  else audiocallback(base+$5c000);
+    lpoke($3F007e00,$00000003);
 
     end;
   until terminated;
@@ -755,13 +750,6 @@ until terminated;
 running:=0;
 end;
 
-// A dummy callback for audio unit testing
-
-procedure testcallback(userdata: Pointer; stream: PUInt8; len:Integer);
-
-begin
-end;
-
 // ---- Retromachine procedures ------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -786,7 +774,7 @@ for i:=base to base+$FFFFF do poke(i,0); // clean all system area
 displaystart:=$30000000;                 // vitual framebuffer address
 framecnt:=0;                             // frame counter
 
-
+removeramlimits(integer(@noiseshaper));    // noiseshaper needs rwx ram
 //for i:=1 to 8191 do removeramlimits(4096*i);
 // init sid variables
 
@@ -830,18 +818,9 @@ thread:=tretro.create(true);
 thread.start;
 
 // start audio, mouse, kbd and file buffer threads
-
-desired.callback:=@AudioCallback;
-desired.channels:=2;
-desired.format:=AUDIO_S16;
-desired.freq:=44100;
-desired.samples:=384;
-error:=openaudio(@desired,@obtained);
-
-
-//pauseaudio(1);
-//thread3:=taudio.Create(true);
-//thread3.start;
+pauseaudio(1);
+thread3:=taudio.Create(true);
+thread3.start;
 filebuffer:=Tfilebuffer.create(true);
 filebuffer.start;
 amouse:=tmouse.create(true);
@@ -861,7 +840,7 @@ procedure stopmachine;
 begin
 thread.terminate;
 repeat until running=0;
-//thread3.terminate;
+thread3.terminate;
 filebuffer.terminate;
 amouse.terminate;
 akeyboard.terminate;
@@ -1644,7 +1623,7 @@ end;
 //
 //-----------------------------------------------------------------------------
 
-function sid(mode:integer):tsample;
+function sid(mode:integer):tsample32;
 
 //  SID frequency 985248 Hz
 
@@ -1654,7 +1633,8 @@ label p121,p122,p123,p124,p125,p126,p127;
 label p201,p202,p203,p204,p205,p206,p207,p208,p209;
 label p211,p212,p213,p214,p215,p216,p217,p218,p219;
 label p221,p222,p223,p224,p225,p226,p227,p228,p229,p297,p298,p299;
-const
+const oldsc:integer=0;
+      sc:integer=0;
       waveform1:word=0;
       f1:boolean=false;
       waveform2:word=0;
@@ -2686,72 +2666,210 @@ str r8,[r7,#0x1ac]
 sid[0]:= (siddata[$6b]*3) div 4; //  2048+ (siddata[$6c] div (16*16384));//16384;//32768;
 sid[1]:= (siddata[$6c]*3) div 4;//2048+ (siddata[$6b] div (16*16384));//16384;//32768;
 
-
+oldsc:=sc;
+sc:=(siddata[$6c]+siddata[$6B]);
+scope[scj]:=sc;
+inc(scj);
+if scj>959 then if (oldsc<0) and (sc>0) then scj:=0 else scj:=959;
 
 //sid[0]:=sid1;
 //sid[1]:=sid1l;
 end;
 
 
+procedure noiseshaper1(bufaddr,outbuf,oversample,len:integer);
 
-procedure oscilloscope(sample:integer);
+label p101,p102,p999,i1l,i1r,i2l,i2r;
+
+// -- rev 20170126
 
 begin
-oldsc:=sc;
-sc:=sample+(sample div 2);
-scope[scj]:=sc;
-inc(scj);
-if scj>959 then if (oldsc<0) and (sc>0) then scj:=0 else scj:=959;
+                        asm
+                        push {r0-r10,r12,r14}
+                        ldr r3,i1l            // init integerators
+                        ldr r4,i1r
+                        ldr r7,i2l
+                        ldr r8,i2r
+                        ldr r5,bufaddr        // init buffers addresses
+                        ldr r2,outbuf
+                        ldr r14,oversample    // yes, lr used here, I am short of regs :(
+                        ldr r0,len            // outer loop counter
+
+ p102:                  mov r1,r14            // inner loop counter
+                        ldr r6,[r5],#4        // new input value left
+                        ldr r12,[r5],#4       // new input value right
+
+ p101:                  add r3,r6             // inner loop: do oversampling
+                        add r4,r12
+                        add r7,r3
+                        add r8,r4
+                        mov r9,r7,asr #27
+                        mov r10,r9,lsl #27
+                        sub r3,r10
+                        sub r7,r10
+                        add r9,#1            // kill the negative bug :) :)
+                        lsr r9,#1
+
+                        lsl r9,#8
+
+                        str r9,[r2],#4
+                        mov r9,r8,asr #27
+                        mov r10,r9,lsl #27
+                        sub r4,r10
+                        sub r8,r10
+                        add r9,#1
+                        lsr r9,#1
+
+                        lsl r9,#8
+
+                        str r9,[r2],#4
+                        subs r1,#1
+                        bne p101
+                        subs r0,#1
+                        bne p102
+
+                        str r3,i1l
+                        str r4,i1r
+                        str r7,i2l
+                        str r8,i2r
+
+                        b p999
+
+i1l:                    .long 0
+i1r:                    .long 0
+i2l:                    .long 0
+i2r:                    .long 0
+
+p999:                   pop {r0-r10,r12,r14}
+                        end;
+
+CleanDataCacheRange(outbuf,$10000);
+end;
+
+procedure noiseshaper(bufaddr,outbuf,oversample,len:integer);
+
+label p101,p102,p999,i1l,i1r,i2l,i2r;
+
+// -- rev 20170126
+
+begin
+                        asm
+                        push {r0-r10,r12,r14}
+                        ldr r3,i1l            // init integerators
+                        ldr r4,i1r
+                        ldr r7,i2l
+                        ldr r8,i2r
+                        ldr r5,bufaddr        // init buffers addresses
+                        ldr r2,outbuf
+                        ldr r14,oversample    // yes, lr used here, I am short of regs :(
+                        ldr r0,len            // outer loop counter
+
+ p102:                  mov r1,r14            // inner loop counter
+                        ldr r6,[r5],#4        // new input value left
+                        ldr r12,[r5],#4       // new input value right
+
+ p101:                  add r3,r6             // inner loop: do oversampling
+                        add r4,r12
+                        add r7,r3
+                        add r8,r4
+                        mov r9,r7,asr #20
+                        mov r10,r9,lsl #20
+                        sub r3,r10
+                        sub r7,r10
+                        add r9,#1            // kill the negative bug :) :)
+                        str r9,[r2],#4
+                        mov r9,r8,asr #20
+                        mov r10,r9,lsl #20
+                        sub r4,r10
+                        sub r8,r10
+                        add r9,#1
+                        str r9,[r2],#4
+                        subs r1,#1
+                        bne p101
+                        subs r0,#1
+                        bne p102
+
+                        str r3,i1l
+                        str r4,i1r
+                        str r7,i2l
+                        str r8,i2r
+
+                        b p999
+
+i1l:                    .long 0
+i1r:                    .long 0
+i2l:                    .long 0
+i2r:                    .long 0
+
+p999:                   pop {r0-r10,r12,r14}
+                        end;
+
+CleanDataCacheRange(outbuf,$10000);
 end;
 
 
-procedure AudioCallback(userdata: Pointer; stream: PUInt8; len:Integer );
+procedure AudioCallback(b:integer);
 
 label p999;
 
-var audio2:psmallint;
-    audio3:psingle;
-    s:tsample;
+var audio2:pinteger;
+    s:tsample32;
     ttt:int64;
-    il:integer;
+    outbuf, k,i,il:integer;
     buf:array[0..25] of byte;
 
 const aa:integer=0;
-
+const bb:integer=0;
 
 
 begin
-
-audio2:=psmallint(stream);
-audio3:=psingle(stream);
-
+audio2:=pinteger(b);
 ttt:=clockgettotal;
+if pause1=true then goto p999;
 k:=0;
 
 if filetype=3 then
   begin
-  if sfh>0 then
+  if sfh>-1 then
     begin
-    il:=filebuffer.getdata(integer(stream),1536);
+    il:=filebuffer.getdata(integer(@buf2[0]),1536);
     if il<>1536 then
       begin
       fileclose(sfh);
       sfh:=-1;
       songtime:=0;
-      pauseaudio(1);
-      nextsong:=1;
+      pause1:=true;
       timer1:=-1;
-      end
-    else
-      begin
-      timer1+=siddelay;
-      songtime+=siddelay;
-      if head.pcm=1 then for i:=0 to 383 do oscilloscope(audio2[2*i]+audio2[2*i+1])
-                        else for i:=0 to 95 do oscilloscope(round(16384*(audio3[4*i]+audio3[4*i+1]+audio3[4*i+2]+audio3[4*i+3])));
+      for i:=il to 1535 do buf2[i]:=0;
+      // wypelnij reszte bufora!!!!!
+      pauseaudio(1);
+      if b=base+$5a000 then outbuf:=base+$70000 else outbuf:=base+$a0000;
+      if head.srate=44100 then noiseshaper(b,outbuf,21,768)
+      else if head.srate=96000 then noiseshaper(b, outbuf, 10,384);
+      repeat until peek(base+$60028)=0;
+      poke(base+$60028,208);
+      repeat until peek(base+$60028)=0;
+      poke(base+$60028,141);
       end;
+    if head.srate=44100 then begin
+    for i:=0 to 767 do audio2[i]:=(buf2[i]*dbtable[volume])+$8000000;
+    for i:=0 to 767 do scope[i]:=buf2[i]+buf2[i+1];
+    end
+      else     if head.srate=96000 then begin
+    for i:=0 to 383 do audio2[i]:=round((buf2f[i]*dbtable[volume]*32768))+$8000000;
+    for i:=0 to 383 do scope[i]:=round(32768*(buf2f[i]+buf2f[i+1]));
+    end ;
+
+    timer1+=siddelay;
+    songtime+=siddelay;
+    if b=base+$5a000 then outbuf:=base+$70000 else outbuf:=base+$a0000;
+    if head.srate=44100 then noiseshaper(b,outbuf,21,768)
+    else if head.srate=96000 then noiseshaper(b,outbuf,10,384);
+    //    il:=fileread(sfh,buf2[0],1536);
     end;
   end
 else
+
   begin
   aa+=2500;
   if (aa>=siddelay) then
@@ -2762,6 +2880,7 @@ else
       if filetype=0 then
         begin
         il:=fileread(sfh,buf,25);
+        if skip=1 then  il:=fileread(sfh,buf,25);
         if il=25 then
           begin
           for i:=0 to 24 do poke(base+$d400+i,buf[i]);
@@ -2791,36 +2910,66 @@ else
         times6502[15]:=clockgettotal-t6;
         t6:=0; for i:=0 to 15 do t6+=times6502[i];
         time6502:=t6-15;
-        //CleanDataCacheRange($d400,32);
+      //  CleanDataCacheRange($d400,32);
         timer1+=siddelay;
         songtime+=siddelay;
-        end;
-
+        end
 
       end;
     end;
+
+//  ttt:=clockgettotal;
+  if filetype<>3 then
+    begin
     s:=sid(1);
-    audio2[0]:=(s[0]);
-    audio2[1]:=(s[1]);
-    oscilloscope(s[0]+s[1]);
+    audio2[0]:=(s[0] *dbtable[volume])+$8000000;
+    audio2[1]:=(s[1] *dbtable[volume])+$8000000;
     for i:=1 to 119 do
       begin
       s:=sid(0);
-      audio2[2*i]:=(s[0]);
-      audio2[2*i+1]:=(s[1]);
-      oscilloscope(s[0]+s[1]);
+      audio2[2*i]:=(s[0] * dbtable[volume])+$8000000;
+      audio2[2*i+1]:=(s[1] *dbtable[volume])+$8000000;
       end;
+    if b=base+$5a000 then outbuf:=base+$70000 else outbuf:=base+$a0000;
+    noiseshaper(b,outbuf,20,120)
+    end
+  else
+    begin
+
+    end;
   end;
+//noiseshaper(b);
 inc(sidcount);
 //sidtime+=gettime-t;
 p999:
 sidtime:=clockgettotal-ttt;
+
 end;
 
 
 
 
 
+
+procedure pauseaudio(mode:integer);
+
+begin
+if mode=1 then
+  begin
+  pause1:=true;
+  sleep(5);
+  for i:=0 to 767 do buf2[i]:=0;
+  for i:=base+$5a000 to base+$5dfff do if (i mod 4) = 0 then lpoke(i,0);
+  CleanDataCacheRange(base+$5a000,16384);
+  for i:=base+$70000 to base+$cffff do if (i mod 4) = 0 then lpoke(i,128);
+  CleanDataCacheRange(base+$70000,$60000);
+  sleep(5);
+  end
+else
+  begin
+  pause1:=false;
+  end;
+end;
 
 
 
