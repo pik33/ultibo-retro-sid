@@ -292,6 +292,10 @@ var fh,filetype:integer;                // this needs cleaning...
     oldsc:integer=0;
     sc:integer=0;
 
+    channel1on:byte=1;
+    channel2on:byte=1;
+    channel3on:byte=1;
+
 // system variables
 
     systempallette:array[0..255] of TPallette absolute base+_pallette;
@@ -382,6 +386,8 @@ var fh,filetype:integer;                // this needs cleaning...
 
     desired, obtained:TAudioSpec;
     error:integer;
+    mousereports:array[0..7] of TMouseReport;
+
 
 // prototypes
 
@@ -448,28 +454,74 @@ end;
 procedure TMouse.Execute;
 
 var mb:tmousedata;
+    i:integer;
     mi:cardinal;
     x,y,w:integer;
+    m:TMouseReport;
+    mousexy,buttons,offsetx,offsety,wheel:integer;
+    const mousecount:integer=0;
 
 begin
   repeat
-  if mouseread(@mb,sizeof(tMousedata),mi)=0 then
-    begin
-    x:=mousex+mb.offsetx;
+    repeat m:=getmousereport; threadsleep(1); until m[0]<>255;
+    mousecount+=1;
+    for i:=0 to 7 do mouserecord[i]:=(m[i]);
+    for i:=0 to 6 do mousereports[i]:=mousereports[i+1];
+    mousereports[7]:=m;
+    mousetype:=0;
+    for i:=0 to 6 do if mousereports[i,7]<>m[7] then mousetype:=m[0]; // 1 or 2
+    // now add type 3 detect here
+    if mousetype=0 then  // most standard mouse type
+       begin
+       buttons:=m[0];
+       offsetx:=shortint(m[1]);
+       offsety:=shortint(m[2]);
+       wheel:=shortint(m[3]);
+       end
+    else if mousetype=2 then  // the strange Logitech wireless 12-bit mouse
+       begin
+       buttons:=m[1];
+       mousexy:=m[2]+256*(m[3] and 15);
+       if mousexy>=2048 then mousexy:=mousexy-4096;
+       if m[6]=0 then offsetx:=mousexy else offsetx:=0;
+       mousexy:=m[4]*16 + m[3] div 16;
+       if mousexy>=2048 then mousexy:=mousexy-4096;
+       if m[6]=0 then offsety:=mousexy else offsety:=0;
+       if ((m[7]=134) or (m[7]=198)) and (m[6]=0) and (m[1]=0) and (m[2]=0) and (m[3]=0) and (m[4]=0) then wheel:=shortint(m[5]) else wheel:=0;
+       end
+     else if mousetype=1 then
+       begin
+       buttons:=m[1];
+       mousexy:=m[2]+256*(m[3] and 15);
+       if mousexy>=2048 then mousexy:=mousexy-4096;
+       offsetx:=mousexy;
+       mousexy:=m[4]*16 + m[3] div 16;
+       if mousexy>=2048 then mousexy:=mousexy-4096;
+       offsety:=mousexy;
+       wheel:=shortint(m[5]);
+       end
+    else if mousetype=3 then  // 16-bit mouse
+       begin
+       buttons:=shortint(m[0]);
+       offsetx:=shortint(m[2]);
+       offsety:=shortint(m[4]);
+       wheel:=shortint(m[6]);
+       end;
+    x:=mousex+offsetx;
     if x<0 then x:=0;
     if x>1791 then x:=1791;
     mousex:=x;
-    y:=mousey+mb.offsety;
+    y:=mousey+offsety;
     if y<0 then y:=0;
     if y>1119 then y:=1119;
     mousey:=y;
-    mousek:=mb.Buttons;
-    w:=mousewheel+mb.OffsetWheel;
+    mousek:=Buttons and 255;
+    if wheel<-1 then wheel:=-1;
+    if wheel>1 then wheel:=1;
+    w:=mousewheel+Wheel;
     if w<127 then w:=127;
     if w>129 then w:=129;
     mousewheel:=w;//poke(base+$60032,w);
-    end;
-//  sleep(0);
   until terminated;
 end;
 
@@ -1723,9 +1775,9 @@ sidptr:=@siddata;
 if mode=1 then  // get regs
 
   begin
-  siddata[$56]:=peek(base+$100003);
-  siddata[$57]:=peek(base+$100004);
-  siddata[$58]:=peek(base+$100005);
+  siddata[$56]:=channel1on;
+  siddata[$57]:=channel2on;
+  siddata[$58]:=channel3on;
   siddata[0]:=round(1.0263*(16*peek(base+$D400)+4096*peek(base+$d401))); //freq1
   siddata[$10]:=round(1.0263*(16*peek(base+$d407)+4096*peek(base+$d408)));
   siddata[$20]:=round(1.0263*(16*peek(base+$d40e)+4096*peek(base+$d40f)));
@@ -2713,11 +2765,10 @@ var audio2:psmallint;
     audio3:psingle;
     s:tsample;
     ttt:int64;
-    il:integer;
+    i,il:integer;
     buf:array[0..25] of byte;
 
 const aa:integer=0;
-
 
 
 begin
@@ -2726,7 +2777,7 @@ audio2:=psmallint(stream);
 audio3:=psingle(stream);
 
 ttt:=clockgettotal;
-k:=0;
+
 
 if filetype=3 then
   begin
@@ -2747,7 +2798,7 @@ if filetype=3 then
       timer1+=siddelay;
       songtime+=siddelay;
       if head.pcm=1 then for i:=0 to 383 do oscilloscope(audio2[2*i]+audio2[2*i+1])
-                        else for i:=0 to 95 do oscilloscope(round(16384*(audio3[4*i]+audio3[4*i+1]+audio3[4*i+2]+audio3[4*i+3])));
+                         else for i:=0 to 95 do oscilloscope(round(16384*(audio3[4*i]+audio3[4*i+1]+audio3[4*i+2]+audio3[4*i+3])));
       end;
     end;
   end
@@ -2760,16 +2811,12 @@ else
     if sfh>-1 then
       begin
       if filetype=0 then
+
         begin
         il:=fileread(sfh,buf,25);
         if il=25 then
           begin
           for i:=0 to 24 do poke(base+$d400+i,buf[i]);
-          for i:=0 to 15 do times6502[i]:=times6502[i+1];
-          t6:=clockgettotal;
-          times6502[15]:=0;
-          t6:=0; for i:=0 to 15 do t6+=times6502[i];
-          time6502:=t6;
           timer1+=siddelay;
           songtime+=siddelay;
           end

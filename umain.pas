@@ -54,6 +54,7 @@ procedure writebmp;
 
 implementation
 
+uses mouse;
 procedure rainbow;
 
 begin
@@ -282,10 +283,11 @@ v:=-vol123;
 if vol123<73 then outtextxyz(1168,1070,inttostr(v)+' dB',24,2,2)
 else outtextxyz(1184,1070,'Mute',24,2,2);
 outtextxyz(1284,1070,clock,220,2,2);
-if peek(base+$100003)=1 then outtextxyz(1540,1070,inttostr(peek(base+$d404)shr 4),108,2,2);
-if peek(base+$100004)=1 then outtextxyz(1580,1070,inttostr(peek(base+$d40b)shr 4),200,2,2);
-if peek(base+$100005)=1 then outtextxyz(1620,1070,inttostr(peek(base+$d412)shr 4),40,2,2);
-outtextxyz(1680,1070,inttostr(peek(base+$60028)),44,2,2);
+outtextxyz(1560,1070,'m'+inttostr(mousetype),136,2,2);
+if channel1on=1 then outtextxyz(1640,1070,inttostr(peek(base+$d404)shr 4),108,2,2);
+if channel2on=1 then outtextxyz(1680,1070,inttostr(peek(base+$d40b)shr 4),200,2,2);
+if channel3on=1 then outtextxyz(1720,1070,inttostr(peek(base+$d412)shr 4),40,2,2);
+//outtextxyz(1680,1070,inttostr(peek(base+$60028)),44,2,2);
 
 for i:=0 to 14 do tbb[i]:=tbb[i+1];
 tbb[15]:=TemperatureGetCurrent(0) ;

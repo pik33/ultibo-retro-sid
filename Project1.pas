@@ -17,25 +17,15 @@ uses
   MMC,         {Include the MMC/SD core to access our SD card}
   FileSystem,  {Include the file system core and interfaces}
   FATFS,       {Include the FAT file system driver}
-//  ntfs,
-
   BCM2710,
   Ultibo,
   Keyboard,    {Keyboard uses USB so that will be included automatically}
   Mouse,
   DWCOTG,
-
   retromalina,
   cwindows,
   Unit6502,
   umain, mp3, simpleaudio;
-//  console,
-//  Syscalls;
-
-//{$linklib libmpg123}
-
-//function mpg123_init:integer; cdecl; external 'libmpg123' Name 'mpg123_init';
-
 
 
 label p101,p999;
@@ -48,27 +38,17 @@ var s,currentdir,currentdir2:string;
     nsel:integer;
     buf:array[0..25] of  byte;
     fn:string;
-    fs:integer;
+
     cia:integer;
-//    song:word=0;
-//    songs:word=0;
     init:word;
     atitle,author,copyright:string[32];
     workdir:string;
     pause1a:boolean=true;
-    ch:tkeyboardreport;
-    keyboardstatus:array[0..255]of byte;
-    activekey:byte=0;
-    rptcnt:byte=0;
     drivetable:array['A'..'Z'] of boolean;
     c:char;
     f:textfile;
-     drive:string;
-     mb:tmousedata;
-     mi:cardinal;
- //    click, dblcnt, clickcnt:integer;
-       d:double; e:integer;
-     key:integer;
+    drive:string;
+    key:integer;
     wheel:integer;
     t,tt,ttt:int64;
 
@@ -143,7 +123,6 @@ box(18,912,800,32,244);
 outtextxyz(18,912,'Wave file, '+inttostr(head.srate)+' Hz',250,2,2);
 p999:
 end;
-
 
 procedure sidopen (var fh:integer);
 
@@ -256,7 +235,6 @@ procedure dirlist(dir:string);
 
 var c:char;
 
-
 begin
 for c:='C' to 'F' do drivetable[c]:=directoryexists(c+':\');
 currentdir2:=dir;
@@ -341,33 +319,26 @@ l:=length(s);
 outtextxyz(1344-8*l,75,s,44,2,2);
 end;
 
-procedure testcallback(userdata: Pointer; stream: PUInt8; len:Integer);
-
-begin
-end;
 
 //------------------- The main loop
 
 begin
 
-//settime(12,34,56,0);
 while not DirectoryExists('C:\') do
   begin
   Sleep(100);
   end;
 
-  if fileexists('C:\kernel7.img') then begin workdir:='C:\ultibo\'; drive:='C:\'; end
-  else if fileexists('D:\kernel7.img') then begin workdir:='D:\ultibo\' ; drive:='D:\'; end
-  else if fileexists('E:\kernel7.img') then begin workdir:='E:\ultibo\' ; drive:='E:\'; end
-  else if fileexists('F:\kernel7.img') then begin workdir:='F:\ultibo\' ; drive:='F:\'; end
-  else
-    begin
-    outtextxyz(440,1060,'Error. No Ultibo folder found. Press Enter to reboot',157,2,2);
-    repeat until readkey=$13;
-    systemrestart(0);
-    end;
-
-
+if fileexists('C:\kernel7.img') then begin workdir:='C:\ultibo\'; drive:='C:\'; end
+else if fileexists('D:\kernel7.img') then begin workdir:='D:\ultibo\' ; drive:='D:\'; end
+else if fileexists('E:\kernel7.img') then begin workdir:='E:\ultibo\' ; drive:='E:\'; end
+else if fileexists('F:\kernel7.img') then begin workdir:='F:\ultibo\' ; drive:='F:\'; end
+else
+  begin
+  outtextxyz(440,1060,'Error. No Ultibo folder found. Press Enter to reboot',157,2,2);
+  repeat until readkey=$13;
+  systemrestart(0);
+  end;
 
 if fileexists(drive+'now.txt') then
   begin
@@ -384,42 +355,35 @@ if fileexists(drive+'kernel7_l.img') then
   RenameFile(drive+'kernel7_l.img',drive+'kernel7.img');
   end;
 
-
-//sleep(3000);
 for c:='C' to 'F' do drivetable[c]:=directoryexists(c+':\');
 
-fs:=1;
 workdir:=drive;
 songtime:=0;
 siddelay:=20000;
 setcurrentdir(workdir);
 
 initmachine;
-dpoke(base+$6002c,960);
-dpoke(base+$6002e,600);
-dpoke(base+$60032,128);
-poke(base+$100002,0);
-poke(base+$100006,0);
-poke(base+$100007,0);
-poke(base+$100008,1);
-lpoke(base+$6000c,$002040);
-lpoke (base+$60008,0);
-lpoke (base+$60020,1792);
-lpoke (base+$60024,1120);
+mousex:=960;
+mousey:=600;
+mousewheel:=128;
+//poke(base+$100002,0);
+//poke(base+$100006,0);
+//poke(base+$100007,0);
+//poke(base+$100008,1);
+bordercolor:=$002040;
+graphicmode:=0;
+xres:=1792;
+yres:=1120;
 
 
 main1;
 dirlist(drive);
-poke(base+$100003,1);
-poke(base+$100004,1);
-poke(base+$100005,1);
-
-
 threadsleep(1);
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_0);
 threadsleep(1);
-for i:=0 to 255 do keyboardstatus[i]:=0;
+//for i:=0 to 255 do keyboardstatus[i]:=0;
 startreportbuffer;
+startmousereportbuffer;
 
 lpoke(base+$6fffc,440);
 
@@ -429,10 +393,18 @@ lpoke(base+$6fffc,440);
 
 repeat
 main2;
-//box(100,100,200,100,0);
-//outtextxyz(100,100,inttostr(SA_getcurrentfreq),136,2,2);
-//outtextxyz(100,132,inttostr(SA_getcurrentrange),136,2,2);
-//outtextxyz(100,164,inttostr(error),136,2,2);
+box(100,100,500,128,0);
+outtextxyz(100,100,inttohex(mouserecordb[0],2)+' '+
+inttohex(mouserecordb[1],2)+' '+
+inttohex(mouserecordb[2],2)+' '+
+inttohex(mouserecordb[3],2)+' '+
+inttohex(mouserecordb[4],2)+' '+
+inttohex(mouserecordb[5],2)+' '+
+inttohex(mouserecordb[6],2)+' '+
+inttohex(mouserecordb[7],2),136,2,2);
+outtextxyz(100,132,inttostr(mouse_rb_start),136,2,2);
+outtextxyz(100,164,inttostr(mouse_rb_end),136,2,2);
+
 
   if cfs=nil then
     begin
@@ -479,9 +451,9 @@ main2;
   else if key=ord('3') then begin siddelay:=6666; songfreq:=150; skip:=0; end
   else if key=ord('4') then begin siddelay:=2500; songfreq:=400; skip:=0; end
   else if key=ord('p') then begin pause1a:=not pause1a; if pause1a then pauseaudio(1) else pauseaudio(0); end
-  else if key=186 then begin if peek(base+$100003)=0 then poke (base+$100003,1) else poke (base+$100003,0); end
-  else if key=187 then begin if peek(base+$100004)=0 then poke (base+$100004,1) else poke (base+$100004,0); end
-  else if key=188 then begin if peek(base+$100005)=0 then poke (base+$100005,1) else poke (base+$100005,0); end
+  else if key=186 then begin if channel1on=0 then channel1on:=1 else channel1on:=0; end   // F1 toggle channel 1 on/off
+  else if key=187 then begin if channel2on=0 then channel2on:=1 else channel2on:=0; end   // F2 toggle channel 1 on/off
+  else if key=188 then begin if channel3on=0 then channel3on:=1 else channel3on:=0; end   // F3 toggle channel 1 on/off
 
   else if key=ord('b') then
     begin
@@ -497,6 +469,11 @@ main2;
     vol123+=1; if vol123>73 then vol123:=73;
     setdbvolume(-vol123);
     end
+ else if key=ord('m') then
+    begin
+    mousetype+=1; if mousetype>2 then mousetype:=0;
+    end
+
 
  else if key=ord('t') then
    begin
@@ -665,6 +642,7 @@ main2;
         fileread(sfh,buf,4);
         if (buf[0]=ord('S')) and (buf[1]=ord('D')) and (buf[2]=ord('M')) and (buf[3]=ord('P')) then
           begin
+          for i:=0 to 15 do times6502[i]:=0;
           box(18,132,800,600,178);
           outtextxyz(18,132,'type: SDMP',188,2,2);
           songs:=0;
@@ -677,8 +655,8 @@ main2;
           outtextxyz(18,164,'title: '+atitle,188,2,2);
           box(18,912,800,32,244);
           outtextxyz(18,912,'SIDCog DMP file, '+inttostr(songfreq)+' Hz',250,2,2);
-         if a1base=432 then error:=SA_changeparams(47127,16,2,120)
-                       else error:=SA_changeparams(48000,16,2,120);
+          if a1base=432 then error:=SA_changeparams(47127,16,2,120)
+                        else error:=SA_changeparams(48000,16,2,120);
           songs:=0;
           end
        else if (buf[0]=ord('P')) and (buf[1]=ord('S')) and (buf[2]=ord('I')) and (buf[3]=ord('D')) then
@@ -704,6 +682,7 @@ main2;
         else if (buf[0]=ord('R')) and (buf[1]=ord('I')) and (buf[2]=ord('F')) and (buf[3]=ord('F')) then
           begin
           pauseaudio(1);
+          for i:=0 to 15 do times6502[i]:=0;
           filetype:=3;
           waveopen(sfh);
           filebuffer.clear;
@@ -723,13 +702,14 @@ main2;
           end
         else
           begin
+          for i:=0 to 15 do times6502[i]:=0;
           fileread(sfh,buf,21);
           box(18,132,800,600,178);
           outtextxyz(18,132,'type: unknown, 50 Hz SDMP assumed',188,2,2);
           box(18,912,800,32,244);
           outtextxyz(18,912,'SIDCog DMP file, 50 Hz',250,2,2);
           if a1base=432 then error:=SA_changeparams(47127,16,2,120)
-                        else error:=SA_changeparams(47127,16,2,120);
+                        else error:=SA_changeparams(48000,16,2,120);
 
           songs:=0;
           end;
