@@ -23,9 +23,11 @@ uses
   Mouse,
   DWCOTG,
   retromalina,
-  cwindows,
+ // cwindows,
   Unit6502,
-  umain, mp3, simpleaudio;
+  screen,
+//  mp3,
+  simpleaudio;
 
 
 label p101,p999;
@@ -52,7 +54,7 @@ var s,currentdir,currentdir2:string;
     wheel:integer;
     t,tt,ttt:int64;
 
-
+    mousedebug:boolean=false;
 
 // ---- procedures
 
@@ -336,7 +338,7 @@ else if fileexists('F:\kernel7.img') then begin workdir:='F:\ultibo\' ; drive:='
 else
   begin
   outtextxyz(440,1060,'Error. No Ultibo folder found. Press Enter to reboot',157,2,2);
-  repeat until readkey=$13;
+  repeat until readkey=$141;
   systemrestart(0);
   end;
 
@@ -366,84 +368,69 @@ initmachine;
 mousex:=960;
 mousey:=600;
 mousewheel:=128;
-//poke(base+$100002,0);
-//poke(base+$100006,0);
-//poke(base+$100007,0);
-//poke(base+$100008,1);
-bordercolor:=$002040;
-graphicmode:=0;
-xres:=1792;
-yres:=1120;
 
 
-main1;
+initscreen;
 dirlist(drive);
 threadsleep(1);
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_0);
 threadsleep(1);
-//for i:=0 to 255 do keyboardstatus[i]:=0;
 startreportbuffer;
 startmousereportbuffer;
 
-lpoke(base+$6fffc,440);
-
-// test the audio unit
-
-
-
 repeat
-main2;
-box(100,100,500,128,0);
-outtextxyz(100,100,inttohex(mouserecordb[0],2)+' '+
-inttohex(mouserecordb[1],2)+' '+
-inttohex(mouserecordb[2],2)+' '+
-inttohex(mouserecordb[3],2)+' '+
-inttohex(mouserecordb[4],2)+' '+
-inttohex(mouserecordb[5],2)+' '+
-inttohex(mouserecordb[6],2)+' '+
-inttohex(mouserecordb[7],2),136,2,2);
-outtextxyz(100,132,inttostr(mouse_rb_start),136,2,2);
-outtextxyz(100,164,inttostr(mouse_rb_end),136,2,2);
+  refreshscreen;
 
-
-  if cfs=nil then
+// mouse debug
+  if mousedebug then
     begin
-    key:=readkey and $FF;
-    wheel:=readwheel;
-
-    if (key=0) and (wheel=-1) then begin key:=208;  end;
-    if (key=0) and (wheel=1) then begin key:=209;  end;
-    if (key=0) and (nextsong=2) then begin nextsong:=0; key:=141; end;
-    if (key=0) and (nextsong=1) then begin nextsong:=2; key:=208; end;
-    if (dblclick) and (key=0) and (mousex>896) then begin key:=141; end;
-
-    if (click) and (mousex>896) then
-      begin
-
-      nsel:=(mousey-132) div 32;
-      if (nsel<=ild) and (nsel>=0) then
-        begin
-        box(920,132+32*sel,840,32,34);
-        if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
-        if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
-        if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
-        for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-        if filenames[sel+selstart,1]<>'(DIR)'then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
-        if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
-        sel:=nsel;
-        box(920,132+32*sel,840,32,36);
-        if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
-        if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
-        if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
-        for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
-        if filenames[sel+selstart,1]<>'(DIR)' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
-        if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
-        end;
-      end;
+    box(300,872,500,96,129);
+    outtextxyz(300,872,inttohex(mouserecordb[0],2)+' '+
+    inttohex(mouserecordb[1],2)+' '+
+    inttohex(mouserecordb[2],2)+' '+
+    inttohex(mouserecordb[3],2)+' '+
+    inttohex(mouserecordb[4],2)+' '+
+    inttohex(mouserecordb[5],2)+' '+
+    inttohex(mouserecordb[6],2)+' '+
+    inttohex(mouserecordb[7],2),136,2,2);
+    outtextxyz(300,904,inttostr(mouse_rb_start),136,2,2);
+    outtextxyz(300,936,inttostr(mouse_rb_end),136,2,2);
     end;
 
-  if cfs<>nil then begin if cfs.done then begin cfs.destroy; cfs:=nil; end; end;
-  if cfs<>nil then begin if cfs.needdestroy then begin cfs.destroy; cfs:=nil; end; end;
+  key:=readkey and $FF;
+  wheel:=readwheel;
+
+  if (key=0) and (wheel=-1) then begin key:=key_downarrow;  end;
+  if (key=0) and (wheel=1) then begin key:=key_uparrow;  end;
+
+  if (key=0) and (nextsong=2) then begin nextsong:=0; key:=key_enter; end;      // play the next song
+  if (key=0) and (nextsong=1) then begin nextsong:=2; key:=key_downarrow; end;  // select the nest song
+
+  if (dblclick) and (key=0) and (mousex>896) then begin key:=key_enter; end;          // dbl click on right panel=enter
+
+  if (click) and (mousex>896) then
+    begin
+
+    nsel:=(mousey-132) div 32;
+    if (nsel<=ild) and (nsel>=0) then
+      begin
+      box(920,132+32*sel,840,32,34);
+      if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
+      if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
+      if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
+      for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+      if filenames[sel+selstart,1]<>'(DIR)'then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
+      if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
+      sel:=nsel;
+      box(920,132+32*sel,840,32,36);
+      if filenames[sel+selstart,1]<>'(DIR)' then l:=length(filenames[sel+selstart,0])-4 else  l:=length(filenames[sel+selstart,0]);
+      if filenames[sel+selstart,1]<>'(DIR)' then  s:=copy(filenames[sel+selstart,0],1,length(filenames[sel+selstart,0])-4) else s:=filenames[sel+selstart,0];
+      if length(s)>40 then begin s:=copy(s,1,40); l:=40; end;
+      for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
+      if filenames[sel+selstart,1]<>'(DIR)' then outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);
+      if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
+      end;
+    end;
 
   if key=ord('5') then begin siddelay:=20000; songfreq:=50; skip:=0; end
   else if key=ord('1') then begin siddelay:=10000; songfreq:=100; skip:=0; end
@@ -451,38 +438,33 @@ outtextxyz(100,164,inttostr(mouse_rb_end),136,2,2);
   else if key=ord('3') then begin siddelay:=6666; songfreq:=150; skip:=0; end
   else if key=ord('4') then begin siddelay:=2500; songfreq:=400; skip:=0; end
   else if key=ord('p') then begin pause1a:=not pause1a; if pause1a then pauseaudio(1) else pauseaudio(0); end
-  else if key=186 then begin if channel1on=0 then channel1on:=1 else channel1on:=0; end   // F1 toggle channel 1 on/off
-  else if key=187 then begin if channel2on=0 then channel2on:=1 else channel2on:=0; end   // F2 toggle channel 1 on/off
-  else if key=188 then begin if channel3on=0 then channel3on:=1 else channel3on:=0; end   // F3 toggle channel 1 on/off
+  else if key=key_f1 then begin if channel1on=0 then channel1on:=1 else channel1on:=0; end   // F1 toggle channel 1 on/off
+  else if key=key_f2 then begin if channel2on=0 then channel2on:=1 else channel2on:=0; end   // F2 toggle channel 1 on/off
+  else if key=key_f3 then begin if channel3on=0 then channel3on:=1 else channel3on:=0; end   // F3 toggle channel 1 on/off
 
-  else if key=ord('b') then
+  else if key=ord('b') then   // save bitmap
     begin
     writebmp;
     end
-  else if key=ord('q') then
+
+  else if key=ord('m') then   // save bitmap
+    begin
+    mousedebug:=not mousedebug
+    end
+
+  else if key=ord('q') then   // volume up
     begin
     vol123-=1; if vol123<0 then vol123:=0;
     setdbvolume(-vol123);
     end
-  else if key=ord('a') then
+
+  else if key=ord('a') then  // volume down
     begin
     vol123+=1; if vol123>73 then vol123:=73;
     setdbvolume(-vol123);
     end
- else if key=ord('m') then
-    begin
-    mousetype+=1; if mousetype>2 then mousetype:=0;
-    end
 
-
- else if key=ord('t') then
-   begin
-
-   if cfs=nil then  begin cfs:=cfselector.create(900,200,508,492,508,492,141,128,'File selector','C:\',''); key:=0; end;
-
-   end
-
-  else if key=208 then
+  else if key=key_downarrow then
     begin
     if sel<ild then
       begin
@@ -519,7 +501,7 @@ outtextxyz(100,164,inttostr(mouse_rb_end),136,2,2);
       end;
     end
 
-  else if key=209 then
+  else if key=key_uparrow then
      begin
       if sel>0 then
         begin
@@ -556,7 +538,7 @@ outtextxyz(100,164,inttostr(mouse_rb_end),136,2,2);
         end;
       end
 
-     else if key=43 then
+     else if key=ord('+') then  // next subsong
       begin
       if songs>0 then
         begin
@@ -568,7 +550,7 @@ outtextxyz(100,164,inttostr(mouse_rb_end),136,2,2);
         end;
       end
 
-     else if key=45 then
+     else if key=ord('-') then // previous subsong
       begin
       if songs>0 then
         begin
@@ -580,17 +562,20 @@ outtextxyz(100,164,inttostr(mouse_rb_end),136,2,2);
         end;
       end
 
-//     else if key=207 then
-//       begin
-//       filebuffer.seek(-1760000)
-//       end
-//     else if key=206 then
-//       begin
-//       filebuffer.seek(1760000)
-//       end
+     else if key=key_leftarrow then
+       begin
+       if abs(SA_GetCurrentFreq-44100)<200 then filebuffer.seek(-1760000)
+       else filebuffer.seek(-7680000);
+       end
+
+     else if key=key_rightarrow then
+       begin
+       if abs(SA_GetCurrentFreq-44100)<200 then filebuffer.seek(1760000)
+       else filebuffer.seek(7680000);
+       end
 
 
-     else if key=ord('f') then
+     else if key=ord('f') then  // set 432 Hz
       begin
       a1base:=432;
       if abs(SA_GetCurrentFreq-44100)<200 then SA_ChangeParams(43298,0,0,0);
@@ -598,7 +583,7 @@ outtextxyz(100,164,inttostr(mouse_rb_end),136,2,2);
       if abs(SA_GetCurrentFreq-96000)<400 then SA_ChangeParams(94254,0,0,0);
       end
 
-    else if key=ord('g') then
+    else if key=ord('g') then   // set 440 Hz
       begin
       a1base:=440;
       if abs(SA_GetCurrentFreq-43298)<200 then SA_ChangeParams(44100,0,0,0);
@@ -606,7 +591,7 @@ outtextxyz(100,164,inttostr(mouse_rb_end),136,2,2);
       if abs(SA_GetCurrentFreq-94254)<400 then SA_ChangeParams(96000,0,0,0);
       end
 
-    else if key=141 then       // Enter=128+13
+    else if key=key_enter then
       begin
 
       if filenames[sel+selstart,1]='(DIR)' then
@@ -695,8 +680,9 @@ outtextxyz(100,164,inttostr(mouse_rb_end),136,2,2);
           if head.srate=96000 then if a1base=432 then error:=SA_changeparams(94254,32,2,192)
                                                  else error:=SA_changeparams(96000,32,2,192);
 
-          if spr6x=spr7x then begin sprx:=100; spr2x:=200; spr3x:=300;spr4x:=400; spr5x:=500; spr6x:=600; spr7x:=700; end;
-         // sleep(200);
+          if sprite6x>2047 then begin sprite0x:=100; sprite1x:=200; sprite2x:=300;sprite3x:=400; sprite4x:=500; sprite5x:=600; sprite6x:=700; end;
+
+          // sleep(200);
           pauseaudio(0);
 
           end
@@ -720,7 +706,7 @@ outtextxyz(100,164,inttostr(mouse_rb_end),136,2,2);
         end;
     end;
 
-  until (mousek=3) or (key=155) ;
+  until (mousek=3) or (key=key_escape) ;
   pauseaudio(1);
   if sfh>0 then fileclose(sfh);
   setcurrentdir(workdir);

@@ -508,6 +508,28 @@ const
      {255} (#0, #0, #0, #0)        {Reserved (256 to 65535 Reserved)}
    );
 
+  key_enter=141;     //USB_HID_BOOT_USAGE_ID[40,0];    //141;
+  key_escape=155;    //USB_HID_BOOT_USAGE_ID[41,0];    //155;
+  key_backspace=136; //USB_HID_BOOT_USAGE_ID[42,0];    //136;
+  key_tab=137;       //USB_HID_BOOT_USAGE_ID[43,0];    //137;
+  key_f1=186;        //USB_HID_BOOT_USAGE_ID[58,0];    //186;
+  key_f2=187;        //USB_HID_BOOT_USAGE_ID[59,0];    //187;
+  key_f3=188;        //USB_HID_BOOT_USAGE_ID[60,0];    //188;
+  key_f4=189;        //USB_HID_BOOT_USAGE_ID[61,0];    //189;
+  key_f5=190;        //USB_HID_BOOT_USAGE_ID[62,0];    //190;
+  key_f6=191;        //USB_HID_BOOT_USAGE_ID[63,0];    //191;
+  key_f7=192;        //USB_HID_BOOT_USAGE_ID[64,0];    //192;
+  key_f8=193;        //USB_HID_BOOT_USAGE_ID[65,0];    //193;
+  key_f9=194;        //USB_HID_BOOT_USAGE_ID[66,0];    //194;
+  key_f10=195;       //USB_HID_BOOT_USAGE_ID[67,0];    //195;
+  key_f11=196;       //USB_HID_BOOT_USAGE_ID[68,0];    //196;
+  key_f12=197;       //USB_HID_BOOT_USAGE_ID[69,0];    //197;
+  key_rightarrow=206;//USB_HID_BOOT_USAGE_ID[79,0];    //206;
+  key_leftarrow=207; //USB_HID_BOOT_USAGE_ID[80,0];    //207;
+  key_downarrow=208; //USB_HID_BOOT_USAGE_ID[81,0];    //208;
+  key_uparrow=209;   //USB_HID_BOOT_USAGE_ID[82,0];    //209;
+
+
 // ------------------- end of patch  -------------------------------------------
 
  USB_HID_BOOT_USAGE_NUMLOCK    = 83;

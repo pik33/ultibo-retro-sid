@@ -718,7 +718,7 @@ begin
 report_buffer_active:=false;
 end;
 
-procedure startreportbuffer;
+procedure  startreportbuffer;
 
 begin
 report_buffer_active:=true;

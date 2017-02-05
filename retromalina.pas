@@ -187,7 +187,7 @@ type
      il,fh,newfh:integer;
      newfilename:string;
      needclear:boolean;
-     seekamount:integer;
+     seekamount:int64;
      protected
        procedure Execute; override;
      public
@@ -197,7 +197,7 @@ type
       function getdata(b,ii:integer):integer;
       procedure setfile(nfh:integer);
       procedure clear;
-      procedure seek(amount:integer);
+      procedure seek(amount:int64);
      end;
 
      // mouse thread
@@ -323,6 +323,7 @@ var fh,filetype:integer;                // this needs cleaning...
     key_charcode:    byte     absolute base+_keybd;
     key_modifiers:   byte     absolute base+_keybd+1;
     key_scancode:    byte     absolute base+_keybd+2;
+    mousexy:         cardinal absolute base+_mousexy;
     mousex:          word     absolute base+_mousexy;
     mousey:          word     absolute base+_mousexy+2;
     mousek:          byte     absolute base+_mousekey;
@@ -330,36 +331,52 @@ var fh,filetype:integer;                // this needs cleaning...
     mousewheel:      byte     absolute base+_mousekey+2;
     mousedblclick:   byte     absolute base+_mousekey+3;
     dlpos:           cardinal absolute base+_dlpos;
+    sprite0xy:       cardinal absolute base+_sprite0xy;
     sprite0x:        word     absolute base+_sprite0xy;
     sprite0y:        word     absolute base+_sprite0xy+2;
+    sprite0zoom:     cardinal absolute base+_sprite0zoom;
     sprite0zoomx:    word     absolute base+_sprite0zoom;
     sprite0zoomy:    word     absolute base+_sprite0zoom+2;
+    sprite1xy:       cardinal absolute base+_sprite0xy;
     sprite1x:        word     absolute base+_sprite1xy;
     sprite1y:        word     absolute base+_sprite1xy+2;
+    sprite1zoom:     cardinal absolute base+_sprite1zoom;
     sprite1zoomx:    word     absolute base+_sprite1zoom;
     sprite1zoomy:    word     absolute base+_sprite1zoom+2;
+    sprite2xy:       cardinal absolute base+_sprite2xy;
     sprite2x:        word     absolute base+_sprite2xy;
     sprite2y:        word     absolute base+_sprite2xy+2;
+    sprite2zoom:     cardinal absolute base+_sprite2zoom;
     sprite2zoomx:    word     absolute base+_sprite2zoom;
     sprite2zoomy:    word     absolute base+_sprite2zoom+2;
+    sprite3xy:       cardinal absolute base+_sprite3xy;
     sprite3x:        word     absolute base+_sprite3xy;
     sprite3y:        word     absolute base+_sprite3xy+2;
+    sprite3zoom:     cardinal absolute base+_sprite3zoom;
     sprite3zoomx:    word     absolute base+_sprite3zoom;
     sprite3zoomy:    word     absolute base+_sprite3zoom+2;
+    sprite4xy:       cardinal absolute base+_sprite4xy;
     sprite4x:        word     absolute base+_sprite4xy;
     sprite4y:        word     absolute base+_sprite4xy+2;
+    sprite4zoom:     cardinal absolute base+_sprite4zoom;
     sprite4zoomx:    word     absolute base+_sprite4zoom;
     sprite4zoomy:    word     absolute base+_sprite4zoom+2;
+    sprite5xy:       cardinal absolute base+_sprite5xy;
     sprite5x:        word     absolute base+_sprite5xy;
     sprite5y:        word     absolute base+_sprite5xy+2;
+    sprite5zoom:     cardinal absolute base+_sprite5zoom;
     sprite5zoomx:    word     absolute base+_sprite5zoom;
     sprite5zoomy:    word     absolute base+_sprite5zoom+2;
+    sprite6xy:       cardinal absolute base+_sprite6xy;
     sprite6x:        word     absolute base+_sprite6xy;
     sprite6y:        word     absolute base+_sprite6xy+2;
+    sprite6zoom:     cardinal absolute base+_sprite6zoom;
     sprite6zoomx:    word     absolute base+_sprite6zoom;
     sprite6zoomy:    word     absolute base+_sprite6zoom+2;
+    sprite7xy:       cardinal absolute base+_sprite7xy;
     sprite7x:        word     absolute base+_sprite7xy;
     sprite7y:        word     absolute base+_sprite7xy+2;
+    sprite7zoom:     cardinal absolute base+_sprite7zoom;
     sprite7zoomx:    word     absolute base+_sprite7zoom;
     sprite7zoomy:    word     absolute base+_sprite7zoom+2;
 
@@ -422,8 +439,6 @@ procedure outtextxys(x,y:integer; t:string;c,s:integer);
 procedure outtextxyzs(x,y:integer; t:string;c,xz,yz,s:integer);
 procedure scrollup;
 function sid(mode:integer):tsample;
-//procedure initaudio;
-//procedure pauseaudio(mode:integer);   // instead of the real one
 procedure AudioCallback(userdata: Pointer; stream: PUInt8; len:Integer );
 function getpixel(x,y:integer):integer; inline;
 function getkey:integer; inline;
@@ -631,7 +646,7 @@ begin
 
 repeat
 if self.needclear then begin self.koniec:=0; self.pocz:=0; self.needclear:=false; self.empty:=true; self.m:=131072; for i:=0 to 131071 do buf[i]:=0; end;
-//if (self.seekamount<>0) and (self.fh>0) then begin fileseek(fh,10000000,fsFromCurrent); seekamount:=0; end;
+if (self.seekamount<>0) and (self.fh>0) then begin fileseek(fh,seekamount,fsFromCurrent); seekamount:=0; end;
 if self.fh>0 then
   begin
   if self.koniec>=self.pocz then self.m:=131072-self.koniec+self.pocz-1 else self.m:=self.pocz-self.koniec-1;
@@ -663,7 +678,7 @@ until terminated;
 
 end;
 
-procedure TFileBuffer.seek(amount:integer);
+procedure TFileBuffer.seek(amount:int64);
 
 begin
 seekamount:=amount;
