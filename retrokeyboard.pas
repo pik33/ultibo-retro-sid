@@ -68,7 +68,7 @@ USB Keyboard Devices
 {$H+}          {Default to AnsiString}
 {$inline on}   {Allow use of Inline procedures}
 
-unit Keyboard;
+unit retrokeyboard;
 
 interface
 

@@ -11,7 +11,7 @@ unit screen;
 
 interface
 
-uses sysutils,classes,retromalina,platform,retro,cwindows;
+uses sysutils,classes,retromalina,platform,retro,cwindows,threads;
 
 const ver='The retromachine player v. 0.21u --- 2017.02.05';
 
@@ -49,7 +49,7 @@ var test:integer ;
         $00,$00,$00,$07,$00,$00,$60,$04,$00,$00,$01,$00,$18,$00,$00,$00,
         $00,$00,$00,$e0,$5b,$00,$23,$2e,$00,$00,$23,$2e,$00,$00,$00,$00,
         $00,$00,$00,$00,$00,$00);
-   bmpbuf:array[0..2007039] of bmppixel absolute $20000000;
+   bmpbuf:packed array[0..2007039] of bmppixel;
    bmpi:integer;
    bmpp:bmppixel absolute bmpi;
    a1base:integer=440;
@@ -64,7 +64,7 @@ procedure writebmp;
 
 implementation
 
-uses mouse;
+uses simpleaudio,retromouse;
 
 procedure rainbow;
 
@@ -272,17 +272,15 @@ frame:=(framecnt mod 32) div 2;
 
 // animate the sprites
 
-sprite0ptr:=cardinal(@spr0)+4096*frame;
-sprite1ptr:=cardinal(@spr1)+4096*frame;
-sprite2ptr:=cardinal(@spr2)+4096*frame;
-sprite3ptr:=cardinal(@spr3)+4096*frame;
-sprite4ptr:=cardinal(@spr4)+4096*frame;
-sprite5ptr:=cardinal(@spr5)+4096*frame;
-sprite6ptr:=cardinal(@spr6)+4096*frame;
+sprite0ptr:=cardinal(@spr0[0])+4096*frame;
+sprite1ptr:=cardinal(@spr1[0])+4096*frame;
+sprite2ptr:=cardinal(@spr2[0])+4096*frame;
+sprite3ptr:=cardinal(@spr3[0])+4096*frame;
+sprite4ptr:=cardinal(@spr4[0])+4096*frame;
+sprite5ptr:=cardinal(@spr5[0])+4096*frame;
+sprite6ptr:=cardinal(@spr6[0])+4096*frame;
 
 c1:=framecnt mod 60;
-
-//c:=c+1; c1:=c mod 60;
 
 // Refresh the yellow field with song name and time
 
@@ -493,14 +491,16 @@ end;
 
 procedure writebmp;
 
-var fh,i,j,k,idx:integer;
+var bmp_fh,i,j,k,idx:integer;
     b:byte;
+    s:string;
 
 begin
-
-fh:=filecreate('c:\dump'+datetimetostr(now)+'.bmp');
-filewrite(fh,bmphead[0],54);
-
+//pauseaudio(1);
+s:=timetostr(now);
+for i:=1 to length(s) do if s[i]=':' then s[i]:='_';
+bmp_fh:=filecreate('d:\dump'+s+'.bmp');
+filewrite(bmp_fh,bmphead[0],54);
 k:=0;
 for i:=1119 downto 0 do
   for j:=0 to 1791 do
@@ -510,8 +510,10 @@ for i:=1119 downto 0 do
    bmpbuf[k]:=bmpp;                    // bmp is 24 bit while pallette is integer
    k+=1;
    end;
-for i:=0 to 1469 do begin filewrite(fh,bmpbuf[1024*i],4096); sleep(1); end;// filewrite(fh,bmpbuf,6021120);
-fileclose (fh);
+for i:=0 to 119 do begin filewrite(bmp_fh,bmpbuf[i*17920],53760); threadsleep(10); end;
+fileclose(fh);
+//sleep(1000);
+//pauseaudio(0);
 end;
 
 procedure mandelbrot;

@@ -19,15 +19,25 @@ uses
   FATFS,       {Include the FAT file system driver}
   BCM2710,
   Ultibo,
-  Keyboard,    {Keyboard uses USB so that will be included automatically}
-  Mouse,
+  retrokeyboard,    {Keyboard uses USB so that will be included automatically}
+  retromouse,
   DWCOTG,
   retromalina,
  // cwindows,
   Unit6502,
   screen,
-//  mp3,
+  mp3,
+//  syscalls,
   simpleaudio;
+
+
+
+{$linklib m}
+{$linklib minimp3}
+
+function pow(a,b:double):double; cdecl; external 'libm' name 'pow';
+function mp3_create:pointer; cdecl; external 'libminimp3' name 'mp3_create';
+function mp3_decode(dec,buf:pointer; bytes:integer; oout:pointer;info:pointer):integer; cdecl; external 'libminimp3' name 'mp3_decode';
 
 
 label p101,p999;
@@ -55,6 +65,16 @@ var s,currentdir,currentdir2:string;
     t,tt,ttt:int64;
 
     mousedebug:boolean=false;
+
+//    mp3test:pointer;
+//    mp3testi:cardinal absolute mp3test;
+//
+//    mp3buf:byte absolute $20000000;
+//    outbuf:byte absolute $21000000;
+//    mp3bufidx:integer=0;
+//    outbufidx:integer=0;
+//    info:mp3_info_t;
+//    framesize:integer;
 
 // ---- procedures
 
@@ -378,24 +398,10 @@ threadsleep(1);
 startreportbuffer;
 startmousereportbuffer;
 
+
+
 repeat
   refreshscreen;
-
-// mouse debug
-  if mousedebug then
-    begin
-    box(300,872,500,96,129);
-    outtextxyz(300,872,inttohex(mouserecordb[0],2)+' '+
-    inttohex(mouserecordb[1],2)+' '+
-    inttohex(mouserecordb[2],2)+' '+
-    inttohex(mouserecordb[3],2)+' '+
-    inttohex(mouserecordb[4],2)+' '+
-    inttohex(mouserecordb[5],2)+' '+
-    inttohex(mouserecordb[6],2)+' '+
-    inttohex(mouserecordb[7],2),136,2,2);
-    outtextxyz(300,904,inttostr(mouse_rb_start),136,2,2);
-    outtextxyz(300,936,inttostr(mouse_rb_end),136,2,2);
-    end;
 
   key:=readkey and $FF;
   wheel:=readwheel;
@@ -442,14 +448,11 @@ repeat
   else if key=key_f2 then begin if channel2on=0 then channel2on:=1 else channel2on:=0; end   // F2 toggle channel 1 on/off
   else if key=key_f3 then begin if channel3on=0 then channel3on:=1 else channel3on:=0; end   // F3 toggle channel 1 on/off
 
+
+
   else if key=ord('b') then   // save bitmap
     begin
     writebmp;
-    end
-
-  else if key=ord('m') then   // save bitmap
-    begin
-    mousedebug:=not mousedebug
     end
 
   else if key=ord('q') then   // volume up

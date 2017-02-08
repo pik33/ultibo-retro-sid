@@ -54,7 +54,7 @@ USB Mouse Devices
 {$H+}          {Default to AnsiString}
 {$inline on}   {Allow use of Inline procedures}
 
-unit Mouse;
+unit retromouse;
 
 interface
 

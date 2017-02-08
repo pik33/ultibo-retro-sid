@@ -725,7 +725,7 @@ threadsleep(1);
 
     // if not pause then we should call audiocallback to fill the buffer
 
-    CurrentAudioSpec.callback(CurrentAudioSpec.userdata, samplebuffer_ptr, CurrentAudioSpec.size);
+    if CurrentAudioSpec.callback<>nil then CurrentAudioSpec.callback(CurrentAudioSpec.userdata, samplebuffer_ptr, CurrentAudioSpec.size);
 
     // the buffer has to be converted to 2 chn 32bit integer
 

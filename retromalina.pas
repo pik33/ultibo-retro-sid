@@ -89,8 +89,8 @@ unit retromalina;
 
 interface
 
-uses sysutils,classes,unit6502,Platform,Framebuffer,keyboard,mouse,
-     threads,GlobalConst,ultibo,retro,simpleaudio;
+uses sysutils,classes,unit6502,Platform,Framebuffer,retrokeyboard,retromouse,
+     threads,GlobalConst,ultibo,retro,simpleaudio, mp3;
 
 const base=          $2F000000;     // retromachine system area base
       nocache=       $C0000000;     // cache off address addition
@@ -166,15 +166,6 @@ type
        Constructor Create(CreateSuspended : boolean);
      end;
 
-     // Audio thread
-
-     TAudio= class(TThread)
-     private
-     protected
-       procedure Execute; override;
-     public
-      Constructor Create(CreateSuspended : boolean);
-     end;
 
      // File buffer thread
 
@@ -182,12 +173,15 @@ type
      private
      buf:array[0..131071] of byte;
      tempbuf:array[0..32767] of byte;
+     outbuf: array[0..8191] of byte;
      pocz:integer;
      koniec:integer;
      il,fh,newfh:integer;
      newfilename:string;
      needclear:boolean;
      seekamount:int64;
+     eof:boolean;
+     mp3:boolean;
      protected
        procedure Execute; override;
      public
@@ -199,6 +193,31 @@ type
       procedure clear;
       procedure seek(amount:int64);
      end;
+
+     TMp3Buffer= class(TThread)
+      private
+      buf:array[0..131071] of byte;
+      tempbuf:array[0..32767] of byte;
+      outbuf: array[0..8191] of byte;
+
+      pocz:integer;
+      koniec:integer;
+      il,fh,newfh:integer;
+      newfilename:string;
+      needclear:boolean;
+      seekamount:int64;
+      eof:boolean;
+      protected
+        procedure Execute; override;
+      public
+       m:integer;
+       empty,full:boolean;
+       Constructor Create(CreateSuspended : boolean);
+       function getdata(b,ii:integer):integer;
+       procedure setfile(nfh:integer);
+       procedure clear;
+       procedure seek(amount:int64);
+      end;
 
      // mouse thread
 
@@ -254,7 +273,7 @@ var fh,filetype:integer;                // this needs cleaning...
     skip:integer;
     scj:integer=0;
     thread:TRetro;
-    thread3:TAudio;
+
     times6502:array[0..15] of integer;
     attacktable:array[0..15] of double=(5.208e-4,1.302e-4,6.51e-5,4.34e-5,2.74e-5,1.86e-5,1.53e-5,1.3e-5,1.04e-5,4.17e-6,2.08e-6,1.302e-6,1.04e-6,3.47e-7,2.08e-7,1.3e-7);
     attacktablei:array[0..15] of int64;
@@ -280,6 +299,7 @@ var fh,filetype:integer;                // this needs cleaning...
     buf2:array[0..1919] of smallint;
     buf2f:array[0..959] of single absolute buf2;
     filebuffer:TFileBuffer;
+    mp3buffer:TMp3Buffer;
     amouse:tmouse ;
     akeyboard:tkeyboard ;
     psystem,psystem2:pointer;
@@ -469,7 +489,7 @@ end;
 procedure TMouse.Execute;
 
 var mb:tmousedata;
-    i:integer;
+    i,j:integer;
     mi:cardinal;
     x,y,w:integer;
     m:TMouseReport;
@@ -485,7 +505,11 @@ begin
     mousereports[7]:=m;
     mousetype:=0;
     for i:=0 to 6 do if mousereports[i,7]<>m[7] then mousetype:=m[0]; // 1 or 2
-    // now add type 3 detect here
+    j:=0; for i:=0 to 7 do begin j+=mousereports[i,1]; j+=mousereports[i,7]; end;
+    for i:=0 to 7 do if (mousereports[i,3]=$FF) and (mousereports[i,2]=0) then j+=1;
+    for i:=0 to 7 do if (mousereports[i,3]=$1) and (mousereports[i,2]=0) then j+=1;
+    if j=0 then mousetype:=3;
+
     if mousetype=0 then  // most standard mouse type
        begin
        buttons:=m[0];
@@ -626,46 +650,56 @@ constructor TFileBuffer.Create(CreateSuspended : boolean);
 begin
 FreeOnTerminate := True;
 inherited Create(CreateSuspended);
-self.m:=131072;
-self.pocz:=0;
-self.koniec:=0;
-self.fh:=-1;
-self.newfh:=-1;
-self.il:=0;
-self.newfilename:='';
-self.empty:=true; self.full:=false;
-self.needclear:=false;
-self.seekamount:=0;
+m:=131072;
+pocz:=0;
+koniec:=0;
+fh:=-1;
+newfh:=-1;
+il:=0;
+newfilename:='';
+empty:=true; full:=false;
+needclear:=false;
+seekamount:=0;
+eof:=true;
+mp3:=false
 end;
 
 procedure TFileBuffer.Execute;
 
 var i:integer;
+    qq:integer;
+    info:mp3_info_t;
+    mp3test:pointer;
+    framesize:integer;
 
 begin
-
+mp3test:=mp3_create;
+qq:=32768;
 repeat
 if self.needclear then begin self.koniec:=0; self.pocz:=0; self.needclear:=false; self.empty:=true; self.m:=131072; for i:=0 to 131071 do buf[i]:=0; end;
-if (self.seekamount<>0) and (self.fh>0) then begin fileseek(fh,seekamount,fsFromCurrent); seekamount:=0; end;
+if (self.seekamount<>0) and (self.fh>0) then begin fileseek(fh,seekamount,fsFromCurrent); seekamount:=0; {pocz:=(koniec-6144) mod 131072;} end;
 if self.fh>0 then
   begin
   if self.koniec>=self.pocz then self.m:=131072-self.koniec+self.pocz-1 else self.m:=self.pocz-self.koniec-1;
   if  (self.m>=32768) then
     begin
-    self.il:=fileread(self.fh,self.tempbuf[0],32768);
-
-    for i:=0 to il-1 do self.buf[(i+self.koniec) and $1FFFF]:=self.tempbuf[i] ;
-    self.koniec:=(self.koniec+self.il) and $1FFFF;
-
-    if self.il<>32768 then
+    if  not mp3 then
       begin
+      self.il:=fileread(self.fh,self.tempbuf[0],32768);
 
-      if self.newfh>0 then
+      for i:=0 to il-1 do self.buf[(i+self.koniec) and $1FFFF]:=self.tempbuf[i] ;
+      self.koniec:=(self.koniec+self.il) and $1FFFF;
+
+      if self.il<>32768 then
         begin
-        self.fh:=self.newfh; self.newfh:=-1;
+
+        if self.newfh>0 then
+          begin
+          self.fh:=self.newfh; self.newfh:=-1;
+          end
         end;
+      if self.m<3*32768 then self.empty:=false;
       end;
-    if self.m<3*32768 then self.empty:=false;
     end;
   end
 else
@@ -677,6 +711,7 @@ sleep(1);
 until terminated;
 
 end;
+
 
 procedure TFileBuffer.seek(amount:int64);
 
@@ -722,36 +757,122 @@ begin
 self.needclear:=true;
 end;
 
+// ---- TMp3Buffer thread methods --------------------------------------------------
 
-// ---- TAudio thread methods --------------------------------------------------
+// As it is now, this is a copy of FileBuffer class
+// patched to decode mp3
+// I didn't made inheritance here because these classes
+// will be different in the future versions
 
-constructor TAudio.Create(CreateSuspended : boolean);
+constructor Tmp3Buffer.Create(CreateSuspended : boolean);
 
 begin
 FreeOnTerminate := True;
 inherited Create(CreateSuspended);
+self.m:=131072;
+self.pocz:=0;
+self.koniec:=0;
+self.fh:=-1;
+self.newfh:=-1;
+self.il:=0;
+self.newfilename:='';
+self.empty:=true; self.full:=false;
+self.needclear:=false;
+self.seekamount:=0;
+eof:=true;
+end;
+
+procedure Tmp3Buffer.Execute;
+
+var i:integer;
+    qq:integer;
+    info:mp3_info_t;
+    mp3test:pointer;
+    framesize:integer;
+
+begin
+mp3test:=mp3_create;
+qq:=32768;
+repeat
+if self.needclear then begin self.koniec:=0; self.pocz:=0; self.needclear:=false; self.empty:=true; self.m:=131072; for i:=0 to 131071 do buf[i]:=0; end;
+if (self.seekamount<>0) and (self.fh>0) then begin fileseek(fh,seekamount,fsFromCurrent); seekamount:=0; {pocz:=(koniec-6144) mod 131072;} end;
+if self.fh>0 then
+  begin
+  if self.koniec>=self.pocz then self.m:=131072-self.koniec+self.pocz-1 else self.m:=self.pocz-self.koniec-1;
+  if  (self.m>=32768) then
+    begin
+
+    il:=fileread(fh,tempbuf[32768-qq],qq);
+
+    framesize:=mp3_decode(mp3test,@tempbuf,32768,@outbuf,@info);
+    for i:=framesize to 32767 do tempbuf[i-framesize]:=tempbuf[i];
+    for i:=0 to info.audio_bytes do buf[(i+koniec) and $1FFFF]:=outbuf[i];
+    self.koniec:=(self.koniec+info.audio_bytes) and $1FFFF;
+
+    if self.il<>qq then
+      begin
+
+      if self.newfh>0 then
+        begin
+        self.fh:=self.newfh; self.newfh:=-1;
+        end
+      end;
+    if self.m<3*32768 then self.empty:=false;
+    end;
+  end
+else
+  begin
+  self.full:=true;
+  if self.newfh>0 then begin fh:=self.newfh; self.newfh:=-1; end;
+  end;
+sleep(1);
+until terminated;
+
 end;
 
 
-procedure TAudio.Execute;
-
-var a:integer;
-
+procedure Tmp3Buffer.seek(amount:int64);
 
 begin
-ThreadSetCPU(ThreadGetCurrent,CPU_ID_1);
-//ThreadSetPriority(ThreadGetCurrent,5);
-threadsleep(1);
-  repeat
-  repeat sleep(0); a:= lpeek($3F007e00) until (a and 2) <>0 ;
-  if (a and 2)<>0 then
-    begin
-//    if lpeek($3f007e1c)=nocache+ctrl1_adr {base+$c2000000} then audiocallback(base+$5a000)
-//                                  else audiocallback(base+$5c000);
-//    lpoke($3F007e00,$00000003);
+seekamount:=amount;
+end;
 
+function Tmp3Buffer.getdata(b,ii:integer):integer;
+
+var i,d:integer;
+
+begin
+result:=0;
+if not self.empty then
+  begin
+  if self.koniec>=self.pocz then d:=self.koniec-self.pocz
+  else d:=131072-self.pocz+self.koniec;
+  if d>=ii then
+    begin
+    self.full:=false;
+    result:=ii;
+    for i:=0 to ii-1 do poke(b+i,buf[(self.pocz+i) and $1FFFF]);
+    self.pocz:=(self.pocz+ii) and $1FFFF;
+    if self.pocz=self.koniec then self.empty:=true;
+    end
+  else
+    begin
+    for i:=0 to ii-1 do poke(b+i,0);
+    result:=0;
     end;
-  until terminated;
+  end;
+end;
+
+
+procedure Tmp3Buffer.setfile(nfh:integer);
+
+begin
+self.newfh:=nfh;
+end;
+procedure Tmp3Buffer.clear;
+
+begin
+self.needclear:=true;
 end;
 
 
@@ -822,12 +943,6 @@ until terminated;
 running:=0;
 end;
 
-// A dummy callback for audio unit testing
-
-procedure testcallback(userdata: Pointer; stream: PUInt8; len:Integer);
-
-begin
-end;
 
 // ---- Retromachine procedures ------------------------------------------------
 
@@ -911,6 +1026,9 @@ error:=openaudio(@desired,@obtained);
 //thread3.start;
 filebuffer:=Tfilebuffer.create(true);
 filebuffer.start;
+//mp3buffer:=Tmp3buffer.create(true);
+//mp3buffer.start;
+
 amouse:=tmouse.create(true);
 amouse.start;
 akeyboard:=tkeyboard.create(true);
