@@ -15,6 +15,12 @@ uses sysutils,classes,retromalina,platform,retro,cwindows,threads;
 
 const ver='The retromachine player v. 0.21u --- 2017.02.05';
 
+const wavcolor=44;//166;
+      mp3color=44;//132;
+      sidcolor=44;
+      dmpcolor=44;//182;
+      dircolor=44;//24;
+
 type bmppixel=array[0..2] of byte;
 
 var test:integer ;
@@ -372,7 +378,7 @@ for j:=20 to 840 do if abs(scope[j])<46000 then box(20+j,700-scope[j] div 768,2,
 
 // if the file is SID then move the sprites acccording to SID regs
 
-if filetype<>3 then
+if filetype<3 then
   begin
   if channel1on=1 then sprite0x:=(dpeek(base+$d400) div 40)+74 else sprite0x:=2048;
   sprite0y:=920-3*(peek(base+$d406) and $F0);

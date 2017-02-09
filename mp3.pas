@@ -43,11 +43,10 @@ mp3_info_t=record
    audio_bytes:integer;  // generated amount of audio per frame
    end;
 
-
-{$linklib m}
 {$linklib minimp3}
+{$linklib m}
 
-function pow(a,b:double):double; cdecl; external 'libm' name 'pow';
+//function pow(a,b:double):double; cdecl; external 'libm' name 'pow';
 function mp3_create:pointer; cdecl; external 'libminimp3' name 'mp3_create';
 function mp3_decode(dec:mp3_decoder_p;buf:pointer; bytes:integer; oout:pointer;info:pointer):integer; cdecl; external 'libminimp3' name 'mp3_decode';
 procedure mp3_done(dec:mp3_decoder_p) external 'libminimp3' name 'mp3_done';
