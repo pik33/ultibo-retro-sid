@@ -90,7 +90,7 @@ unit retromalina;
 interface
 
 uses sysutils,classes,unit6502,Platform,Framebuffer,retrokeyboard,retromouse,
-     threads,GlobalConst,ultibo,retro,simpleaudio, mp3;
+     threads,GlobalConst,ultibo,retro, simpleaudio, mp3, HeapManager;
 
 const base=          $2F000000;     // retromachine system area base
       nocache=       $C0000000;     // cache off address addition
@@ -153,6 +153,15 @@ const _pallette=        $10000;
       _textsize=        $600AC;
       _audiodma=        $600C0;
 
+      _dma_enable=  $3F007ff0;       // DMA enable register
+      _dma_cs=      $3F007000;       // DMA control and status
+      _dma_conblk=  $3F007004;       // DMA ctrl block address
+      _dma_nextcb=  $3F00701C;       // DMA next control block
+
+      dma_chn=6;
+
+
+
 
 type
 
@@ -181,7 +190,7 @@ type
      needclear:boolean;
      seekamount:int64;
      eof:boolean;
-     mp3:boolean;
+     mp3:integer;
      qq:integer;
      protected
        procedure Execute; override;
@@ -193,7 +202,7 @@ type
       procedure setfile(nfh:integer);
       procedure clear;
       procedure seek(amount:int64);
-             procedure setmp3(mp3b:boolean);
+             procedure setmp3(mp3b:integer);
      end;
 
 
@@ -215,6 +224,10 @@ type
      public
       Constructor Create(CreateSuspended : boolean);
      end;
+
+     TCtrlBlock=array[0..7] of cardinal;
+     PCtrlBlock=^TCtrlBlock;
+
 
 type wavehead=packed record
     riff:integer;
@@ -294,7 +307,12 @@ var fh,filetype:integer;                // this needs cleaning...
     channel2on:byte=1;
     channel3on:byte=1;
 
+    mp3time:int64;
 
+          dma_enable:cardinal  absolute _dma_enable;   // DMA Enable register
+      dma_cs:cardinal      absolute _dma_cs+($100*dma_chn); // DMA ctrl/status
+      dma_conblk:cardinal  absolute _dma_conblk+($100*dma_chn); // DMA ctrl block addr
+      dma_nextcb:cardinal  absolute _dma_nextcb+($100*dma_chn); // DMA next ctrl block addr
 // system variables
 
     systempallette:array[0..255] of TPallette absolute base+_pallette;
@@ -404,6 +422,7 @@ var fh,filetype:integer;                // this needs cleaning...
     error:integer;
     mousereports:array[0..7] of TMouseReport;
 
+    mp2test:kjmp2_context_t;
     mp3test:pointer;
     mp3testi:cardinal absolute mp3test;
 
@@ -414,6 +433,8 @@ var fh,filetype:integer;                // this needs cleaning...
    info:mp3_info_t;
    framesize:integer;
 
+   chuj: integer;
+    pizda: integer=0;
 // prototypes
 
 procedure initmachine;
@@ -457,6 +478,7 @@ procedure waitvbl;
 procedure removeramlimits(addr:integer);
 function readwheel: shortint; inline;
 procedure unhidecolor(c,bank:cardinal);
+procedure dma_box(x,y,l,h,c:cardinal);
 
 
 
@@ -475,6 +497,8 @@ inherited Create(CreateSuspended);
 end;
 
 procedure TMouse.Execute;
+
+label p101;
 
 var mb:tmousedata;
     i,j:integer;
@@ -496,10 +520,22 @@ begin
       mousereports[7]:=m;
       end;
     mousetype:=0;
-    for i:=0 to 6 do if mousereports[i,7]<>m[7] then mousetype:=m[0]; // 1 or 2
-    j:=0; for i:=0 to 7 do begin j+=mousereports[i,1]; j+=mousereports[i,7]; end;
+    j:=0;
+    for i:=0 to 6 do if mousereports[i,7]<>m[7]  then j+=1;
+    for i:=0 to 6 do if mousereports[i,6]<>m[6]  then j+=1;
+    for i:=0 to 6 do if mousereports[i,5]<>m[5]  then j+=1;
+    for i:=0 to 6 do if mousereports[i,4]<>m[4]  then j+=1;
+    if j=0 then begin mousetype:=0; goto p101; end;
+
+    j:=0;
+    for i:=0 to 7 do begin j+=mousereports[i,1]; j+=mousereports[i,7]; end;
     for i:=0 to 7 do if (mousereports[i,3]<>$FF) and (mousereports[i,3]<>0) then j+=1;
-    if j=0 then mousetype:=3;
+    if j=0 then begin mousetype:=3; goto p101; end;
+
+    for i:=0 to 6 do if mousereports[i,7]<>m[7] then mousetype:=m[0]; // 1 or 2
+
+p101:
+
     if mousetype=0 then  // most standard mouse type
        begin
        buttons:=m[0];
@@ -651,18 +687,22 @@ empty:=true; full:=false;
 needclear:=false;
 seekamount:=0;
 eof:=true;
-mp3:=false;
+mp3:=0;
 qq:=32768;
 end;
 
 procedure TFileBuffer.Execute;
 
 var i,il2,k:integer;
+    ml:int64;
+
 
 //    info:mp3_info_t;
 //    framesize:integer;
 
 begin
+ThreadSetCPU(ThreadGetCurrent,CPU_ID_2);
+sleep(1);
 //mp3test:=mp3_create;
 repeat
 if self.needclear then begin self.koniec:=0; self.pocz:=0; self.needclear:=false; self.empty:=true; self.m:=131072; for i:=0 to 131071 do buf[i]:=0; qq:=32768;
@@ -673,7 +713,7 @@ if self.fh>0 then
   if self.koniec>=self.pocz then self.m:=131072-self.koniec+self.pocz-1 else self.m:=self.pocz-self.koniec-1;
   if  (self.m>=32768) then
     begin
-    if  not mp3 then
+    if   mp3=0 then
       begin
       il:=fileread(fh,tempbuf[0],32768);
       for i:=0 to il-1 do self.buf[(i+self.koniec) and $1FFFF]:=self.tempbuf[i] ;
@@ -687,20 +727,31 @@ if self.fh>0 then
         end;
       if self.m<3*32768 then self.empty:=false;
       end
-    else       // mp3
+    else if mp3>0 then
       begin
       il:=fileread(fh,tempbuf[32768-qq],qq);
       if il=qq then
         begin
         qq:=0;
+        ml:=gettime;
         for k:=0 to 6 do
           begin
-          il2:=mp3_decode(mp3test,@tempbuf,32768,@outbuf,@info);
+          if mp3=1 then il2:=mp3_decode(mp3test,@tempbuf,32768,@outbuf,@info);
+          if mp3=2 then begin il2:=kjmp2_decode_frame(@mp2test,@tempbuf,@outbuf); chuj:=il2; pizda+=1;end;
+
           for i:=il2 to 32767 do tempbuf[i-il2]:=tempbuf[i];
-          for i:=0 to info.audio_bytes-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
+
+          if mp3=1 then for i:=0 to info.audio_bytes-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
+          if mp3=2 then for i:=0 to 4*1152-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
+
           qq+=il2;
-          koniec:=(koniec+info.audio_bytes) and $1FFFF;
+
+          if mp3=1 then koniec:=(koniec+info.audio_bytes) and $1FFFF;
+          if mp3=2 then koniec:=(koniec+4*1152) and $1FFFF;
+
+
           end;
+        mp3time:=gettime-ml;
         end
       else
         begin
@@ -711,6 +762,33 @@ if self.fh>0 then
           end;
         end;
       if m<3*32678 then empty:=false;
+      end
+    else if mp3=2 then    // mp2
+      begin
+ {     il:=fileread(fh,tempbuf[32768-qq],qq);
+      if il=qq then
+        begin
+        qq:=0;
+        ml:=gettime;
+        for k:=0 to 3 do
+          begin
+          il2:=kjmp2_decode_frame(@mp2test,@tempbuf,@outbuf);
+          for i:=il2 to 32767 do tempbuf[i-il2]:=tempbuf[i];
+          for i:=0 to info.audio_bytes-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
+          qq+=il2;
+          koniec:=(koniec+info.audio_bytes) and $1FFFF;
+          end;
+        mp3time:=gettime-ml;
+        end
+      else
+        begin
+        if newfh>0 then
+          begin
+          fh:=newfh;
+          newfh:=-1;
+          end;
+        end;
+      if m<3*32678 then empty:=false; }
       end;
     end;
   end
@@ -724,7 +802,7 @@ until terminated;
 
 end;
 
-procedure TFileBuffer.setmp3(mp3b:boolean);
+procedure TFileBuffer.setmp3(mp3b:integer);
 
 begin
 mp3:=mp3b;
@@ -884,6 +962,7 @@ siddata[$2e]:=$7FFFF8;
 reset6502;
 
 mp3test:=mp3_create;
+kjmp2_init(@mp2test);
 
 //init the framebuffer
 //TODO: if the screen is 1920x1080 init it to this resolution
@@ -2814,7 +2893,7 @@ audio3:=psingle(stream);
 ttt:=clockgettotal;
 
 
-if (filetype=3) or (filetype=4) then
+if (filetype=3) or (filetype=4) or (filetype=5) then
   begin
   if sfh>0 then
     begin
@@ -2832,7 +2911,7 @@ if (filetype=3) or (filetype=4) then
       begin
       timer1+=siddelay;
       songtime+=siddelay;
-      if (head.pcm=1) or (filetype=4) then for i:=0 to 383 do oscilloscope(audio2[2*i]+audio2[2*i+1])
+      if (head.pcm=1) or (filetype>=4) then for i:=0 to 383 do oscilloscope(audio2[2*i]+audio2[2*i+1])
                          else for i:=0 to 95 do oscilloscope(round(16384*(audio3[4*i]+audio3[4*i+1]+audio3[4*i+2]+audio3[4*i+3])));
       end;
     end;
@@ -2900,6 +2979,44 @@ sidtime:=clockgettotal-ttt;
 end;
 
 
+
+procedure dma_box(x,y,l,h,c:cardinal);               //TODO don't init second time!!!
+
+var i:integer;
+
+
+    ctrl1_ptr:PCtrlBlock;
+    transfer_info2:cardinal;
+    d:array[0..15] of cardinal;
+
+begin
+transfer_info2:=$00000232;
+
+for i:=0 to 15 do lpoke ($22000000+4*i,$28282828);
+cleandatacacherange ($22000000,512);
+
+
+ctrl1_ptr:=PCtrlBlock($23000000); //GetAlignedMem(32,32));    // set pointers so the ctrl blocks can be accessed as array
+
+//dmabuf1_ptr:=@c;                       // allocate 64k for DMA buffer
+
+ctrl1_ptr^[0]:=transfer_info2;             // transfer info
+ctrl1_ptr^[1]:=$E2000000;       // source address -> buffer #1
+ctrl1_ptr^[2]:=nocache+displaystart+1792*y+x;      // destination address
+ctrl1_ptr^[3]:=l+h shl 16;                        // transfer length
+ctrl1_ptr^[4]:=(1792-l) shl 16;                      // 2D length, unused
+ctrl1_ptr^[5]:=0;         // next ctrl block -> ctrl block #2
+ctrl1_ptr^[6]:=$0;                        // unused
+ctrl1_ptr^[7]:=$0;                        // unused
+CleanDataCacheRange($23000000,32);      // now push this into RAM
+sleep(1);
+
+// Init the hardware
+
+dma_enable:=dma_enable or (1 shl dma_chn);                 // enable dma channel # dma_chn
+dma_conblk:=$E3000000; //nocache+ptruint(ctrl1_ptr);                             // init DMA ctr block to ctrl block # 1
+dma_cs:=$00000003;                                         // start DMA
+end;
 
 
 

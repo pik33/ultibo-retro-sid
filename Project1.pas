@@ -321,6 +321,14 @@ if findfirst(currentdir,faAnyFile,sr)=0 then
   ilf+=1;
   until (findnext(sr)<>0) or (ilf=1000);
 sysutils.findclose(sr);
+currentdir:=currentdir2+'*.mp2';
+if findfirst(currentdir,faAnyFile,sr)=0 then
+  repeat
+  filenames[ilf,0]:=sr.name;
+  filenames[ilf,1]:='mp2';
+  ilf+=1;
+  until (findnext(sr)<>0) or (ilf=1000);
+sysutils.findclose(sr);
 
 sort;
 
@@ -334,6 +342,7 @@ for i:=0 to ild do
   for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
   if filenames[i,1]='wav' then outtextxyz(1344-8*l,132+32*i,s,wavcolor,2,2);
   if filenames[i,1]='mp3' then outtextxyz(1344-8*l,132+32*i,s,mp3color,2,2);
+  if filenames[i,1]='mp2' then outtextxyz(1344-8*l,132+32*i,s,mp3color,2,2);
   if filenames[i,1]='sid' then outtextxyz(1344-8*l,132+32*i,s,sidcolor,2,2);
   if filenames[i,1]='dmp' then outtextxyz(1344-8*l,132+32*i,s,dmpcolor,2,2);
   if filenames[i,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*i,s,dircolor,2,2);  outtextxyz(1672,132+32*i,'(DIR)',dircolor,2,2);   end;
@@ -406,10 +415,9 @@ startmousereportbuffer;
 
 
 repeat
-//  box(100,100,200,200,0);
-//  outtextxyz(100,100,inttostr(integer(mp3test)),136,2,2);
-//  outtextxyz(100,132,inttostr(info.sample_rate),136,2,2);
-//  outtextxyz(100,164,inttostr(skip),136,2,2);
+// box(100,100,200,200,0);
+//  outtextxyz(100,100,inttostr(integer(filetype)),136,2,2);
+
 
   refreshscreen;
 
@@ -437,6 +445,7 @@ repeat
       for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
       if filenames[sel+selstart,1]='wav'then outtextxyz(1344-8*l,132+32*(sel),s,wavcolor,2,2);
       if filenames[sel+selstart,1]='mp3'then outtextxyz(1344-8*l,132+32*(sel),s,mp3color,2,2);
+      if filenames[sel+selstart,1]='mp2'then outtextxyz(1344-8*l,132+32*(sel),s,mp3color,2,2);
       if filenames[sel+selstart,1]='dmp'then outtextxyz(1344-8*l,132+32*(sel),s,dmpcolor,2,2);
       if filenames[sel+selstart,1]='sid'then outtextxyz(1344-8*l,132+32*(sel),s,sidcolor,2,2);
       if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,dircolor,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',dircolor,2,2);   end;
@@ -448,6 +457,7 @@ repeat
       for j:=1 to length(s) do if s[j]='_' then s[j]:=' ';
       if filenames[sel+selstart,1]='wav' then outtextxyz(1344-8*l,132+32*(sel),s,wavcolor,2,2);
       if filenames[sel+selstart,1]='mp3' then outtextxyz(1344-8*l,132+32*(sel),s,mp3color,2,2);
+      if filenames[sel+selstart,1]='mp2' then outtextxyz(1344-8*l,132+32*(sel),s,mp3color,2,2);
       if filenames[sel+selstart,1]='dmp' then outtextxyz(1344-8*l,132+32*(sel),s,dmpcolor,2,2);
       if filenames[sel+selstart,1]='sid' then outtextxyz(1344-8*l,132+32*(sel),s,sidcolor,2,2);
       if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,dircolor,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',dircolor,2,2);   end;
@@ -469,6 +479,10 @@ repeat
   else if key=ord('b') then   // save bitmap
     begin
     writebmp;
+    end
+           else if key=ord('d') then   // save bitmap
+    begin
+    dma_box(100,100,500,500,40);
     end
 
   else if key=ord('m') then   // save bitmap
@@ -504,6 +518,7 @@ repeat
 //      if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
       if filenames[sel+selstart,1]='wav' then outtextxyz(1344-8*l,132+32*(sel),s,wavcolor,2,2);
       if filenames[sel+selstart,1]='mp3' then outtextxyz(1344-8*l,132+32*(sel),s,mp3color,2,2);
+      if filenames[sel+selstart,1]='mp2' then outtextxyz(1344-8*l,132+32*(sel),s,mp3color,2,2);
       if filenames[sel+selstart,1]='dmp' then outtextxyz(1344-8*l,132+32*(sel),s,dmpcolor,2,2);
       if filenames[sel+selstart,1]='sid' then outtextxyz(1344-8*l,132+32*(sel),s,sidcolor,2,2);
       if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,dircolor,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',dircolor,2,2);   end;
@@ -517,6 +532,7 @@ repeat
 //      if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
       if filenames[sel+selstart,1]='wav' then outtextxyz(1344-8*l,132+32*(sel),s,wavcolor,2,2);
       if filenames[sel+selstart,1]='mp3' then outtextxyz(1344-8*l,132+32*(sel),s,mp3color,2,2);
+      if filenames[sel+selstart,1]='mp2' then outtextxyz(1344-8*l,132+32*(sel),s,mp3color,2,2);
       if filenames[sel+selstart,1]='dmp' then outtextxyz(1344-8*l,132+32*(sel),s,dmpcolor,2,2);
       if filenames[sel+selstart,1]='sid' then outtextxyz(1344-8*l,132+32*(sel),s,sidcolor,2,2);
       if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,dircolor,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',dircolor,2,2);   end;
@@ -536,6 +552,7 @@ repeat
 //        if filenames[i+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*i,s,44,2,2);  outtextxyz(1672,132+32*i,'(DIR)',44,2,2);   end;
         if filenames[i+selstart,1]='wav' then outtextxyz(1344-8*l,132+32*i,s,wavcolor,2,2);
         if filenames[i+selstart,1]='mp3' then outtextxyz(1344-8*l,132+32*i,s,mp3color,2,2);
+        if filenames[i+selstart,1]='mp2' then outtextxyz(1344-8*l,132+32*i,s,mp3color,2,2);
         if filenames[i+selstart,1]='dmp' then outtextxyz(1344-8*l,132+32*i,s,dmpcolor,2,2);
         if filenames[i+selstart,1]='sid' then outtextxyz(1344-8*l,132+32*i,s,sidcolor,2,2);
         if filenames[i+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*i,s,dircolor,2,2);  outtextxyz(1672,132+32*i,'(DIR)',dircolor,2,2);   end;
@@ -556,6 +573,7 @@ repeat
 //        if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
         if filenames[sel+selstart,1]='wav' then outtextxyz(1344-8*l,132+32*(sel),s,wavcolor,2,2);
         if filenames[sel+selstart,1]='mp3' then outtextxyz(1344-8*l,132+32*(sel),s,mp3color,2,2);
+        if filenames[sel+selstart,1]='mp2' then outtextxyz(1344-8*l,132+32*(sel),s,mp3color,2,2);
         if filenames[sel+selstart,1]='dmp' then outtextxyz(1344-8*l,132+32*(sel),s,dmpcolor,2,2);
         if filenames[sel+selstart,1]='sid' then outtextxyz(1344-8*l,132+32*(sel),s,sidcolor,2,2);
         if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,dircolor,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',dircolor,2,2);   end;
@@ -569,6 +587,7 @@ repeat
 //        if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,44,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',44,2,2);   end;
         if filenames[sel+selstart,1]='wav' then outtextxyz(1344-8*l,132+32*(sel),s,wavcolor,2,2);
         if filenames[sel+selstart,1]='mp3' then outtextxyz(1344-8*l,132+32*(sel),s,mp3color,2,2);
+        if filenames[sel+selstart,1]='mp2' then outtextxyz(1344-8*l,132+32*(sel),s,mp3color,2,2);
         if filenames[sel+selstart,1]='dmp' then outtextxyz(1344-8*l,132+32*(sel),s,dmpcolor,2,2);
         if filenames[sel+selstart,1]='sid' then outtextxyz(1344-8*l,132+32*(sel),s,sidcolor,2,2);
         if filenames[sel+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*(sel),s,dircolor,2,2);  outtextxyz(1672,132+32*(sel),'(DIR)',dircolor,2,2);   end;
@@ -588,6 +607,7 @@ repeat
 //          if filenames[i+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*i,s,44,2,2);  outtextxyz(1672,132+32*i,'(DIR)',44,2,2);   end;
           if filenames[i+selstart,1]='wav' then outtextxyz(1344-8*l,132+32*i,s,wavcolor,2,2);
           if filenames[i+selstart,1]='mp3' then outtextxyz(1344-8*l,132+32*i,s,mp3color,2,2);
+          if filenames[i+selstart,1]='mp2' then outtextxyz(1344-8*l,132+32*i,s,mp3color,2,2);
           if filenames[i+selstart,1]='dmp' then outtextxyz(1344-8*l,132+32*i,s,dmpcolor,2,2);
           if filenames[i+selstart,1]='sid' then outtextxyz(1344-8*l,132+32*i,s,sidcolor,2,2);
           if filenames[i+selstart,1]='(DIR)' then begin outtextxyz(1344-8*l,132+32*i,s,dircolor,2,2);  outtextxyz(1672,132+32*i,'(DIR)',dircolor,2,2);   end;
@@ -724,6 +744,7 @@ repeat
           end
         else if filenames[sel+selstart,1]='mp3' then
           begin
+          filetype:=4;
           pauseaudio(1);
           if (buf[0]=ord('I')) and (buf[1]=ord('D')) and (buf[2]=ord('3'))  then
             begin
@@ -734,10 +755,37 @@ repeat
             end
           else fileseek(sfh,0,fsfrombeginning);
           filebuffer.clear;
-          sleep(10);
-          filebuffer.setmp3(true);
+          sleep(20);
+          filebuffer.setmp3(1);
           for i:=0 to 15 do times6502[i]:=0;
           filetype:=4;
+       //   waveopen(sfh);
+
+          filebuffer.setfile(sfh);
+          sleep(200);
+          songs:=0;
+          //if head.srate=44100 then
+          siddelay:=8707 ;//else siddelay:=2000;
+        //  if head.srate=44100 then if a1base=432 then error:=SA_changeparams(43298,16,2,384)
+       //                                          else error:=SA_changeparams(44100,16,2,384);
+       //   if head.srate=96000 then if a1base=432 then error:=SA_changeparams(94254,32,2,192)
+       //                                          else error:=SA_changeparams(96000,32,2,192);
+
+          if sprite6x>2047 then begin sprite0x:=100; sprite1x:=200; sprite2x:=300;sprite3x:=400; sprite4x:=500; sprite5x:=600; sprite6x:=700; end;
+
+          pauseaudio(0);
+          end
+
+         else if filenames[sel+selstart,1]='mp2' then
+          begin
+          pauseaudio(1);
+          fileseek(sfh,0,fsfrombeginning);
+          filebuffer.clear;
+          sleep(50);
+          filetype:=5;
+          filebuffer.setmp3(2);
+          for i:=0 to 15 do times6502[i]:=0;
+          filetype:=5;
        //   waveopen(sfh);
 
           filebuffer.setfile(sfh);
@@ -758,7 +806,7 @@ repeat
         else if (buf[0]=ord('R')) and (buf[1]=ord('I')) and (buf[2]=ord('F')) and (buf[3]=ord('F')) then
           begin
           pauseaudio(1);
-          filebuffer.setmp3(false);
+          filebuffer.setmp3(0);
           for i:=0 to 15 do times6502[i]:=0;
           filetype:=3;
           waveopen(sfh);
