@@ -192,6 +192,8 @@ type
      eof:boolean;
      mp3:integer;
      qq:integer;
+     maintenance:boolean;
+     reading:boolean;
      protected
        procedure Execute; override;
      public
@@ -433,8 +435,7 @@ var fh,filetype:integer;                // this needs cleaning...
    info:mp3_info_t;
    framesize:integer;
 
-   chuj: integer;
-    pizda: integer=0;
+
 // prototypes
 
 procedure initmachine;
@@ -703,46 +704,59 @@ var i,il2,k:integer;
 begin
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_2);
 sleep(1);
-//mp3test:=mp3_create;
 repeat
-if self.needclear then begin self.koniec:=0; self.pocz:=0; self.needclear:=false; self.empty:=true; self.m:=131072; for i:=0 to 131071 do buf[i]:=0; qq:=32768;
-for i:=0 to 32767 do tempbuf[i]:=0;end;
-if (self.seekamount<>0) and (self.fh>0) then begin fileseek(fh,seekamount,fsFromCurrent); seekamount:=0; {pocz:=(koniec-6144) mod 131072;} end;
-if self.fh>0 then
-  begin
-  if self.koniec>=self.pocz then self.m:=131072-self.koniec+self.pocz-1 else self.m:=self.pocz-self.koniec-1;
-  if  (self.m>=32768) then
+  if needclear or (seekamount<>0) then
+  // now do not do maintenence tasks while other thread is reading the buffer or the conflit may happen
     begin
-    if   mp3=0 then
+    repeat until not reading;
+    maintenance:=true;
+    if seekamount<>0 then needclear:=true;
+    if needclear then
       begin
-      il:=fileread(fh,tempbuf[0],32768);
-      for i:=0 to il-1 do self.buf[(i+self.koniec) and $1FFFF]:=self.tempbuf[i] ;
-      self.koniec:=(self.koniec+self.il) and $1FFFF;
-      if self.il<>32768 then
-        begin
-        if self.newfh>0 then
-          begin
-          self.fh:=self.newfh; self.newfh:=-1;
-          end;
-        end;
-      if self.m<3*32768 then self.empty:=false;
-      end
-    else if mp3>0 then
+      koniec:=0;
+      pocz:=0;
+      needclear:=false;
+      empty:=true;
+      m:=131072;
+      for i:=0 to 131071 do buf[i]:=0;
+      qq:=32768;
+      for i:=0 to 32767 do tempbuf[i]:=0;
+      end;
+    if (seekamount<>0) and (fh>0) then
       begin
-      il:=fileread(fh,tempbuf[32768-qq],qq);
-      if il=qq then
+      fileseek(fh,seekamount,fsFromCurrent);
+      seekamount:=0;
+      end;
+    maintenance:=false;
+    end;
+    // end of maintenance processes
+
+  if fh>0 then
+    begin
+    if koniec>=pocz then m:=131072-koniec+pocz-1 else m:=pocz-koniec-1;
+    if m>=32768 then // more than 32k free place, do a read
+      begin
+      if mp3=0 then  // no decoding needed, simply read 32k from file
         begin
-        qq:=0;
-        ml:=gettime;
-        for k:=0 to 6 do
+        il:=fileread(fh,tempbuf[0],32768);
+        for i:=0 to il-1 do buf[(i+koniec) and $1FFFF]:=tempbuf[i] ;
+        koniec:=(koniec+il) and $1FFFF;
+        if m<3*32768 then empty:=false; //more than 32 k in the buffer=not empty
+        end
+      else // compressed file: read and decompress
+        begin
+        il:=fileread(fh,tempbuf[32768-qq],qq);
+        if il=qq then
           begin
-          if mp3=1 then il2:=mp3_decode(mp3test,@tempbuf,32768,@outbuf,@info);
-          if mp3=2 then begin il2:=kjmp2_decode_frame(@mp2test,@tempbuf,@outbuf); chuj:=il2; pizda+=1;end;
-
-          for i:=il2 to 32767 do tempbuf[i-il2]:=tempbuf[i];
-
-          if mp3=1 then for i:=0 to info.audio_bytes-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
-          if mp3=2 then for i:=0 to 4*1152-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
+          qq:=0;
+          ml:=gettime;
+          for k:=0 to 3 do
+            begin
+            if mp3=1 then il2:=mp3_decode(mp3test,@tempbuf,32768,@outbuf,@info);
+            if mp3=2 then begin il2:=kjmp2_decode_frame(@mp2test,@tempbuf,@outbuf); end;
+            for i:=il2 to 32767 do tempbuf[i-il2]:=tempbuf[i];
+            if mp3=1 then for i:=0 to info.audio_bytes-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
+            if mp3=2 then for i:=0 to 4*1152-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
 
           qq+=il2;
 
@@ -751,6 +765,10 @@ if self.fh>0 then
 
 
           end;
+
+
+
+
         mp3time:=gettime-ml;
         end
       else
@@ -762,34 +780,16 @@ if self.fh>0 then
           end;
         end;
       if m<3*32678 then empty:=false;
-      end
-    else if mp3=2 then    // mp2
-      begin
- {     il:=fileread(fh,tempbuf[32768-qq],qq);
-      if il=qq then
+      end ;
+
+
+      if self.il<>32768 then
         begin
-        qq:=0;
-        ml:=gettime;
-        for k:=0 to 3 do
+        if self.newfh>0 then
           begin
-          il2:=kjmp2_decode_frame(@mp2test,@tempbuf,@outbuf);
-          for i:=il2 to 32767 do tempbuf[i-il2]:=tempbuf[i];
-          for i:=0 to info.audio_bytes-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
-          qq+=il2;
-          koniec:=(koniec+info.audio_bytes) and $1FFFF;
-          end;
-        mp3time:=gettime-ml;
-        end
-      else
-        begin
-        if newfh>0 then
-          begin
-          fh:=newfh;
-          newfh:=-1;
+          self.fh:=self.newfh; self.newfh:=-1;
           end;
         end;
-      if m<3*32678 then empty:=false; }
-      end;
     end;
   end
 else
@@ -820,8 +820,10 @@ function TFileBuffer.getdata(b,ii:integer):integer;
 var i,d:integer;
 
 begin
+repeat until not maintenance;
+reading:=true;
 result:=0;
-if not self.empty then
+if not empty then
   begin
   if self.koniec>=self.pocz then d:=self.koniec-self.pocz
   else d:=131072-self.pocz+self.koniec;
@@ -839,6 +841,7 @@ if not self.empty then
     result:=0;
     end;
   end;
+reading:=false;
 end;
 
 
