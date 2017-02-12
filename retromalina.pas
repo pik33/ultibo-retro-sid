@@ -731,73 +731,69 @@ repeat
     end;
     // end of maintenance processes
 
-  if fh>0 then
+  if (fh>0) and not eof then
     begin
     if koniec>=pocz then m:=131072-koniec+pocz-1 else m:=pocz-koniec-1;
     if m>=32768 then // more than 32k free place, do a read
       begin
       if mp3=0 then  // no decoding needed, simply read 32k from file
         begin
-        il:=fileread(fh,tempbuf[0],32768);
+        il:=fileread(fh,tempbuf[0],qq);
         for i:=0 to il-1 do buf[(i+koniec) and $1FFFF]:=tempbuf[i] ;
         koniec:=(koniec+il) and $1FFFF;
-        if m<3*32768 then empty:=false; //more than 32 k in the buffer=not empty
+        m:=m-il;
+        if m<3*32678 then empty:=false;
+        if il<qq then eof:=true;
         end
       else // compressed file: read and decompress
         begin
         il:=fileread(fh,tempbuf[32768-qq],qq);
+        if il<qq then eof:=true;
         if il=qq then
           begin
           qq:=0;
           ml:=gettime;
-          for k:=0 to 3 do
+          for k:=0 to 1 do
             begin
             if mp3=1 then il2:=mp3_decode(mp3test,@tempbuf,32768,@outbuf,@info);
             if mp3=2 then begin il2:=kjmp2_decode_frame(@mp2test,@tempbuf,@outbuf); end;
             for i:=il2 to 32767 do tempbuf[i-il2]:=tempbuf[i];
             if mp3=1 then for i:=0 to info.audio_bytes-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
             if mp3=2 then for i:=0 to 4*1152-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
-
-          qq+=il2;
-
-          if mp3=1 then koniec:=(koniec+info.audio_bytes) and $1FFFF;
-          if mp3=2 then koniec:=(koniec+4*1152) and $1FFFF;
-
-
+            qq+=il2;
+            if mp3=1 then koniec:=(koniec+info.audio_bytes) and $1FFFF;
+            if mp3=2 then koniec:=(koniec+4*1152) and $1FFFF;
+            end;
+          mp3time:=gettime-ml;
+          if koniec>=pocz then m:=131072-koniec+pocz-1 else m:=pocz-koniec-1;
+          if m<131072-8192 then empty:=false;
           end;
+        end;
 
-
-
-
-        mp3time:=gettime-ml;
-        end
-      else
+      if eof then   // if there is a new file to read, do it
         begin
         if newfh>0 then
           begin
-          fh:=newfh;
-          newfh:=-1;
+          fh:=newfh; newfh:=-1;  eof:=false;
           end;
         end;
-      if m<3*32678 then empty:=false;
-      end ;
 
-
-      if self.il<>32768 then
-        begin
-        if self.newfh>0 then
-          begin
-          self.fh:=self.newfh; self.newfh:=-1;
-          end;
-        end;
+      end
+    else
+      begin
+      full:=true;
+      end;
+    end
+  else
+    begin
+    if newfh>0 then
+      begin
+      fh:=newfh;
+      newfh:=-1;
+      eof:=false;
+      end;
     end;
-  end
-else
-  begin
-  self.full:=true;
-  if self.newfh>0 then begin fh:=self.newfh; self.newfh:=-1; end;
-  end;
-sleep(1);
+  sleep(1);
 until terminated;
 
 end;
@@ -825,15 +821,15 @@ reading:=true;
 result:=0;
 if not empty then
   begin
-  if self.koniec>=self.pocz then d:=self.koniec-self.pocz
-  else d:=131072-self.pocz+self.koniec;
+  if koniec>=pocz then d:=koniec-pocz
+  else d:=131072-pocz+koniec;
   if d>=ii then
     begin
-    self.full:=false;
+    full:=false;
     result:=ii;
-    for i:=0 to ii-1 do poke(b+i,buf[(self.pocz+i) and $1FFFF]);
-    self.pocz:=(self.pocz+ii) and $1FFFF;
-    if self.pocz=self.koniec then self.empty:=true;
+    for i:=0 to ii-1 do poke(b+i,buf[(pocz+i) and $1FFFF]);
+    pocz:=(pocz+ii) and $1FFFF;
+    if pocz=koniec then empty:=true;
     end
   else
     begin
@@ -849,6 +845,7 @@ procedure TFileBuffer.setfile(nfh:integer);
 
 begin
 self.newfh:=nfh;
+eof:=false;
 end;
 procedure TFileBuffer.clear;
 
@@ -2900,8 +2897,8 @@ if (filetype=3) or (filetype=4) or (filetype=5) then
   begin
   if sfh>0 then
     begin
-    il:=filebuffer.getdata(integer(stream),1536);
-    if il<>1536 then
+
+    if filebuffer.eof then // il<>1536 then
       begin
       fileclose(sfh);
       sfh:=-1;
@@ -2912,6 +2909,7 @@ if (filetype=3) or (filetype=4) or (filetype=5) then
       end
     else
       begin
+      il:=filebuffer.getdata(integer(stream),1536);
       timer1+=siddelay;
       songtime+=siddelay;
       if (head.pcm=1) or (filetype>=4) then for i:=0 to 383 do oscilloscope(audio2[2*i]+audio2[2*i+1])
