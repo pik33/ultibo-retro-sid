@@ -743,12 +743,12 @@ repeat
         koniec:=(koniec+il) and $1FFFF;
         m:=m-il;
         if m<3*32678 then empty:=false;
-        if il<qq then eof:=true;
+        if (il<qq) and empty then eof:=true;
         end
       else // compressed file: read and decompress
         begin
         il:=fileread(fh,tempbuf[32768-qq],qq);
-        if il<qq then eof:=true;
+        if (il<qq) and empty then eof:=true;
         if il=qq then
           begin
           qq:=0;

@@ -42,6 +42,7 @@ var s,currentdir,currentdir2:string;
     selstart:integer=0;
     nsel:integer;
     buf:array[0..25] of  byte;
+    longbuf:array[0..4095] of byte;
     fn:string;
 
     cia:integer;
@@ -772,14 +773,17 @@ repeat
        //                                          else error:=SA_changeparams(96000,32,2,192);
 
           if sprite6x>2047 then begin sprite0x:=100; sprite1x:=200; sprite2x:=300;sprite3x:=400; sprite4x:=500; sprite5x:=600; sprite6x:=700; end;
-
+                    box(18,132,800,600,178);
+          outtextxyz(18,132,'type: MP3',188,2,2);
           pauseaudio(0);
           end
 
          else if filenames[sel+selstart,1]='mp2' then
           begin
           pauseaudio(1);
+
           fileseek(sfh,0,fsfrombeginning);
+
           filebuffer.clear;
           sleep(50);
           filetype:=5;
@@ -799,7 +803,8 @@ repeat
        //                                          else error:=SA_changeparams(96000,32,2,192);
 
           if sprite6x>2047 then begin sprite0x:=100; sprite1x:=200; sprite2x:=300;sprite3x:=400; sprite4x:=500; sprite5x:=600; sprite6x:=700; end;
-
+          box(18,132,800,600,178);
+          outtextxyz(18,132,'type: MP2',188,2,2);
           pauseaudio(0);
           end
 
