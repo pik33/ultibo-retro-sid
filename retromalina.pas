@@ -704,7 +704,6 @@ repeat
     if eof and (newfh>0) then
       begin
       fh:=newfh;
-      bordercolor :=$FF;
       newfh:=-1;
       eof:=false;
       qq:=32768;
