@@ -61,6 +61,9 @@
 //    2F06_00B0 - 2F06_00C0 - reserved
 //    2F06_00C0 - 2F06_00FF - audio DMA ctrl blocks, 2x32 bytes
 //
+//    2F06_0100 - 2F06_01?? - blitter
+//    2F06_0100 - 2F06_011F - blitter DMA ctrl block
+//    2F06_0120 - 2F06_0127 - blitter fill color area
 //    2F06_0100 - 2F06_FFFF - reserved
 //
 //    2F07_0000 - 2F08_FFFF - 2x64k long audio buffer for noise shaper
@@ -153,12 +156,6 @@ const _pallette=        $10000;
       _textsize=        $600AC;
       _audiodma=        $600C0;
 
-      _dma_enable=  $3F007ff0;       // DMA enable register
-      _dma_cs=      $3F007000;       // DMA control and status
-      _dma_conblk=  $3F007004;       // DMA ctrl block address
-      _dma_nextcb=  $3F00701C;       // DMA next control block
-
-      dma_chn=6;
 
 
 
@@ -226,9 +223,6 @@ type
      public
       Constructor Create(CreateSuspended : boolean);
      end;
-
-     TCtrlBlock=array[0..7] of cardinal;
-     PCtrlBlock=^TCtrlBlock;
 
 
 type wavehead=packed record
@@ -311,10 +305,7 @@ var fh,filetype:integer;                // this needs cleaning...
 
     mp3time:int64;
 
-          dma_enable:cardinal  absolute _dma_enable;   // DMA Enable register
-      dma_cs:cardinal      absolute _dma_cs+($100*dma_chn); // DMA ctrl/status
-      dma_conblk:cardinal  absolute _dma_conblk+($100*dma_chn); // DMA ctrl block addr
-      dma_nextcb:cardinal  absolute _dma_nextcb+($100*dma_chn); // DMA next ctrl block addr
+
 // system variables
 
     systempallette:array[0..255] of TPallette absolute base+_pallette;
@@ -479,8 +470,8 @@ procedure waitvbl;
 procedure removeramlimits(addr:integer);
 function readwheel: shortint; inline;
 procedure unhidecolor(c,bank:cardinal);
-procedure dma_box(x,y,l,h,c:cardinal);
-
+//procedure dma_box(x,y,l,h,c:cardinal);
+procedure box3(x,y,l,h,c:integer);
 
 
 implementation
@@ -705,11 +696,19 @@ begin
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_2);
 sleep(1);
 repeat
-  if needclear or (seekamount<>0) then
+  if needclear or (seekamount<>0) or (newfh>0) then
   // now do not do maintenence tasks while other thread is reading the buffer or the conflit may happen
     begin
     repeat until not reading;
     maintenance:=true;
+    if eof and (newfh>0) then
+      begin
+      fh:=newfh;
+      bordercolor :=$FF;
+      newfh:=-1;
+      eof:=false;
+      qq:=32768;
+      end;
     if seekamount<>0 then needclear:=true;
     if needclear then
       begin
@@ -751,33 +750,27 @@ repeat
         if (il<qq) and empty then eof:=true;
         if il=qq then
           begin
-          qq:=0;
+
           ml:=gettime;
-          for k:=0 to 1 do
-            begin
-            if mp3=1 then il2:=mp3_decode(mp3test,@tempbuf,32768,@outbuf,@info);
-            if mp3=2 then begin il2:=kjmp2_decode_frame(@mp2test,@tempbuf,@outbuf); end;
-            for i:=il2 to 32767 do tempbuf[i-il2]:=tempbuf[i];
-            if mp3=1 then for i:=0 to info.audio_bytes-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
-            if mp3=2 then for i:=0 to 4*1152-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
-            qq+=il2;
-            if mp3=1 then koniec:=(koniec+info.audio_bytes) and $1FFFF;
-            if mp3=2 then koniec:=(koniec+4*1152) and $1FFFF;
-            end;
+
+          if mp3=1 then il2:=mp3_decode(mp3test,@tempbuf,32768,@outbuf,@info);
+          if mp3=2 then il2:=kjmp2_decode_frame(@mp2test,@tempbuf,@outbuf);
+
+          for i:=il2 to 32767 do tempbuf[i-il2]:=tempbuf[i];
+
+          if mp3=1 then for i:=0 to info.audio_bytes-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
+          if mp3=2 then for i:=0 to 4*1152-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
+
+          qq:=il2;
+
+          if mp3=1 then koniec:=(koniec+info.audio_bytes) and $1FFFF;
+          if mp3=2 then koniec:=(koniec+4*1152) and $1FFFF;
+
           mp3time:=gettime-ml;
           if koniec>=pocz then m:=131072-koniec+pocz-1 else m:=pocz-koniec-1;
-          if m<131072-8192 then empty:=false;
+          if m<131072-4096 then empty:=false;
           end;
         end;
-
-      if eof then   // if there is a new file to read, do it
-        begin
-        if newfh>0 then
-          begin
-          fh:=newfh; newfh:=-1;  eof:=false;
-          end;
-        end;
-
       end
     else
       begin
@@ -786,12 +779,12 @@ repeat
     end
   else
     begin
-    if newfh>0 then
-      begin
-      fh:=newfh;
-      newfh:=-1;
-      eof:=false;
-      end;
+//    if newfh>0 then
+//      begin
+//      fh:=newfh;
+//      newfh:=-1;
+//      eof:=false;
+//      end;
     end;
   sleep(1);
 until terminated;
@@ -845,7 +838,7 @@ procedure TFileBuffer.setfile(nfh:integer);
 
 begin
 self.newfh:=nfh;
-eof:=false;
+//eof:=false;
 end;
 procedure TFileBuffer.clear;
 
@@ -888,12 +881,13 @@ repeat
   begin
 
   vblank1:=0;
-  t:=clockgettotal;
+  t:=gettime;
+//  InvalidateDataCacheRange(displaystart,$200000);
   scrconvert(p2);
-  tim:=clockgettotal-t;
-  t:=clockgettotal;
+  tim:=gettime-t;
+  t:=gettime;
   sprite(p2);
-  ts:=clockgettotal-t;
+  ts:=gettime-t;
   vblank1:=1;
   CleanDataCacheRange(integer(p2),9216000);
   framecnt+=1;
@@ -902,12 +896,13 @@ repeat
   FramebufferDeviceWaitSync(fb);
 
   vblank1:=0;
-  t:=clockgettotal;
+  t:=gettime;
+ // InvalidateDataCacheRange(displaystart,$200000);
   scrconvert(p2+2304000);
-  tim:=clockgettotal-t;
-  t:=clockgettotal;
+  tim:=gettime-t;
+  t:=gettime;
   sprite(p2+2304000);
-  ts:=clockgettotal-t;
+  ts:=gettime-t;
   vblank1:=1;
   CleanDataCacheRange(integer(p2)+9216000,9216000);
   framecnt+=1;
@@ -947,7 +942,7 @@ displaystart:=$30000000;                 // vitual framebuffer address
 framecnt:=0;                             // frame counter
 
 
-//for i:=1 to 8191 do removeramlimits(4096*i);
+//for i:=0 to 4095 do removeramlimits($F0000000+4096*i);
 // init sid variables
 
 for i:=0 to 127 do siddata[i]:=0;
@@ -1252,10 +1247,11 @@ PageTableSetEntry(Entry);
 end;
 
 
-function gettime:int64;
+function gettime:int64; inline;
 
 begin
-result:=clockgettotal;
+//result:=clockgettotal;
+result:=PLongWord($3F003004)^;
 end;
 
 
@@ -1521,6 +1517,52 @@ p1: strb r1,[r0]
   end;
 p999:
 end;
+
+procedure box3(x,y,l,h,c:integer);
+
+label p101,p102,p999;
+
+var screenptr:cardinal;
+
+begin
+
+screenptr:=displaystart;
+if x<0 then begin l:=l+x; x:=0; if l<1 then goto p999; end;
+if x>=xres then goto p999;
+if y<0 then begin h:=h+y; y:=0; if h<1 then goto p999; end;
+if y>=yres then goto p999;
+if x+l>=xres then l:=xres-x;
+if y+h>=yres then h:=yres-y;
+
+
+             asm
+             push {r0-r6}
+             ldr r2,y
+             mov r3,#1792
+             ldr r1,x
+             mul r3,r3,r2
+             ldr r4,l
+             add r3,r1
+             ldr r0,screenptr
+             add r0,r3
+             ldrb r3,c
+             ldr r6,h
+
+p102:        mov r5,r4
+p101:        strb r3,[r0],#1  // inner loop
+             subs r5,#1
+             bne p101
+             add r0,#1792
+             sub r0,r4
+             subs r6,#1
+             bne p102
+
+             pop {r0-r6}
+             end;
+
+p999:
+end;
+
 
 //  ---------------------------------------------------------------------
 //   box2(x1,y1,x2,y2,color)
@@ -2897,7 +2939,6 @@ if (filetype=3) or (filetype=4) or (filetype=5) then
   begin
   if sfh>0 then
     begin
-
     if filebuffer.eof then // il<>1536 then
       begin
       fileclose(sfh);
@@ -2909,10 +2950,11 @@ if (filetype=3) or (filetype=4) or (filetype=5) then
       end
     else
       begin
-      il:=filebuffer.getdata(integer(stream),1536);
+      il:=filebuffer.getdata(integer(stream),len);
       timer1+=siddelay;
       songtime+=siddelay;
-      if (head.pcm=1) or (filetype>=4) then for i:=0 to 383 do oscilloscope(audio2[2*i]+audio2[2*i+1])
+      if ((head.pcm=1) or (filetype>=4)) and (len=1536) then for i:=0 to 383 do oscilloscope(audio2[2*i]+audio2[2*i+1])
+                         else if ((head.pcm=1) or (filetype>=4)) and (len=768) then for i:=0 to 383 do oscilloscope(audio2[i])
                          else for i:=0 to 95 do oscilloscope(round(16384*(audio3[4*i]+audio3[4*i+1]+audio3[4*i+2]+audio3[4*i+3])));
       end;
     end;
@@ -2979,45 +3021,6 @@ p999:
 sidtime:=clockgettotal-ttt;
 end;
 
-
-
-procedure dma_box(x,y,l,h,c:cardinal);               //TODO don't init second time!!!
-
-var i:integer;
-
-
-    ctrl1_ptr:PCtrlBlock;
-    transfer_info2:cardinal;
-    d:array[0..15] of cardinal;
-
-begin
-transfer_info2:=$00000232;
-
-for i:=0 to 15 do lpoke ($22000000+4*i,$28282828);
-cleandatacacherange ($22000000,512);
-
-
-ctrl1_ptr:=PCtrlBlock($23000000); //GetAlignedMem(32,32));    // set pointers so the ctrl blocks can be accessed as array
-
-//dmabuf1_ptr:=@c;                       // allocate 64k for DMA buffer
-
-ctrl1_ptr^[0]:=transfer_info2;             // transfer info
-ctrl1_ptr^[1]:=$E2000000;       // source address -> buffer #1
-ctrl1_ptr^[2]:=nocache+displaystart+1792*y+x;      // destination address
-ctrl1_ptr^[3]:=l+h shl 16;                        // transfer length
-ctrl1_ptr^[4]:=(1792-l) shl 16;                      // 2D length, unused
-ctrl1_ptr^[5]:=0;         // next ctrl block -> ctrl block #2
-ctrl1_ptr^[6]:=$0;                        // unused
-ctrl1_ptr^[7]:=$0;                        // unused
-CleanDataCacheRange($23000000,32);      // now push this into RAM
-sleep(1);
-
-// Init the hardware
-
-dma_enable:=dma_enable or (1 shl dma_chn);                 // enable dma channel # dma_chn
-dma_conblk:=$E3000000; //nocache+ptruint(ctrl1_ptr);                             // init DMA ctr block to ctrl block # 1
-dma_cs:=$00000003;                                         // start DMA
-end;
 
 
 

@@ -38,7 +38,9 @@
    (0xffe00000 | (3 << 17) | (0xf << 12) | (3 << 10) | (3 << 19))
 
 #define FRAC_BITS   15
+// orig:15
 #define WFRAC_BITS  14
+// orig 14
 
 #define OUT_MAX (32767)
 #define OUT_MIN (-32768)
@@ -2654,3 +2656,5 @@ int mp3_decode(mp3_decoder_t *dec, void *buf, int bytes, signed short *out, mp3_
     }
     return s->frame_size;
 }
+
+double test(void) {return asin(1); }

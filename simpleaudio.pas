@@ -2,9 +2,15 @@ unit simpleaudio;
 
 //------------------------------------------------------------------------------
 // A simple audio unit for Ultibo modelled after SDL audio API
-// v.0.90 beta - 20170201
+// v.0.91 beta - 20170218
 // pik33@o2.pl
 // gpl 2.0 or higher
+//------------------------------------------------------------------------------
+//
+// beta changelog
+//
+// 0.91 - fixed the bug which caused 1-channel sound play badly distorted
+//
 //------------------------------------------------------------------------------
 
 {$mode objfpc}{$H+}
@@ -84,6 +90,7 @@ function  SA_OpenAudio(freq,bits,channels,samples:integer; callback: TAudioSpecC
 function  SA_ChangeParams(freq,bits,channels,samples:integer): Integer;
 function  SA_GetCurrentFreq:integer;
 function  SA_GetCurrentRange:integer;
+
 
 //------------------ End of Interface ------------------------------------------
 
@@ -195,7 +202,7 @@ var       gpfsel4:cardinal     absolute _gpfsel4;      // GPIO Function Select 4
           ctrl2_adr:cardinal absolute ctrl2_ptr;       // DMA ctrl block #2 array address
 
 
-          CurrentAudioSpec:TAudioSpec;
+//          CurrentAudioSpec:TAudioSpec;
 
           SampleBuffer_ptr:pointer;
           SampleBuffer_ptr_b:PByte absolute SampleBuffer_ptr;
@@ -215,7 +222,7 @@ var       gpfsel4:cardinal     absolute _gpfsel4;      // GPIO Function Select 4
 
           nc:cardinal;
           working:integer;
-
+          CurrentAudioSpec:TAudioSpec;
           s_desired, s_obtained: TAudioSpec;
 
 
@@ -432,7 +439,8 @@ if obtained^.size>sample_buffer_size then
   exit;
   end;
 
-obtained^.oversampled_size:=obtained^.size*4*obtained^.oversample;
+if obtained^.channels=2 then obtained^.oversampled_size:=obtained^.size*4*obtained^.oversample
+                       else obtained^.oversampled_size:=obtained^.size*8*obtained^.oversample; //output is always 2 channels
 if obtained^.format=AUDIO_U8 then obtained^.size:=obtained^.size;
 if obtained^.format=AUDIO_S16 then obtained^.size:=obtained^.size*2;
 if obtained^.format=AUDIO_F32 then obtained^.size:=obtained^.size*4;
@@ -525,9 +533,10 @@ if obtained^.size>sample_buffer_size then
   exit;
   end;
 
-obtained^.oversampled_size:=obtained^.size*4*obtained^.oversample;
-if obtained^.format=AUDIO_U8 then obtained^.size:=obtained^.size div 2;
-if obtained^.format=AUDIO_F32 then obtained^.size:=obtained^.size *2;
+if obtained^.channels=2 then obtained^.oversampled_size:=obtained^.size*4*obtained^.oversample
+                       else obtained^.oversampled_size:=obtained^.size*8*obtained^.oversample; //output is always 2 channels
+if obtained^.format=AUDIO_S16 then obtained^.size:=obtained^.size * 2;
+if obtained^.format=AUDIO_F32 then obtained^.size:=obtained^.size * 4;
 
 // Here the common part ends.
 //
@@ -740,15 +749,14 @@ threadsleep(1);
     else
       begin
       case CurrentAudioSpec.format of
-        AUDIO_U8:  for i:=0 to 2*CurrentAudioSpec.samples-1 do samplebuffer_32_ptr[i]:= volume*256*samplebuffer_ptr_b[i shr 1];
-        AUDIO_S16: for i:=0 to 2*CurrentAudioSpec.samples-1 do samplebuffer_32_ptr[i]:= volume*samplebuffer_ptr_si[i shr 1]+$8000000;
-        AUDIO_F32: for i:=0 to 2*CurrentAudioSpec.samples-1 do samplebuffer_32_ptr[i]:= round(volume*32768*samplebuffer_ptr_f[i shr 1])+$8000000;
+        AUDIO_U8:  for i:=0 to CurrentAudioSpec.samples-1 do begin samplebuffer_32_ptr[2*i]:= volume*256*samplebuffer_ptr_b[i]; samplebuffer_32_ptr[2*i+1]:= samplebuffer_32_ptr[2*i]; end;
+        AUDIO_S16: for i:=0 to CurrentAudioSpec.samples-1 do begin samplebuffer_32_ptr[2*i]:= volume*samplebuffer_ptr_si[i]+$8000000; samplebuffer_32_ptr[2*i+1]:= samplebuffer_32_ptr[2*i]; end;
+        AUDIO_F32: for i:=0 to CurrentAudioSpec.samples-1 do begin samplebuffer_32_ptr[2*i]:= round(volume*32768*samplebuffer_ptr_f[i])+$8000000; samplebuffer_32_ptr[2*i+1]:= samplebuffer_32_ptr[2*i]; end;
         end;
       end;
     if nc=nocache+ctrl1_adr then noiseshaper8(samplebuffer_32_adr,dmabuf1_adr,CurrentAudioSpec.oversample,CurrentAudioSpec.samples)
     else noiseshaper8(samplebuffer_32_adr,dmabuf2_adr,CurrentAudioSpec.oversample,CurrentAudioSpec.samples);
     if nc=nocache+ctrl1_adr then CleanDataCacheRange(dmabuf1_adr,$10000) else CleanDataCacheRange(dmabuf2_adr,$10000);
-
     end;
   dma_cs:=$00FF0003;
   working:=0;

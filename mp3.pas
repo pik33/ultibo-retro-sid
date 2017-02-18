@@ -79,14 +79,18 @@ kjmp2_context_t=record
     end;
 
 
-{$linklib FLAC}
+{$linklib drflac}
+{$linklib mad}
 {$linklib minimp3}
 {$linklib kjmp2}
 {$linklib m}
 
+function drflac_open_file(filename:pchar):pointer; cdecl; external 'libdrflac' name 'drflac_open_file';
+
 function mp3_create:pointer; cdecl; external 'libminimp3' name 'mp3_create';
 function mp3_decode(dec:mp3_decoder_p;buf:pointer; bytes:integer; oout:pointer;info:pointer):integer; cdecl; external 'libminimp3' name 'mp3_decode';
 procedure mp3_done(dec:mp3_decoder_p) external 'libminimp3' name 'mp3_done';
+function mp3_test:double; external 'libminimp3' name 'test';
 
 procedure kjmp2_init(mp2: kjmp2_context_p); external 'libkjmp2' name 'kjmp2_init';
 function kjmp2_get_sample_rate(frame:PByte):integer; external 'libkjmp2' name 'kjmp2_get_sample_rate';

@@ -13,13 +13,7 @@ interface
 
 uses sysutils,classes,retromalina,platform,retro,cwindows,threads;
 
-const ver='The retromachine player v. 0.21u --- 2017.02.05';
-
-const wavcolor=44;//166;
-      mp3color=44;//132;
-      sidcolor=44;
-      dmpcolor=44;//182;
-      dircolor=44;//24;
+const ver='The retromachine player v. 0.22u --- 2017.02.18';
 
 type bmppixel=array[0..2] of byte;
 
