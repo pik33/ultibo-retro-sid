@@ -300,7 +300,7 @@ else outtextxyz(18,864,songname,250,2,2);
 if filetype=0 then outtextxyz(18,912,'SIDCog DMP file, '+inttostr(songfreq)+' Hz',250,2,2)
 else if filetype=1 then outtextxyz(18,912,'PSID file, '+inttostr(1000000 div siddelay)+' Hz',250,2,2)
 else if filetype=3 then outtextxyz(18,912,'Wave file, '+inttostr(head.srate)+' Hz',250,2,2)
-else if filetype=4 then outtextxyz(18,912,'MP3 file'{, '+inttostr(head.srate)+' Hz'},250,2,2)
+else if filetype=4 then outtextxyz(18,912,'MP3 file, '+inttostr(head.srate)+' Hz, ' + inttostr(head.brate)+' kbps',250,2,2)
 else if filetype=5 then outtextxyz(18,912,'MP2 file'{, '+inttostr(head.srate)+' Hz'},250,2,2);
 outtextxyz(18,960,hhs+':'+mms+':'+sss,190,4,2);
 

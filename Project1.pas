@@ -29,6 +29,7 @@ uses
   mp3,
 //  syscalls,
   blitter,
+ // retro,
   simpleaudio;
 
 
@@ -60,6 +61,7 @@ var s,currentdir,currentdir2:string;
     t,tt,ttt,tttt:int64;
     srate,samples,bits:integer;
     mousedebug:boolean=false;
+        mp3buf:array[0..4096] of byte;
 
 //    mp3test:pointer;
 //    mp3testi:cardinal absolute mp3test;
@@ -140,6 +142,49 @@ outtextxyz(18,420,   'samples:          '+inttostr(samplenum),188,2,2);
 box(18,912,800,32,244);
 outtextxyz(18,912,'Wave file, '+inttostr(head.srate)+' Hz',250,2,2);
 p999:
+end;
+
+procedure mp3open (var fh:integer);
+
+label p999;
+
+var
+    il2:integer;
+    skip:integer;
+
+
+begin
+fileseek(fh,0,fsfrombeginning);
+fileread(fh,mp3buf,10);
+if (mp3buf[0]=ord('I')) and (mp3buf[1]=ord('D')) and (mp3buf[2]=ord('3')) then // Skip ID3
+  begin
+  skip:=(mp3buf[6] shl 21) + (mp3buf[7] shl 14) + (mp3buf[8] shl 7) + mp3buf[9]+10;
+  end
+else skip:=0;
+fileseek(fh,skip,fsfrombeginning);
+
+
+
+// visualize wave data
+
+box(18,132,800,600,178);
+outtextxyz(42,156,'type: mp3',177,2,2);
+outtextxyz(18,132,'type: mp3',188,2,2);
+
+
+outtextxyz(42,228+24,'channels:         '+inttostr(head.channels),177,2,2);
+outtextxyz(42,260+24,'sample rate:      '+inttostr(head.srate),177,2,2);
+outtextxyz(42,292+24,'bitrate:          ',177,2,2);
+
+outtextxyz(18,228,   'channels:         '+inttostr(head.channels),188,2,2);
+outtextxyz(18,260,   'sample rate:      '+inttostr(head.srate),188,2,2);
+outtextxyz(18,292,   'bitrate:          ',188,2,2);
+
+
+// determine the number of samples
+
+box(18,912,800,32,244);
+outtextxyz(18,912,'MP3 file, '+inttostr(head.srate)+' Hz',250,2,2);
 end;
 
 procedure sidopen (var fh:integer);
@@ -364,10 +409,29 @@ l:=length(s);
 outtextxyz(1344-8*l,75,s,44,2,2);
 end;
 
-
-//------------------- The main loop
+procedure initframebuffer;
 
 begin
+fb:=FramebufferDevicegetdefault;
+FramebufferDeviceRelease(fb);
+Sleep(100);
+FramebufferProperties.Depth:=32;
+FramebufferProperties.PhysicalWidth:=1920;
+FramebufferProperties.PhysicalHeight:=1200;
+FramebufferProperties.VirtualWidth:=FramebufferProperties.PhysicalWidth;
+FramebufferProperties.VirtualHeight:=FramebufferProperties.PhysicalHeight * 2;
+FramebufferDeviceAllocate(fb,@FramebufferProperties);
+sleep(100);
+FramebufferDeviceGetProperties(fb,@FramebufferProperties);
+p2:=Pointer(FramebufferProperties.Address);
+
+end;
+
+//------------------- The main program
+
+begin
+initmachine;
+initscreen;
 
 while not DirectoryExists('C:\') do
   begin
@@ -402,26 +466,18 @@ if fileexists(drive+'kernel7_l.img') then
 
 for c:='C' to 'F' do drivetable[c]:=directoryexists(c+':\');
 
-workdir:=drive;
+workdir:='C:\';
+dirlist('C:\');
 songtime:=0;
 siddelay:=20000;
 setcurrentdir(workdir);
-
-initmachine;
-mousex:=960;
-mousey:=600;
-mousewheel:=128;
-
-
-initscreen;
-dirlist(drive);
-threadsleep(1);
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_0);
 threadsleep(1);
 startreportbuffer;
 startmousereportbuffer;
 
 
+//------------------- The main loop
 
 repeat
   refreshscreen;
@@ -435,7 +491,7 @@ repeat
   if (key=0) and (nextsong=2) then begin nextsong:=0; key:=key_enter; end;      // play the next song
   if (key=0) and (nextsong=1) then begin nextsong:=2; key:=key_downarrow; end;  // select the nest song
 
-  if (dblclick) and (key=0) and (mousex>896) then begin key:=key_enter; end;          // dbl click on right panel=enter
+  if (dblclick) and (key=0) and (mousex>896) then begin key:=key_enter; end;    // dbl click on right panel=enter
 
   if (click) and (mousex>896) then
     begin
@@ -478,6 +534,11 @@ repeat
     box3(100,100,500,500,136);
     tttt:=gettime-tttt;
     outtextxyz(100,100,inttostr(tttt),15,3,3);
+    end
+
+  else if key=ord('m') then   // blitter test
+    begin
+
     end
 
   else if key=ord('q') then   // volume up
@@ -698,14 +759,15 @@ repeat
           begin
           filetype:=4;
           pauseaudio(1);
-          if (buf[0]=ord('I')) and (buf[1]=ord('D')) and (buf[2]=ord('3'))  then
-            begin
-            fileread(sfh,buf,2);
-            fileread(sfh,buf,4);
-            skip:=(buf[0] shl 21) + (buf[1] shl 14) + (buf[2] shl 7) + buf[3];
-            fileseek(sfh,skip,fsfrombeginning);
-            end
-          else fileseek(sfh,0,fsfrombeginning);
+//          if (buf[0]=ord('I')) and (buf[1]=ord('D')) and (buf[2]=ord('3'))  then
+//            begin
+//            fileread(sfh,buf,2);
+//            fileread(sfh,buf,4);
+//            skip:=(buf[0] shl 21) + (buf[1] shl 14) + (buf[2] shl 7) + buf[3];
+//            fileseek(sfh,skip,fsfrombeginning);
+//            end
+//          else fileseek(sfh,0,fsfrombeginning);
+          mp3open(sfh);
           filebuffer.clear;
           sleep(20);
           filebuffer.setmp3(1);
@@ -726,8 +788,8 @@ repeat
        //                                          else error:=SA_changeparams(96000,32,2,192);
 
           if sprite6x>2047 then begin sprite0x:=100; sprite1x:=200; sprite2x:=300;sprite3x:=400; sprite4x:=500; sprite5x:=600; sprite6x:=700; end;
-                    box(18,132,800,600,178);
-          outtextxyz(18,132,'type: MP3',188,2,2);
+ //                   box(18,132,800,600,178);
+  //        outtextxyz(18,132,'type: MP3',188,2,2);
           pauseaudio(0);
           end
 

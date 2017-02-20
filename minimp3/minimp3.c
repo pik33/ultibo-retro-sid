@@ -24,6 +24,7 @@
 #include "libc.h"
 #include "minimp3.h"
 
+
 #define MP3_FRAME_SIZE 1152
 #define MP3_MAX_CODED_FRAME_SIZE 1792
 #define MP3_MAX_CHANNELS 2

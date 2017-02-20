@@ -180,6 +180,7 @@ type
      buf:array[0..131071] of byte;
      tempbuf:array[0..32767] of byte;
      outbuf: array[0..8191] of byte;
+     //outbuf: array[0..4095] of smallint;// absolute outbuf;
      pocz:integer;
      koniec:integer;
      il,fh,newfh:integer;
@@ -419,8 +420,8 @@ var fh,filetype:integer;                // this needs cleaning...
     mp3test:pointer;
     mp3testi:cardinal absolute mp3test;
 
-   mp3buf:byte absolute $20000000;
-   outbuf:byte absolute $21000000;
+//   mp3buf:byte absolute $20000000;
+//   outbuf:byte absolute $21000000;
    mp3bufidx:integer=0;
    outbufidx:integer=0;
    info:mp3_info_t;
@@ -687,12 +688,14 @@ procedure TFileBuffer.Execute;
 
 var i,il2,k:integer;
     ml:int64;
-
+    const cnt:integer=0;
+ var   outbuf2: PSmallint;
 
 //    info:mp3_info_t;
 //    framesize:integer;
 
 begin
+outbuf2:=@outbuf;
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_2);
 sleep(1);
 repeat
@@ -745,6 +748,7 @@ repeat
         end
       else // compressed file: read and decompress
         begin
+        cnt+=1;
         il:=fileread(fh,tempbuf[32768-qq],qq);
         if (il<qq) and empty then eof:=true;
         if il=qq then
@@ -752,17 +756,29 @@ repeat
 
           ml:=gettime;
 
-          if mp3=1 then il2:=mp3_decode(mp3test,@tempbuf,32768,@outbuf,@info);
-          if mp3=2 then il2:=kjmp2_decode_frame(@mp2test,@tempbuf,@outbuf);
-
+          //if mp3=1 then il2:=mp3_decode(mp3test,@tempbuf,32768,@outbuf,@info);
+          //for i:=0 to 8191 do outbuf[i]:=0;
+          {if mp3=1 then} mad_stream_buffer(@test_mad_stream,@tempbuf, 32768);
+          {if mp3=1 then} mad_frame_decode(@test_mad_frame, @test_mad_stream);
+          {if mp3=1 then} mad_synth_frame(@test_mad_synth,@test_mad_frame);
+          {if mp3=1 then}
+          if test_mad_synth.pcm.channels=2 then for i:=0 to 1151 do begin outbuf2[2*i]:= test_mad_synth.pcm.samples[0,i] div 8192;   outbuf2[2*i+1]:= test_mad_synth.pcm.samples[1,i] div 8192; end;
+          if test_mad_synth.pcm.channels=1 then for i:=0 to 1151 do begin outbuf2[2*i]:= test_mad_synth.pcm.samples[0,i] div 8192;   outbuf2[2*i+1]:= test_mad_synth.pcm.samples[0,i] div 8192; end;
+          //if mp3=2 then il2:=kjmp2_decode_frame(@mp2test,@tempbuf,@outbuf);
+         // box(100,100,100,100,0); outtextxyz(100,100,inttostr(PtrUInt(test_mad_stream.next_frame)-ptruint(@tempbuf)),15,2,2);
+          {if mp3=1 then }il2:= (PtrUInt(test_mad_stream.next_frame)-ptruint(@tempbuf));
+          if head.srate=44100 then head.brate:=8*((130+il2*10) div 261)
+          else head.brate:=8*((120+il2*10) div 240);
+          head.srate:=44100;//info.sample_rate;
+          head.channels:=2;//info.channels;
           for i:=il2 to 32767 do tempbuf[i-il2]:=tempbuf[i];
 
-          if mp3=1 then for i:=0 to info.audio_bytes-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
+          if mp3=1 then for i:=0 to 4*1152-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i]; // audio bytes
           if mp3=2 then for i:=0 to 4*1152-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
 
           qq:=il2;
 
-          if mp3=1 then koniec:=(koniec+info.audio_bytes) and $1FFFF;
+          if mp3=1 then koniec:=(koniec+4*1152) and $1FFFF;
           if mp3=2 then koniec:=(koniec+4*1152) and $1FFFF;
 
           mp3time:=gettime-ml;
@@ -934,30 +950,6 @@ var a,i,j,k:integer;
 
 begin
 
-//dmactrl:=nocache+cardinal(GetAlignedMem(64,32));
-
-for i:=base to base+$FFFFF do poke(i,0); // clean all system area
-displaystart:=$30000000;                 // vitual framebuffer address
-framecnt:=0;                             // frame counter
-
-
-//for i:=0 to 4095 do removeramlimits($F0000000+4096*i);
-// init sid variables
-
-for i:=0 to 127 do siddata[i]:=0;
-for i:=0 to 15 do siddata[$30+i]:=round(1073741824*(1-20*attacktable[i]));
-for i:=0 to 15 do siddata[$40+i]:=20*round(1073741824*attacktable[i]);
-for i:=0 to 1023 do siddata[128+i]:=combined[i];
-for i:=0 to 1023 do siddata[128+i]:=(siddata[128+i]-128) shl 16;
-siddata[$0e]:=$7FFFF8;
-siddata[$1e]:=$7FFFF8;
-siddata[$2e]:=$7FFFF8;
-
-reset6502;
-
-mp3test:=mp3_create;
-kjmp2_init(@mp2test);
-
 //init the framebuffer
 //TODO: if the screen is 1920x1080 init it to this resolution
 
@@ -973,18 +965,45 @@ FramebufferDeviceAllocate(fb,@FramebufferProperties);
 sleep(100);
 FramebufferDeviceGetProperties(fb,@FramebufferProperties);
 p2:=Pointer(FramebufferProperties.Address);
+for i:=0 to (1920*2400)-1 do lpoke(PtrUint(p2)+4*i,ataripallette[146]);
+
+for i:=base to base+$FFFFF do poke(i,0); // clean all system area
+displaystart:=$30000000;                 // vitual framebuffer address
+framecnt:=0;                             // frame counter
 
 // init pallette, font and mouse cursor
+
 systemfont:=st4font;
 sprite7def:=mysz;
 setpallette(ataripallette,0);
+cls(146);
 
 // init sprite data pointers
-for i:=0 to 7 do spritepointers[i]:=base+_sprite0def+4096*i;//lpoke(base+$60080+4*i,base+$52000+4096*i);
+for i:=0 to 7 do spritepointers[i]:=base+_sprite0def+4096*i;
 
 // start frame refreshing thread
+
 thread:=tretro.create(true);
 thread.start;
+
+// init sid variables
+
+for i:=0 to 127 do siddata[i]:=0;
+for i:=0 to 15 do siddata[$30+i]:=round(1073741824*(1-20*attacktable[i]));
+for i:=0 to 15 do siddata[$40+i]:=20*round(1073741824*attacktable[i]);
+for i:=0 to 1023 do siddata[128+i]:=combined[i];
+for i:=0 to 1023 do siddata[128+i]:=(siddata[128+i]-128) shl 16;
+siddata[$0e]:=$7FFFF8;
+siddata[$1e]:=$7FFFF8;
+siddata[$2e]:=$7FFFF8;
+
+reset6502;
+
+mp3test:=mp3_create;
+kjmp2_init(@mp2test);
+mad_stream_init(@test_mad_stream);
+mad_synth_init(@test_mad_synth);
+mad_frame_init(@test_mad_frame);
 
 // start audio, mouse, kbd and file buffer threads
 
@@ -995,17 +1014,15 @@ desired.freq:=44100;
 desired.samples:=384;
 error:=openaudio(@desired,@obtained);
 
-
-//pauseaudio(1);
-//thread3:=taudio.Create(true);
-//thread3.start;
 filebuffer:=Tfilebuffer.create(true);
 filebuffer.start;
-//mp3buffer:=Tmp3buffer.create(true);
-//mp3buffer.start;
 
 amouse:=tmouse.create(true);
 amouse.start;
+mousex:=960;
+mousey:=600;
+mousewheel:=128;
+
 akeyboard:=tkeyboard.create(true);
 akeyboard.start;
 end;
