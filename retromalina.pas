@@ -718,7 +718,7 @@ repeat
       pocz:=0;
       needclear:=false;
       empty:=true;
-      m:=131072;
+      m:=131071;
       for i:=0 to 131071 do buf[i]:=0;
       qq:=32768;
       for i:=0 to 32767 do tempbuf[i]:=0;
@@ -756,34 +756,28 @@ repeat
 
           ml:=gettime;
 
-          //if mp3=1 then il2:=mp3_decode(mp3test,@tempbuf,32768,@outbuf,@info);
-          //for i:=0 to 8191 do outbuf[i]:=0;
-          {if mp3=1 then} mad_stream_buffer(@test_mad_stream,@tempbuf, 32768);
-          {if mp3=1 then} mad_frame_decode(@test_mad_frame, @test_mad_stream);
-          {if mp3=1 then} mad_synth_frame(@test_mad_synth,@test_mad_frame);
-          {if mp3=1 then}
-          if test_mad_synth.pcm.channels=2 then for i:=0 to 1151 do begin outbuf2[2*i]:= test_mad_synth.pcm.samples[0,i] div 8192;   outbuf2[2*i+1]:= test_mad_synth.pcm.samples[1,i] div 8192; end;
-          if test_mad_synth.pcm.channels=1 then for i:=0 to 1151 do begin outbuf2[2*i]:= test_mad_synth.pcm.samples[0,i] div 8192;   outbuf2[2*i+1]:= test_mad_synth.pcm.samples[0,i] div 8192; end;
-          //if mp3=2 then il2:=kjmp2_decode_frame(@mp2test,@tempbuf,@outbuf);
-         // box(100,100,100,100,0); outtextxyz(100,100,inttostr(PtrUInt(test_mad_stream.next_frame)-ptruint(@tempbuf)),15,2,2);
-          {if mp3=1 then }il2:= (PtrUInt(test_mad_stream.next_frame)-ptruint(@tempbuf));
+
+           mad_stream_buffer(@test_mad_stream,@tempbuf, 32768);
+           mad_frame_decode(@test_mad_frame, @test_mad_stream);
+           mad_synth_frame(@test_mad_synth,@test_mad_frame);
+
+          if test_mad_synth.pcm.channels=2 then for i:=0 to 1151 do begin outbuf2[2*i]:= test_mad_synth.pcm.samples[0,i] div 12288;   outbuf2[2*i+1]:= test_mad_synth.pcm.samples[1,i] div 12288;  end;
+          if test_mad_synth.pcm.channels=1 then for i:=0 to 1151 do begin outbuf2[2*i]:= test_mad_synth.pcm.samples[0,i] div 12288;   outbuf2[2*i+1]:= test_mad_synth.pcm.samples[0,i] div 12288;  end;
+           il2:= (PtrUInt(test_mad_stream.next_frame)-ptruint(@tempbuf));
+
+       box(100,100,100,100,0); outtextxyz(100,100,inttostr(PtrUInt(test_mad_stream.next_frame)-ptruint(@tempbuf)),15,2,2);     outtextxyz(100,132,inttostr(tempbuf[il2]),15,2,2);
+
           if head.srate=44100 then head.brate:=8*((130+il2*10) div 261)
           else head.brate:=8*((120+il2*10) div 240);
           head.srate:=44100;//info.sample_rate;
           head.channels:=2;//info.channels;
           for i:=il2 to 32767 do tempbuf[i-il2]:=tempbuf[i];
-
-          if mp3=1 then for i:=0 to 4*1152-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i]; // audio bytes
-          if mp3=2 then for i:=0 to 4*1152-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i];
-
+          for i:=0 to 4*1152-1 do buf[(i+koniec) and $1FFFF]:=outbuf[i]; // audio bytes
           qq:=il2;
-
-          if mp3=1 then koniec:=(koniec+4*1152) and $1FFFF;
-          if mp3=2 then koniec:=(koniec+4*1152) and $1FFFF;
-
+          koniec:=(koniec+4*1152) and $1FFFF;
           mp3time:=gettime-ml;
           if koniec>=pocz then m:=131072-koniec+pocz-1 else m:=pocz-koniec-1;
-          if m<131072-4096 then empty:=false;
+          if m<131072-32768 then empty:=false;
           end;
         end;
       end
@@ -811,6 +805,7 @@ procedure TFileBuffer.setmp3(mp3b:integer);
 begin
 mp3:=mp3b;
 qq:=32768;
+needclear:=true;
 end;
 
 procedure TFileBuffer.seek(amount:int64);
@@ -843,6 +838,7 @@ if not empty then
     begin
     for i:=0 to ii-1 do poke(b+i,0);
     result:=0;
+    empty:=true;
     end;
   end;
 reading:=false;

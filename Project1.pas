@@ -162,8 +162,10 @@ if (mp3buf[0]=ord('I')) and (mp3buf[1]=ord('D')) and (mp3buf[2]=ord('3')) then /
   end
 else skip:=0;
 fileseek(fh,skip,fsfrombeginning);
-
-
+if skip>0 then begin
+  repeat skip+=1; mp3buf[1]:=mp3buf[0]; fileread(fh,mp3buf,1) until (mp3buf[0]=$FB) and (mp3buf[1]=$FF);
+  fileseek(fh,skip-2,fsfrombeginning);
+  end;
 
 // visualize wave data
 
@@ -695,12 +697,11 @@ repeat
         begin
         pause1a:=true;
         pauseaudio(1);
-        sleep(54);
+        sleep(10);
         for i:=$d400 to $d420 do poke(base+i,0);
-
         if sfh>=0 then fileclose(sfh);
         sfh:=-1;
-
+        sleep(10);
         for i:=0 to $2F do siddata[i]:=0;
         for i:=$50 to $7F do siddata[i]:=0;
         siddata[$0e]:=$7FFFF8;
@@ -758,27 +759,16 @@ repeat
         else if filenames[sel+selstart,1]='mp3' then
           begin
           filetype:=4;
-          pauseaudio(1);
-//          if (buf[0]=ord('I')) and (buf[1]=ord('D')) and (buf[2]=ord('3'))  then
-//            begin
-//            fileread(sfh,buf,2);
-//            fileread(sfh,buf,4);
-//            skip:=(buf[0] shl 21) + (buf[1] shl 14) + (buf[2] shl 7) + buf[3];
-//            fileseek(sfh,skip,fsfrombeginning);
-//            end
-//          else fileseek(sfh,0,fsfrombeginning);
           mp3open(sfh);
-          filebuffer.clear;
           sleep(20);
           filebuffer.setmp3(1);
+          sleep(50);
           for i:=0 to 15 do times6502[i]:=0;
           filetype:=4;
-       //   waveopen(sfh);
-
           filebuffer.setfile(sfh);
           sleep(200);
           songs:=0;
-         if a1base=432 then error:=SA_changeparams(43298,16,2,384)
+          if a1base=432 then error:=SA_changeparams(43298,16,2,384)
                        else error:=SA_changeparams(44100,16,2,384);
           //if head.srate=44100 then
           siddelay:=8707 ;//else siddelay:=2000;
@@ -796,10 +786,11 @@ repeat
          else if filenames[sel+selstart,1]='mp2' then
           begin
           fileseek(sfh,0,fsfrombeginning);
-          filebuffer.clear;
-          sleep(50);
+       //   filebuffer.clear;
+
           filetype:=5;
           filebuffer.setmp3(2);
+          sleep(50);
           for i:=0 to 15 do times6502[i]:=0;
           filebuffer.setfile(sfh);
           sleep(200);
