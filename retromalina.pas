@@ -765,7 +765,7 @@ repeat
           if test_mad_synth.pcm.channels=1 then for i:=0 to 1151 do begin outbuf2[2*i]:= test_mad_synth.pcm.samples[0,i] div 12288;   outbuf2[2*i+1]:= test_mad_synth.pcm.samples[0,i] div 12288;  end;
            il2:= (PtrUInt(test_mad_stream.next_frame)-ptruint(@tempbuf));
 
-       box(100,100,100,100,0); outtextxyz(100,100,inttostr(PtrUInt(test_mad_stream.next_frame)-ptruint(@tempbuf)),15,2,2);     outtextxyz(100,132,inttostr(tempbuf[il2]),15,2,2);
+      // box(100,100,100,100,0); outtextxyz(100,100,inttostr(PtrUInt(test_mad_stream.next_frame)-ptruint(@tempbuf)),15,2,2);     outtextxyz(100,132,inttostr(tempbuf[il2]),15,2,2);
 
           if head.srate=44100 then head.brate:=8*((130+il2*10) div 261)
           else head.brate:=8*((120+il2*10) div 240);
