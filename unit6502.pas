@@ -122,6 +122,18 @@ procedure beq; forward;
 procedure sbc; forward;
 procedure ina; forward;
 procedure sed; forward;
+procedure anc; forward;
+procedure alr; forward;
+procedure arr; forward;
+procedure xaa; forward;
+procedure ahx; forward;
+procedure shx; forward;
+procedure tas; forward;
+procedure shy; forward;
+procedure las; forward;
+procedure axs; forward;
+procedure atx; forward;
+
 // 65c02
 procedure bra; forward; //ok
 procedure phx; forward; //ok
@@ -157,7 +169,7 @@ var addrtable:array[0..255] of TAddr=(
 {  6  }     @imp, @indx, @abso, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @acc,  @imm,  @ind, @abso, @abso, @abso, {  6  }
 {  7  }     @rel, @indy,  @izp, @indy,  @zpx,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @imp, @absy,  @iax, @absx, @absx, @absx, {  7  }
 {  8  }     @imm, @indx,  @imp, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @imp,  @imm, @abso, @abso, @abso, @abso, {  8  }
-{  9  }     @rel, @indy,  @izp, @indy,  @zpx,  @zpx,  @zpy,  @zpy,  @imp, @absy,  @imp, @absy, @abso, @absx, @absx, @absy, {  9  }
+{  9  }     @rel, @indy,  @izp, @indy,  @zpx,  @zpx,  @zpy,  @zpy,  @imp, @absy,  @imp, @absy, @absx, @absx, @absy, @absy, {  9  }
 {  A  }     @imm, @indx,  @imm, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @imp,  @imm, @abso, @abso, @abso, @abso, {  A  }
 {  B  }     @rel, @indy,  @izp, @indy,  @zpx,  @zpx,  @zpy,  @zpy,  @imp, @absy,  @imp, @absy, @absx, @absx, @absy, @absy, {  B  }
 {  C  }     @imm, @indx,  @imp, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @imp,  @imm, @abso, @abso, @abso, @abso, {  C  }
@@ -168,19 +180,19 @@ var addrtable:array[0..255] of TAddr=(
 
 var optable:array[0..255] of TOpcode=(
 //         |  0   |   1  |   2  |   3  |   4  |   5  |   6  |   7  |   8  |   9  |   A  |   B  |   C  |   D  |   E  |   F  |
-{  0  }      @brk,  @ora,  @ldc,  @slo,  @tsb,  @ora,  @asl,  @slo,  @php,  @ora,  @asl,  @nop,  @tsb,  @ora,  @asl,  @slo, {  0  }
+{  0  }      @brk,  @ora,  @ldc,  @slo,  @tsb,  @ora,  @asl,  @slo,  @php,  @ora,  @asl,  @anc,  @tsb,  @ora,  @asl,  @slo, {  0  }
 {  1  }      @bpl,  @ora,  @ora,  @slo,  @trb,  @ora,  @asl,  @slo,  @clc,  @ora,  @ina,  @slo,  @trb,  @ora,  @asl,  @slo, {  1  }
-{  2  }      @jsr,  @ana,  @ldd,  @rla,  @bit,  @ana,  @rol,  @rla,  @plp,  @ana,  @rol,  @nop,  @bit,  @ana,  @rol,  @rla, {  2  }
+{  2  }      @jsr,  @ana,  @ldd,  @rla,  @bit,  @ana,  @rol,  @rla,  @plp,  @ana,  @rol,  @anc,  @bit,  @ana,  @rol,  @rla, {  2  }
 {  3  }      @bmi,  @ana,  @ana,  @rla,  @bit,  @ana,  @rol,  @rla,  @sec,  @ana,  @dea,  @rla,  @bit,  @ana,  @rol,  @rla, {  3  }
-{  4  }      @rti,  @eor,  @stc,  @sre,  @pld,  @eor,  @lsr,  @sre,  @pha,  @eor,  @lsr,  @nop,  @jmp,  @eor,  @lsr,  @sre, {  4  }
+{  4  }      @rti,  @eor,  @stc,  @sre,  @pld,  @eor,  @lsr,  @sre,  @pha,  @eor,  @lsr,  @alr,  @jmp,  @eor,  @lsr,  @sre, {  4  }
 {  5  }      @bvc,  @eor,  @eor,  @sre,  @nop,  @eor,  @lsr,  @sre,  @cli,  @eor,  @phy,  @sre,  @nop,  @eor,  @lsr,  @sre, {  5  }
-{  6  }      @rts,  @adc,  @std,  @rra,  @stz,  @adc,  @ror,  @rra,  @pla,  @adc,  @ror,  @nop,  @jmp,  @adc,  @ror,  @rra, {  6  }
+{  6  }      @rts,  @adc,  @std,  @rra,  @stz,  @adc,  @ror,  @rra,  @pla,  @adc,  @ror,  @arr,  @jmp,  @adc,  @ror,  @rra, {  6  }
 {  7  }      @bvs,  @adc,  @adc,  @rra,  @stz,  @adc,  @ror,  @rra,  @sei,  @adc,  @ply,  @rra,  @jmp,  @adc,  @ror,  @rra, {  7  }
-{  8  }      @bra,  @sta,  @plc,  @sax,  @sty,  @sta,  @stx,  @sax,  @dey,  @bit,  @txa,  @nop,  @sty,  @sta,  @stx,  @sax, {  8  }
-{  9  }      @bcc,  @sta,  @sta,  @nop,  @sty,  @sta,  @stx,  @sax,  @tya,  @sta,  @txs,  @nop,  @stz,  @sta,  @stz,  @nop, {  9  }
-{  A  }      @ldy,  @lda,  @ldx,  @lax,  @ldy,  @lda,  @ldx,  @lax,  @tay,  @lda,  @tax,  @nop,  @ldy,  @lda,  @ldx,  @lax, {  A  }
-{  B  }      @bcs,  @lda,  @lda,  @lax,  @ldy,  @lda,  @ldx,  @lax,  @clv,  @lda,  @tsx,  @lax,  @ldy,  @lda,  @ldx,  @lax, {  B  }
-{  C  }      @cpy,  @cmp,  @phc,  @dcp,  @cpy,  @cmp,  @dea,  @dcp,  @iny,  @cmp,  @dex,  @nop,  @cpy,  @cmp,  @dea,  @dcp, {  C  }
+{  8  }      @bra,  @sta,  @plc,  @sax,  @sty,  @sta,  @stx,  @sax,  @dey,  @bit,  @txa,  @xaa,  @sty,  @sta,  @stx,  @sax, {  8  }
+{  9  }      @bcc,  @sta,  @sta,  @ahx,  @sty,  @sta,  @stx,  @sax,  @tya,  @sta,  @txs,  @tas,  @shy,  @sta,  @shx,  @ahx, {  9  }
+{  A  }      @ldy,  @lda,  @ldx,  @lax,  @ldy,  @lda,  @ldx,  @lax,  @tay,  @lda,  @tax,  @atx,  @ldy,  @lda,  @ldx,  @lax, {  A  }
+{  B  }      @bcs,  @lda,  @lda,  @lax,  @ldy,  @lda,  @ldx,  @lax,  @clv,  @lda,  @tsx,  @las,  @ldy,  @lda,  @ldx,  @lax, {  B  }
+{  C  }      @cpy,  @cmp,  @phc,  @dcp,  @cpy,  @cmp,  @dea,  @dcp,  @iny,  @cmp,  @dex,  @axs,  @cpy,  @cmp,  @dea,  @dcp, {  C  }
 {  D  }      @bne,  @cmp,  @cmp,  @dcp,  @nop,  @cmp,  @dea,  @dcp,  @cld,  @cmp,  @phx,  @dcp,  @nop,  @cmp,  @dea,  @dcp, {  D  }
 {  E  }      @cpx,  @sbc,  @phd,  @isb,  @cpx,  @sbc,  @ina,  @isb,  @inx,  @sbc,  @nop,  @sbc,  @cpx,  @sbc,  @ina,  @isb, {  E  }
 {  F  }      @beq,  @sbc,  @sbc,  @isb,  @nop,  @sbc,  @ina,  @isb,  @sed,  @sbc,  @plx,  @isb,  @nop,  @sbc,  @ina,  @isb  {  F  }
@@ -380,6 +392,7 @@ end;
 procedure reset6502;
 
 begin
+//for x:=0 to 15 do for y:=0 to 15 do box(16*(x),16*(y),14,14,36);
 pc := word(read6502($FFFC)) or (word(read6502($FFFD) shl 8));
 a := 0;
 x := 0;
@@ -483,6 +496,7 @@ if aa<256 then begin a:=aa; x:=0; y:=0; status:=0; end;
 instructions:=0;
 repeat
   opcode := read6502(pc);
+//  box(16*(opcode mod 16),16*(opcode div 16),14,14,15);
   if opcode=$20 then inc(depth);
   if opcode=$60 then dec(depth);
     begin
@@ -1285,17 +1299,20 @@ end;
 procedure lax;
 
 begin
-lda;
-ldx;
+value := getvalue;
+a:=(value and $00FF);
+x:=a;
+if (a and $0080)<>0 then setsign else clearsign;
+if (a and $00FF)<>0 then clearzero else setzero;
 end;
+
 
 procedure sax;
 
 begin
-sta;
-stx;
 putvalue(a and x);
-if (penaltyop<>0) and (penaltyaddr<>0) then dec (clockticks6502);
+if (a and x and $0080)<>0 then setsign else clearsign;
+if (a and x and $00FF)<>0 then clearzero else setzero;
 end;
 
 procedure dcp;
@@ -1303,7 +1320,6 @@ procedure dcp;
 begin
 dea;
 cmp;
-if (penaltyop<>0) and (penaltyaddr<>0) then dec (clockticks6502);
 end;
 
 procedure isb;
@@ -1345,6 +1361,93 @@ begin
 ror;
 adc;
 if (penaltyop<>0) and (penaltyaddr<>0) then dec (clockticks6502);
+end;
+
+procedure anc;
+
+begin
+ana;
+if (a and $80)>0 then setcarry else clearcarry;
+if (penaltyop<>0) and (penaltyaddr<>0) then dec (clockticks6502);
+end;
+
+procedure alr;
+
+begin;
+value := getvalue;
+aresult := (a and value) shr 1;
+if (aresult and $0080)<>0 then setsign else clearsign;
+if (aresult and $00FF)<>0 then clearzero else setzero;
+a:=aresult;
+end;
+
+procedure arr;
+
+begin;
+value := getvalue;
+aresult := a and value;
+aresult := (aresult shr 1) or ((status and FLAG_CARRY) shl 7);
+if (aresult and 96)=96 then begin setcarry; clearoverflow; end
+else if (aresult  and 96)=0 then begin clearcarry; clearoverflow; end
+else if (aresult  and 96)=32 then begin clearcarry; setoverflow; end
+else begin setcarry; setoverflow; end;
+a:=aresult;
+end;
+
+procedure xaa;
+
+begin;
+
+end;
+
+procedure ahx;
+
+begin;
+
+end;
+
+procedure tas;
+
+begin;
+
+end;
+
+procedure shy;
+
+begin;
+
+end;
+
+procedure shx;
+
+begin;
+
+end;
+
+procedure las;
+
+begin;
+
+end;
+
+procedure axs;
+
+begin;
+value := getvalue;;
+x := word(a and x) - value;
+if (x >= (value and $00FF)) then setcarry else clearcarry;
+if (x = (byte(value and $00FF))) then setzero else clearzero;
+if (x and $0080)<>0 then setsign else clearsign;
+end;
+
+procedure atx;
+
+begin;
+value := getvalue;;
+a:=(a and value and $00FF);
+x:=a;
+if (a and $0080)<>0 then setsign else clearsign;
+if (a and $00FF)<>0 then clearzero else setzero;
 end;
 
 // end of opcodes

@@ -17,6 +17,7 @@ uses
   MMC,         {Include the MMC/SD core to access our SD card}
   FileSystem,  {Include the file system core and interfaces}
   FATFS,       {Include the FAT file system driver}
+  ntfs,
   BCM2710,
   Ultibo,
   retrokeyboard,    {Keyboard uses USB so that will be included automatically}
@@ -30,7 +31,7 @@ uses
 //  syscalls,
   blitter,
  // retro,
-  simpleaudio;
+  simpleaudio,scripttest;
 
 
 label p101,p999;
@@ -299,6 +300,8 @@ end;
 procedure dirlist(dir:string);
 
 var c:char;
+    i:integer;
+    dd:boolean;
 
 begin
 for c:='C' to 'F' do drivetable[c]:=directoryexists(c+':\');
@@ -335,6 +338,19 @@ if findfirst(currentdir,fadirectory,sr)=0 then
     end;
   until (findnext(sr)<>0) or (ilf=1000);
 sysutils.findclose(sr);
+
+// ntfs no .. patch
+
+dd:=false;
+for i:=0 to ilf do if filenames[i,0]='..' then dd:=true;
+if (not dd) and (length(currentdir2)>3) then
+  begin
+  filenames[ilf,0]:='..';
+  filenames[ilf,1]:='(DIR)';
+  ilf+=1;
+  end;
+//box(100,100,100,100,0); if dd then outtextxy(100,100,'true',40) else outtextxy(100,100,'false',40);
+
 
 currentdir:=currentdir2+'*.sid';
 if findfirst(currentdir,faAnyFile,sr)=0 then
@@ -482,6 +498,7 @@ startmousereportbuffer;
 //------------------- The main loop
 
 repeat
+
   refreshscreen;
 
   key:=readkey and $FF;
@@ -533,14 +550,14 @@ repeat
   else if key=ord('b') then   // blitter test
     begin
     tttt:=gettime;
-    box3(100,100,500,500,136);
+    box(100,100,500,500,136);
     tttt:=gettime-tttt;
     outtextxyz(100,100,inttostr(tttt),15,3,3);
     end
 
-  else if key=ord('m') then   // blitter test
+  else if key=ord('s') then   // blitter test
     begin
-
+    script1;
     end
 
   else if key=ord('q') then   // volume up
@@ -731,8 +748,8 @@ repeat
           outtextxyz(18,164,'title: '+atitle,188,2,2);
           box(18,912,800,32,244);
           outtextxyz(18,912,'SIDCog DMP file, '+inttostr(songfreq)+' Hz',250,2,2);
-          if a1base=432 then error:=SA_changeparams(47127,16,2,120)
-                        else error:=SA_changeparams(48000,16,2,120);
+          if a1base=432 then error:=SA_changeparams(10*47127,16,2,1200)
+                        else error:=SA_changeparams(10*48000,16,2,1200);
           songs:=0;
           end
        else if (buf[0]=ord('P')) and (buf[1]=ord('S')) and (buf[2]=ord('I')) and (buf[3]=ord('D')) then
@@ -744,8 +761,8 @@ repeat
           filetype:=1;
           box(18,912,800,32,244);
           outtextxyz(18,912,'PSID file, '+inttostr(1000000 div siddelay)+' Hz',250,2,2);
-          if a1base=432 then error:=SA_changeparams(47127,16,2,120)
-                        else error:=SA_changeparams(48000,16,2,120);
+          if a1base=432 then error:=SA_changeparams(10*47127,16,2,10*120)
+                        else error:=SA_changeparams(10*48000,16,2,10*120);
           fileclose(sfh);
           end
        else if (buf[0]=ord('R')) and (buf[1]=ord('S')) and (buf[2]=ord('I')) and (buf[3]=ord('D')) then
@@ -881,8 +898,8 @@ repeat
           outtextxyz(18,132,'type: unknown, 50 Hz SDMP assumed',188,2,2);
           box(18,912,800,32,244);
           outtextxyz(18,912,'SIDCog DMP file, 50 Hz',250,2,2);
-          if a1base=432 then error:=SA_changeparams(47127,16,2,120)
-                        else error:=SA_changeparams(48000,16,2,120);
+          if a1base=432 then error:=SA_changeparams(471270,16,2,1200)
+                        else error:=SA_changeparams(480000,16,2,1200);
 
           songs:=0;
           end;

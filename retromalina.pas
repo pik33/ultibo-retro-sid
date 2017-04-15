@@ -416,15 +416,8 @@ var fh,filetype:integer;                // this needs cleaning...
     error:integer;
     mousereports:array[0..7] of TMouseReport;
 
-    mp2test:kjmp2_context_t;
-    mp3test:pointer;
-    mp3testi:cardinal absolute mp3test;
-
-//   mp3buf:byte absolute $20000000;
-//   outbuf:byte absolute $21000000;
    mp3bufidx:integer=0;
    outbufidx:integer=0;
-   info:mp3_info_t;
    framesize:integer;
 
 
@@ -472,7 +465,7 @@ procedure removeramlimits(addr:integer);
 function readwheel: shortint; inline;
 procedure unhidecolor(c,bank:cardinal);
 //procedure dma_box(x,y,l,h,c:cardinal);
-procedure box3(x,y,l,h,c:integer);
+//procedure box3(x,y,l,h,c:integer);
 
 
 implementation
@@ -761,8 +754,8 @@ repeat
            mad_frame_decode(@test_mad_frame, @test_mad_stream);
            mad_synth_frame(@test_mad_synth,@test_mad_frame);
 
-          if test_mad_synth.pcm.channels=2 then for i:=0 to 1151 do begin outbuf2[2*i]:= test_mad_synth.pcm.samples[0,i] div 12288;   outbuf2[2*i+1]:= test_mad_synth.pcm.samples[1,i] div 12288;  end;
-          if test_mad_synth.pcm.channels=1 then for i:=0 to 1151 do begin outbuf2[2*i]:= test_mad_synth.pcm.samples[0,i] div 12288;   outbuf2[2*i+1]:= test_mad_synth.pcm.samples[0,i] div 12288;  end;
+          if test_mad_synth.pcm.channels=2 then for i:=0 to 1151 do begin outbuf2[2*i]:= test_mad_synth.pcm.samples[0,i] div 8704;   outbuf2[2*i+1]:= test_mad_synth.pcm.samples[1,i] div 8704;  end;
+          if test_mad_synth.pcm.channels=1 then for i:=0 to 1151 do begin outbuf2[2*i]:= test_mad_synth.pcm.samples[0,i] div 8704;   outbuf2[2*i+1]:= test_mad_synth.pcm.samples[0,i] div 8704;  end;
            il2:= (PtrUInt(test_mad_stream.next_frame)-ptruint(@tempbuf));
 
       // box(100,100,100,100,0); outtextxyz(100,100,inttostr(PtrUInt(test_mad_stream.next_frame)-ptruint(@tempbuf)),15,2,2);     outtextxyz(100,132,inttostr(tempbuf[il2]),15,2,2);
@@ -985,8 +978,8 @@ thread.start;
 // init sid variables
 
 for i:=0 to 127 do siddata[i]:=0;
-for i:=0 to 15 do siddata[$30+i]:=round(1073741824*(1-20*attacktable[i]));
-for i:=0 to 15 do siddata[$40+i]:=20*round(1073741824*attacktable[i]);
+for i:=0 to 15 do siddata[$30+i]:=round(1073741824*(1-2*attacktable[i]));       //20*
+for i:=0 to 15 do siddata[$40+i]:=2*round(1073741824*attacktable[i]);
 for i:=0 to 1023 do siddata[128+i]:=combined[i];
 for i:=0 to 1023 do siddata[128+i]:=(siddata[128+i]-128) shl 16;
 siddata[$0e]:=$7FFFF8;
@@ -995,8 +988,6 @@ siddata[$2e]:=$7FFFF8;
 
 reset6502;
 
-mp3test:=mp3_create;
-kjmp2_init(@mp2test);
 mad_stream_init(@test_mad_stream);
 mad_synth_init(@test_mad_synth);
 mad_frame_init(@test_mad_frame);
@@ -1489,7 +1480,7 @@ end;
 //   length l, height h
 //   rev. 20170111
 //  ---------------------------------------------------------------------
-
+         (*
 procedure box(x,y,l,h,c:integer);
 
 label p1,p999;
@@ -1528,9 +1519,9 @@ p1: strb r1,[r0]
 
   end;
 p999:
-end;
+end;       *)
 
-procedure box3(x,y,l,h,c:integer);
+procedure box(x,y,l,h,c:integer);
 
 label p101,p102,p999;
 
@@ -2222,7 +2213,7 @@ p125:          cmp   r0,#4
 p126:          mov   r0,#0
                str   r0,[r7,#0xb0]
 
-p123:          mov   r0,#10
+p123:          mov   r0,#1 // 10
                str   r0,[r7,#0x1fc]
 
 
@@ -2802,53 +2793,53 @@ p224:          ldr r0,[r4,#0x30]
 
                //  antialias r
 
-               mov r1,#0x6000
-               ldr r2,[r7,#0x198]
-               sub r0,r2
-               ldr r4,[r7,#0x19c]
-               sub r0,r4
-               smull r5,r12,r0,r1
-               lsr r5,#18
-               orr r5,r5,r12,lsl #14
-               add r2,r5
-               str r2,[r7,#0x198]
-               smull r5,r12,r1,r2
-               lsr r5,#18
-               orr r5,r5,r12,lsl #14
-               add r4,r5
-               str r4,[r7,#0x19c]
+//               mov r1,#0x6000
+//               ldr r2,[r7,#0x198]
+//               sub r0,r2
+//               ldr r4,[r7,#0x19c]
+//               sub r0,r4
+//               smull r5,r12,r0,r1
+//               lsr r5,#18
+//               orr r5,r5,r12,lsl #14
+//               add r2,r5
+//               str r2,[r7,#0x198]
+//               smull r5,r12,r1,r2
+//               lsr r5,#18
+//               orr r5,r5,r12,lsl #14
+//               add r4,r5
+//               str r4,[r7,#0x19c]
 
-               ldr r0,[r7,#0x1a8]
+//               ldr r0,[r7,#0x1a8]
                ldr r8,[r7,#0x1b0]
       //         cmp r0,#5//20
-               add r8,r4
+               add r8,r0  // r4
                str r8,[r7,#0x1b0]
 
                //  antialias l
 
-               mov r0,r6
-               ldr r2,[r7,#0x1a0]
-               sub r0,r2
-               ldr r4,[r7,#0x1a4]
-               sub r0,r4
-               smull r5,r12,r0,r1
-               lsr r5,#18
-               orr r5,r5,r12,lsl #14
-               add r2,r5
-               str r2,[r7,#0x1a0]
-               smull r5,r12,r1,r2
-               lsr r5,#18
-               orr r5,r5,r12,lsl #14
-               add r4,r5
-               str r4,[r7,#0x1a4]
+ //              mov r0,r6
+ //              ldr r2,[r7,#0x1a0]
+ //              sub r0,r2
+ //              ldr r4,[r7,#0x1a4]
+ //              sub r0,r4
+ //              smull r5,r12,r0,r1
+ //              lsr r5,#18
+ //              orr r5,r5,r12,lsl #14
+ //              add r2,r5
+ //              str r2,[r7,#0x1a0]
+ //              smull r5,r12,r1,r2
+ //              lsr r5,#18
+ //              orr r5,r5,r12,lsl #14
+ //              add r4,r5
+ //              str r4,[r7,#0x1a4]
 
-               ldr r0,[r7,#0x1a8]
+//               ldr r0,[r7,#0x1a8]
                ldr r8,[r7,#0x1ac]
         //       cmps r0,#10//20
-               add r8,r4       //lt
+               add r8,r6 //r4       //lt
                str r8,[r7,#0x1ac]
-               add r0,#1
-               str r0,[r7,#0x1a8]
+//               add r0,#1
+ //              str r0,[r7,#0x1a8]
 
               // mov r1,#0x7000000
                ldr r0,[r7,#0x1fc]
@@ -2860,21 +2851,21 @@ p224:          ldr r0,[r4,#0x30]
 
                      // for 12 bit pwm shift and unsign
 ldr r8,[r7,#0x1b0]
-mov r9,r8
-asr r9,#4
-add r8,r9
-asr r8,#14
+//mov r9,r8
+//asr r9,#4
+//add r8,r9
+asr r8,#11
 
 //add r8,#2592
 str r8,[r7,#0x1b0]
 
 ldr r8,[r7,#0x1ac]
 
-mov r9,r8
-asr r9,#4
-add r8,r9
+//mov r9,r8
+//asr r9,#4
+//add r8,r9
 
-asr r8,#14  //#18
+asr r8,#11  //#18
 
 //add r8,#2592
 str r8,[r7,#0x1ac]
@@ -2903,8 +2894,8 @@ str r8,[r7,#0x1ac]
 //until sidclock>=20000;//20526;
 //sidtime:=clockgettotal-ttt;
 //sidclock-=20000;//20526;
-sid[0]:= (siddata[$6b]*3) div 4; //  2048+ (siddata[$6c] div (16*16384));//16384;//32768;
-sid[1]:= (siddata[$6c]*3) div 4;//2048+ (siddata[$6b] div (16*16384));//16384;//32768;
+sid[0]:= siddata[$6b]; //  2048+ (siddata[$6c] div (16*16384));//16384;//32768;
+sid[1]:= siddata[$6c];//2048+ (siddata[$6b] div (16*16384));//16384;//32768;
 
 
 
@@ -3019,12 +3010,12 @@ else
     audio2[0]:=(s[0]);
     audio2[1]:=(s[1]);
     oscilloscope(s[0]+s[1]);
-    for i:=1 to 119 do
+    for i:=1 to 1199 do
       begin
       s:=sid(0);
       audio2[2*i]:=(s[0]);
       audio2[2*i+1]:=(s[1]);
-      oscilloscope(s[0]+s[1]);
+      if (i mod 10) = 0 then oscilloscope(s[0]+s[1]);
       end;
   end;
 inc(sidcount);

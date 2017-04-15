@@ -91,14 +91,16 @@ function  SA_ChangeParams(freq,bits,channels,samples:integer): Integer;
 function  SA_GetCurrentFreq:integer;
 function  SA_GetCurrentRange:integer;
 
+var t2222,t1111:int64;
+    n:array[0..65535] of integer;
 
 //------------------ End of Interface ------------------------------------------
 
 implementation
-
+ uses retromalina;
 type
      PLongBuffer=^TLongBuffer;
-     TLongBuffer=array[0..65535] of integer;  // 64K DMA buffer
+     TLongBuffer=array[0..655350] of integer;  // 64K DMA buffer
      TCtrlBlock=array[0..7] of cardinal;
      PCtrlBlock=^TCtrlBlock;
 
@@ -124,7 +126,7 @@ const nocache=$C0000000;              // constant to disable GPU L2 Cache
 
 // TODO: make the sample buffer size dynamic (?)
 
-      sample_buffer_size=8192;        // max size for sample buffer.
+      sample_buffer_size=2048;        // max size for sample buffer.
                                       // The max allowed by dma_buffer_size is 1536 for 44100/16/2 wave
       sample_buffer_32_size=16384;     // 8x sample_buffer_size for 8-bit mono samples
 
@@ -228,6 +230,7 @@ var       gpfsel4:cardinal     absolute _gpfsel4;      // GPIO Function Select 4
 
 procedure InitAudioEx(range,t_length:integer);  forward;
 function noiseshaper8(bufaddr,outbuf,oversample,len:integer):integer; forward;
+function noiseshaper1(bufaddr,outbuf,oversample,len:integer):integer; forward;
 
 // ------------------------------------------------
 // A helper procedure which removes RAM RO limit
@@ -254,16 +257,18 @@ procedure InitAudioEx(range,t_length:integer);               //TODO don't init s
 var i:integer;
 
 begin
+for i:=0 to 65535 do n[i]:=random($10000);
+
 dmactrl_ptr:=GetAlignedMem(64,32);      // get 64 bytes for 2 DMA ctrl blocks
 ctrl1_ptr:=PCtrlBlock(dmactrl_ptr);     // set pointers so the ctrl blocks can be accessed as array
 ctrl2_ptr:=PCtrlBlock(dmactrl_ptr+8);   // second ctrl block is 8 longs further
-dmabuf1_ptr:=getmem(65536);                       // allocate 64k for DMA buffer
-dmabuf2_ptr:=getmem(65536);                       // .. and the second one
+dmabuf1_ptr:=getmem(655360);                       // allocate 64k for DMA buffer
+dmabuf2_ptr:=getmem(655360);                       // .. and the second one
 
 ctrl1_ptr^[0]:=transfer_info;             // transfer info
 ctrl1_ptr^[1]:=nocache+dmabuf1_adr;       // source address -> buffer #1
 ctrl1_ptr^[2]:=_pwm_fif1_ph;              // destination address
-ctrl1_ptr^[3]:=t_length;                  // transfer length
+ctrl1_ptr^[3]:=t_length;                    // 8*2016; // t_length;                  // transfer length
 ctrl1_ptr^[4]:=$0;                        // 2D length, unused
 ctrl1_ptr^[5]:=nocache+ctrl2_adr;         // next ctrl block -> ctrl block #2
 ctrl1_ptr^[6]:=$0;                        // unused
@@ -286,6 +291,20 @@ pwm_dmac:=pwm_dmac_val;                                    // pwm dma enable
 dma_enable:=dma_enable or (1 shl dma_chn);                 // enable dma channel # dma_chn
 dma_conblk:=nocache+ctrl1_adr;                             // init DMA ctr block to ctrl block # 1
 dma_cs:=$00FF0003;                                         // start DMA
+
+  {
+gpfsel4:=(gpfsel4 and and_mask_40_45) or or_mask_40_45_4;  // gpio 40/45 as alt#0 -> PWM Out
+pwmclk:=clk_plld;                                          // set PWM clock src=PLLD (500 MHz)
+pwmclk_div:=$5a000000+$040000;// clk_div;                                       // set PWM clock divisor=2 (250 MHz)
+pwm_rng1:=32;//range;                                           // minimum range for 8-bit noise shaper to avoid overflows
+pwm_rng2:=32;//range;                                           //
+pwm_ctl:=$00002363;                                       // pwm contr0l - enable pwm, clear fifo, use fifo
+pwm_dmac:=pwm_dmac_val;                                    // pwm dma enable
+dma_enable:=dma_enable or (1 shl dma_chn);                 // enable dma channel # dma_chn
+dma_conblk:=nocache+ctrl1_adr;                             // init DMA ctr block to ctrl block # 1
+dma_cs:=$00FF0003;                                         // start DMA
+   }
+
 end;
 
 
@@ -448,6 +467,7 @@ InitAudioEx(obtained^.range,obtained^.oversampled_size);
 CurrentAudioSpec:=obtained^;
 samplebuffer_ptr:=getmem(sample_buffer_size);
 samplebuffer_32_ptr:=getmem(sample_buffer_32_size);
+removeramlimits(integer(@noiseshaper1));  // noise shaper uses local vars or it will be slower
 removeramlimits(integer(@noiseshaper8));  // noise shaper uses local vars or it will be slower
 // now create and start the audio thread
 pauseA:=1;
@@ -631,6 +651,172 @@ if vol<-72 then volume:=0;
 if vol>=0 then volume:=4096;
 end;
 
+function noiseshaper1(bufaddr,outbuf,oversample,len:integer):integer;
+
+label p101,p102,p103,p999,i1l,i1r,i2l,i2r,i3l,i3r,inputl,inputr,outputl,outputr;
+ var i,j,q:cardinal;
+     p:pbyte;
+     pp:PCardinal;
+     nn:pointer;
+
+// -- rev 20170126
+
+begin
+p:= pbyte(outbuf);
+pp:= pCardinal(outbuf);
+oversample*=8;
+nn:=@n  ;
+t2222:=gettime;
+
+                 asm
+                 push {r0-r10,r12,r14}
+                 ldr r3,i1l            // init integerators
+                 ldr r4,i1r
+                 ldr r7,i2l
+                 ldr r8,i2r
+                 ldr r5,bufaddr        // init buffers addresses
+                 ldr r2,outbuf
+                 ldr r14,oversample    // yes, lr used here, I am short of regs :(
+                 ldr r0,len            // outer loop counter
+
+
+            mov r10,#32 // bit counter
+            mov r9,#0
+            str r9,[r2],#4
+            str r9,[r2],#-4
+
+ p102:           mov r1,r14            // inner loop counter
+                 ldr r6,[r5],#4        // new input value left
+                 sub r6,#0x8000000
+                 //lsl r6,#2
+                 str r6,inputl
+
+                 ldr r12,[r5],#4       // new input value right
+                 sub r12,#0x8000000
+                 //lsl r12,#2
+                 str r12,inputr
+
+
+ p101:
+                 ldr r3,i1l
+                 ldr r7,i2l
+                 ldr r9,i3l
+                 ldr r6,inputl
+
+                 qadd r3,r3,r6 // inner loop: do oversampling
+
+                 qadd r7,r7,r3
+                 qadd r9,r9,r7
+                 cmp r7,#0x0000000
+
+                 ldr r8,[r2]
+                 lsl r8,#1
+                 addge r8,#1
+                 str r8,[r2],#4
+
+                 movge r8,#0x8000000
+                 movlt r8,#-0x8000000
+
+
+                 sub r3,r8
+                 sub r7,r7,r8
+               //  sub r9,r8
+                 str r3,i1l
+                 str r7,i2l
+                 str r9,i3l
+
+                 ldr r3,i1r
+                 ldr r7,i2r
+                 ldr r9,i3r
+                 ldr r6,inputr
+
+                 qadd r3,r3,r12 // inner loop: do oversampling
+                 qadd r7,r7,r3
+                 qadd r9,r9,r7
+                 cmp r7,#0x00000
+
+                 ldr r8,[r2]
+                 lsl r8,#1
+                 addge r8,#1
+                 str r8,[r2],#-4
+
+                 movge r8,#0x8000000
+                 movlt r8,#-0x8000000
+
+
+                 sub r3,r8
+                 sub r7,r7,r8
+            //     sub r9,r8
+                 str r3,i1r
+                 str r7,i2r
+                 str r9,i3r
+
+
+          subs r10,#1
+          bne p103
+          mov r10,#32
+          add r2,#8
+          mov r9,#0
+          str r9,[r2],#4
+          str r9,[r2],#-4
+
+
+
+p103:            subs r1,#1
+                 bne p101
+                 subs r0,#1
+                 bne p102
+
+                 str r3,i1l
+                 str r4,i1r
+                 str r7,i2l
+                 str r8,i2r
+                 str r2,result
+
+                 b p999
+
+i1l:            .long 0
+i1r:            .long 0
+i2l:            .long 0
+i2r:            .long 0
+i3l:            .long 0
+i3r:            .long 0
+inputl:         .long 0
+inputr:          .long 0
+outputl:         .long 0
+outputr:          .long 0
+
+
+
+
+p999:           pop {r0-r10,r12,r14}
+
+
+                end;
+
+{
+for i:=0 to (4*1008)-1 do
+  begin
+  q:=0;
+  for j:=0 to 31 do
+    begin
+      if pp[64*i+2*j]>128 then q:=q or ($80000000 shr j);
+    end;
+  pp[2*i]:=q;
+  q:=0;
+  for j:=0 to 31 do
+    begin
+      if pp[64*i+2*j+1]>128 then q:=q or ($80000000 shr j);
+    end;
+  pp[2*i+1]:=q;
+  end;
+
+ }
+
+CleanDataCacheRange(outbuf,$10000);
+t1111:=gettime-t2222;
+end;
+
 
 function noiseshaper8(bufaddr,outbuf,oversample,len:integer):integer;
 
@@ -777,5 +963,4 @@ result:=CurrentAudioSpec.range;
 end;
 
 end.
-
 
