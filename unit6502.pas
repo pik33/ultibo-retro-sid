@@ -133,6 +133,8 @@ procedure shy; forward;
 procedure las; forward;
 procedure axs; forward;
 procedure atx; forward;
+procedure dop; forward;
+procedure top; forward;
 
 // 65c02
 procedure bra; forward; //ok
@@ -160,42 +162,42 @@ TOpcode=procedure;
 
 var addrtable:array[0..255] of TAddr=(
 //        |  0   |  1   |  2   |  3   |  4   |  5   |  6   |  7   |  8   |  9   |  A   |  B   |  C   |  D   |  E   |  F  |
-{  0  }     @imp, @indx, @abso, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @acc,  @imm, @abso, @abso, @abso, @abso, {  0  }
-{  1  }     @rel, @indy,  @izp, @indy,   @zp,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @acc, @absy, @abso, @absx, @absx, @absx, {  1  }
-{  2  }    @abso, @indx, @abso, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @acc,  @imm, @abso, @abso, @abso, @abso, {  2  }
-{  3  }     @rel, @indy,  @izp, @indy,  @zpx,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @acc, @absy, @absx, @absx, @absx, @absx, {  3  }
-{  4  }     @imp, @indx, @abso, @indx,  @imp,   @zp,   @zp,   @zp,  @imp,  @imm,  @acc,  @imm, @abso, @abso, @abso, @abso, {  4  }
-{  5  }     @rel, @indy,  @izp, @indy,  @zpx,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @imp, @absy, @absx, @absx, @absx, @absx, {  5  }
-{  6  }     @imp, @indx, @abso, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @acc,  @imm,  @ind, @abso, @abso, @abso, {  6  }
-{  7  }     @rel, @indy,  @izp, @indy,  @zpx,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @imp, @absy,  @iax, @absx, @absx, @absx, {  7  }
-{  8  }     @imm, @indx,  @imp, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @imp,  @imm, @abso, @abso, @abso, @abso, {  8  }
-{  9  }     @rel, @indy,  @izp, @indy,  @zpx,  @zpx,  @zpy,  @zpy,  @imp, @absy,  @imp, @absy, @absx, @absx, @absy, @absy, {  9  }
+{  0  }     @imp, @indx,  @imp, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @acc,  @imm, @abso, @abso, @abso, @abso, {  0  }
+{  1  }     @rel, @indy,  @imp, @indy,  @zpx,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @imp, @absy, @absx, @absx, @absx, @absx, {  1  }
+{  2  }    @abso, @indx,  @imp, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @acc,  @imm, @abso, @abso, @abso, @abso, {  2  }
+{  3  }     @rel, @indy,  @imp, @indy,  @zpx,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @imp, @absy, @absx, @absx, @absx, @absx, {  3  }
+{  4  }     @imp, @indx,  @imp, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @acc,  @imm, @abso, @abso, @abso, @abso, {  4  }
+{  5  }     @rel, @indy,  @imp, @indy,  @zpx,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @imp, @absy, @absx, @absx, @absx, @absx, {  5  }
+{  6  }     @imp, @indx,  @imp, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @acc,  @imm,  @ind, @abso, @abso, @abso, {  6  }
+{  7  }     @rel, @indy,  @imp, @indy,  @zpx,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @imp, @absy,  @iax, @absx, @absx, @absx, {  7  }
+{  8  }     @imm, @indx,  @imm, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @imp,  @imm, @abso, @abso, @abso, @abso, {  8  }
+{  9  }     @rel, @indy,  @imp, @indy,  @zpx,  @zpx,  @zpy,  @zpy,  @imp, @absy,  @imp, @absy, @absx, @absx, @absy, @absy, {  9  }
 {  A  }     @imm, @indx,  @imm, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @imp,  @imm, @abso, @abso, @abso, @abso, {  A  }
-{  B  }     @rel, @indy,  @izp, @indy,  @zpx,  @zpx,  @zpy,  @zpy,  @imp, @absy,  @imp, @absy, @absx, @absx, @absy, @absy, {  B  }
-{  C  }     @imm, @indx,  @imp, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @imp,  @imm, @abso, @abso, @abso, @abso, {  C  }
-{  D  }     @rel, @indy,  @izp, @indy,  @zpx,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @imp, @absy, @absx, @absx, @absx, @absx, {  D  }
-{  E  }     @imm, @indx,  @imp, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @imp,  @imm, @abso, @abso, @abso, @abso, {  E  }
-{  F  }     @rel, @indy,  @izp, @indy,  @zpx,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @imp, @absy, @absx, @absx, @absx, @absx  {  F  }
+{  B  }     @rel, @indy,  @imp, @indy,  @zpx,  @zpx,  @zpy,  @zpy,  @imp, @absy,  @imp, @absy, @absx, @absx, @absy, @absy, {  B  }
+{  C  }     @imm, @indx,  @imm, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @imp,  @imm, @abso, @abso, @abso, @abso, {  C  }
+{  D  }     @rel, @indy,  @imp, @indy,  @zpx,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @imp, @absy, @absx, @absx, @absx, @absx, {  D  }
+{  E  }     @imm, @indx,  @imm, @indx,   @zp,   @zp,   @zp,   @zp,  @imp,  @imm,  @imp,  @imm, @abso, @abso, @abso, @abso, {  E  }
+{  F  }     @rel, @indy,  @imp, @indy,  @zpx,  @zpx,  @zpx,  @zpx,  @imp, @absy,  @imp, @absy, @absx, @absx, @absx, @absx  {  F  }
 );
 
 var optable:array[0..255] of TOpcode=(
 //         |  0   |   1  |   2  |   3  |   4  |   5  |   6  |   7  |   8  |   9  |   A  |   B  |   C  |   D  |   E  |   F  |
-{  0  }      @brk,  @ora,  @ldc,  @slo,  @tsb,  @ora,  @asl,  @slo,  @php,  @ora,  @asl,  @anc,  @tsb,  @ora,  @asl,  @slo, {  0  }
-{  1  }      @bpl,  @ora,  @ora,  @slo,  @trb,  @ora,  @asl,  @slo,  @clc,  @ora,  @ina,  @slo,  @trb,  @ora,  @asl,  @slo, {  1  }
-{  2  }      @jsr,  @ana,  @ldd,  @rla,  @bit,  @ana,  @rol,  @rla,  @plp,  @ana,  @rol,  @anc,  @bit,  @ana,  @rol,  @rla, {  2  }
-{  3  }      @bmi,  @ana,  @ana,  @rla,  @bit,  @ana,  @rol,  @rla,  @sec,  @ana,  @dea,  @rla,  @bit,  @ana,  @rol,  @rla, {  3  }
-{  4  }      @rti,  @eor,  @stc,  @sre,  @pld,  @eor,  @lsr,  @sre,  @pha,  @eor,  @lsr,  @alr,  @jmp,  @eor,  @lsr,  @sre, {  4  }
-{  5  }      @bvc,  @eor,  @eor,  @sre,  @nop,  @eor,  @lsr,  @sre,  @cli,  @eor,  @phy,  @sre,  @nop,  @eor,  @lsr,  @sre, {  5  }
-{  6  }      @rts,  @adc,  @std,  @rra,  @stz,  @adc,  @ror,  @rra,  @pla,  @adc,  @ror,  @arr,  @jmp,  @adc,  @ror,  @rra, {  6  }
-{  7  }      @bvs,  @adc,  @adc,  @rra,  @stz,  @adc,  @ror,  @rra,  @sei,  @adc,  @ply,  @rra,  @jmp,  @adc,  @ror,  @rra, {  7  }
-{  8  }      @bra,  @sta,  @plc,  @sax,  @sty,  @sta,  @stx,  @sax,  @dey,  @bit,  @txa,  @xaa,  @sty,  @sta,  @stx,  @sax, {  8  }
-{  9  }      @bcc,  @sta,  @sta,  @ahx,  @sty,  @sta,  @stx,  @sax,  @tya,  @sta,  @txs,  @tas,  @shy,  @sta,  @shx,  @ahx, {  9  }
+{  0  }      @brk,  @ora,  @nop,  @slo,  @dop,  @ora,  @asl,  @slo,  @php,  @ora,  @asl,  @anc,  @top,  @ora,  @asl,  @slo, {  0  }
+{  1  }      @bpl,  @ora,  @nop,  @slo,  @dop,  @ora,  @asl,  @slo,  @clc,  @ora,  @nop,  @slo,  @top,  @ora,  @asl,  @slo, {  1  }
+{  2  }      @jsr,  @ana,  @nop,  @rla,  @bit,  @ana,  @rol,  @rla,  @plp,  @ana,  @rol,  @anc,  @bit,  @ana,  @rol,  @rla, {  2  }
+{  3  }      @bmi,  @ana,  @nop,  @rla,  @dop,  @ana,  @rol,  @rla,  @sec,  @ana,  @nop,  @rla,  @top,  @ana,  @rol,  @rla, {  3  }
+{  4  }      @rti,  @eor,  @nop,  @sre,  @dop,  @eor,  @lsr,  @sre,  @pha,  @eor,  @lsr,  @alr,  @jmp,  @eor,  @lsr,  @sre, {  4  }
+{  5  }      @bvc,  @eor,  @nop,  @sre,  @dop,  @eor,  @lsr,  @sre,  @cli,  @eor,  @nop,  @sre,  @top,  @eor,  @lsr,  @sre, {  5  }
+{  6  }      @rts,  @adc,  @nop,  @rra,  @dop,  @adc,  @ror,  @rra,  @pla,  @adc,  @ror,  @arr,  @jmp,  @adc,  @ror,  @rra, {  6  }
+{  7  }      @bvs,  @adc,  @nop,  @rra,  @dop,  @adc,  @ror,  @rra,  @sei,  @adc,  @nop,  @rra,  @top,  @adc,  @ror,  @rra, {  7  }
+{  8  }      @dop,  @sta,  @dop,  @sax,  @sty,  @sta,  @stx,  @sax,  @dey,  @dop,  @txa,  @xaa,  @sty,  @sta,  @stx,  @sax, {  8  }
+{  9  }      @bcc,  @sta,  @nop,  @ahx,  @sty,  @sta,  @stx,  @sax,  @tya,  @sta,  @txs,  @tas,  @shy,  @sta,  @shx,  @ahx, {  9  }
 {  A  }      @ldy,  @lda,  @ldx,  @lax,  @ldy,  @lda,  @ldx,  @lax,  @tay,  @lda,  @tax,  @atx,  @ldy,  @lda,  @ldx,  @lax, {  A  }
-{  B  }      @bcs,  @lda,  @lda,  @lax,  @ldy,  @lda,  @ldx,  @lax,  @clv,  @lda,  @tsx,  @las,  @ldy,  @lda,  @ldx,  @lax, {  B  }
-{  C  }      @cpy,  @cmp,  @phc,  @dcp,  @cpy,  @cmp,  @dea,  @dcp,  @iny,  @cmp,  @dex,  @axs,  @cpy,  @cmp,  @dea,  @dcp, {  C  }
-{  D  }      @bne,  @cmp,  @cmp,  @dcp,  @nop,  @cmp,  @dea,  @dcp,  @cld,  @cmp,  @phx,  @dcp,  @nop,  @cmp,  @dea,  @dcp, {  D  }
-{  E  }      @cpx,  @sbc,  @phd,  @isb,  @cpx,  @sbc,  @ina,  @isb,  @inx,  @sbc,  @nop,  @sbc,  @cpx,  @sbc,  @ina,  @isb, {  E  }
-{  F  }      @beq,  @sbc,  @sbc,  @isb,  @nop,  @sbc,  @ina,  @isb,  @sed,  @sbc,  @plx,  @isb,  @nop,  @sbc,  @ina,  @isb  {  F  }
+{  B  }      @bcs,  @lda,  @nop,  @lax,  @ldy,  @lda,  @ldx,  @lax,  @clv,  @lda,  @tsx,  @las,  @ldy,  @lda,  @ldx,  @lax, {  B  }
+{  C  }      @cpy,  @cmp,  @dop,  @dcp,  @cpy,  @cmp,  @dea,  @dcp,  @iny,  @cmp,  @dex,  @axs,  @cpy,  @cmp,  @dea,  @dcp, {  C  }
+{  D  }      @bne,  @cmp,  @nop,  @dcp,  @dop,  @cmp,  @dea,  @dcp,  @cld,  @cmp,  @nop,  @dcp,  @top,  @cmp,  @dea,  @dcp, {  D  }
+{  E  }      @cpx,  @sbc,  @dop,  @isb,  @cpx,  @sbc,  @ina,  @isb,  @inx,  @sbc,  @nop,  @sbc,  @cpx,  @sbc,  @ina,  @isb, {  E  }
+{  F  }      @beq,  @sbc,  @nop,  @isb,  @dop,  @sbc,  @ina,  @isb,  @sed,  @sbc,  @nop,  @isb,  @top,  @sbc,  @ina,  @isb  {  F  }
 );
 
 var ticktable:array[0..255] of byte = (
@@ -259,268 +261,270 @@ var
  //   cs,ds:^integer;
 
 
-function read6502(address:integer):byte;
+ function read6502(address:integer):byte;
 
-begin
-address:=address and $FFFF;
-result:=peek(base+address); //ram[address and $FFFF];
-end;
+ begin
+ address:=address and $FFFF;
+ result:=peek(base+address); //ram[address and $FFFF];
+ end;
 
-procedure write6502(address:integer; value:byte);
+ procedure write6502(address:integer; value:byte);
 
-begin
-address:=address and $FFFF;
-poke(base+address,value); //ram[address and $FFFF]:=value;
-end;
+ begin
+ address:=address and $FFFF;
+ poke(base+address,value); //ram[address and $FFFF]:=value;
+ end;
 
-//a few general functions used by various other functions
+ //a few general functions used by various other functions
 
-procedure push32(pushval:cardinal);
+ procedure push32(pushval:cardinal);
 
-begin
-write6502(BASE_STACK+sp,(pushval shr 24) and $FF);
-write6502(BASE_STACK+((sp-1) and $FF),(pushval shr 16) and $FF);
-write6502(BASE_STACK+((sp-2) and $FF),(pushval shr 8) and $FF);
-write6502(BASE_STACK+((sp-3) and $FF),pushval and $FF);
-sp-=4;
-end;
+ begin
+ write6502(BASE_STACK+sp,(pushval shr 24) and $FF);
+ write6502(BASE_STACK+((sp-1) and $FF),(pushval shr 16) and $FF);
+ write6502(BASE_STACK+((sp-2) and $FF),(pushval shr 8) and $FF);
+ write6502(BASE_STACK+((sp-3) and $FF),pushval and $FF);
+ sp-=4;
+ end;
 
-procedure push16(pushval:word);
+ procedure push16(pushval:word);
 
-begin
-write6502(BASE_STACK+sp,(pushval shr 8) and $FF);
-write6502(BASE_STACK+((sp-1) and $FF),pushval and $FF);
-sp-=2;
-end;
+ begin
+ write6502(BASE_STACK+sp,(pushval shr 8) and $FF);
+ write6502(BASE_STACK+((sp-1) and $FF),pushval and $FF);
+ sp-=2;
+ end;
 
-procedure push8(pushval:word);
+ procedure push8(pushval:word);
 
-begin
-write6502(BASE_STACK+sp,pushval);
-dec(sp);
-end;
+ begin
+ write6502(BASE_STACK+sp,pushval);
+ dec(sp);
+ end;
 
-function pull32:cardinal;
+ function pull32:cardinal;
 
-var temp32:cardinal;
+ var temp32:cardinal;
 
-begin
-temp32:=read6502(BASE_STACK + ((sp + 4) and $FF));
-temp32:=(temp32 shl 8) + read6502(BASE_STACK + ((sp + 3) and $FF));
-temp32:=(temp32 shl 8) + read6502(BASE_STACK + ((sp + 2) and $FF));
-temp32:=(temp32 shl 8) + read6502(BASE_STACK + ((sp + 1) and $FF));
-result:=temp32;
-sp+=4;
-end;
+ begin
+ temp32:=read6502(BASE_STACK + ((sp + 4) and $FF));
+ temp32:=(temp32 shl 8) + read6502(BASE_STACK + ((sp + 3) and $FF));
+ temp32:=(temp32 shl 8) + read6502(BASE_STACK + ((sp + 2) and $FF));
+ temp32:=(temp32 shl 8) + read6502(BASE_STACK + ((sp + 1) and $FF));
+ result:=temp32;
+ sp+=4;
+ end;
 
-function pull16:word;
+ function pull16:word;
 
-var temp16:word;
+ var temp16:word;
 
-begin
-temp16:=read6502(BASE_STACK + ((sp + 2) and $FF));
-temp16:=(temp16 shl 8) + read6502(BASE_STACK + ((sp + 1) and $FF));
-result:=temp16;
-sp+=2;
-end;
+ begin
+ temp16:=read6502(BASE_STACK + ((sp + 2) and $FF));
+ temp16:=(temp16 shl 8) + read6502(BASE_STACK + ((sp + 1) and $FF));
+ result:=temp16;
+ sp+=2;
+ end;
 
-function pull8:byte;
+ function pull8:byte;
 
-begin
-inc(sp);
-result:=(read6502(BASE_STACK + sp));
-end;
+ begin
+ inc(sp);
+ result:=(read6502(BASE_STACK + sp));
+ end;
 
-function getvalue:word;
+ function getvalue:word;
 
-var ea2:integer;
+ var ea2:integer;
 
-begin
-ea2:=ea;
-if (addrtable[opcode] = @acc) then
-  result:=a
-else
-  result:=read6502(ea2);
-end;
+ begin
+ ea2:=ea;
+ if (addrtable[opcode] = @acc) then
+   result:=a
+ else
+   result:=read6502(ea2);
+ end;
 
-function getvalue16:word;
+ function getvalue16:word;
 
-var ea2:integer;
+ var ea2:integer;
 
-begin
-ea2:=ea;
-result:=word(read6502(ea2)) or (word(read6502(ea2+1)) shl 8);
-end;
+ begin
+ ea2:=ea;
+ result:=word(read6502(ea2)) or (word(read6502(ea2+1)) shl 8);
+ end;
 
-function getvalue32:cardinal;
+ function getvalue32:cardinal;
 
-var ea2:integer;
+ var ea2:integer;
 
-begin
+ begin
 
-ea2:=ea;
+ ea2:=ea;
 
-result:=cardinal(read6502(ea2))
-  or (cardinal(read6502(ea2+1)) shl 8)
-    or (cardinal(read6502(ea2+2)) shl 16)
-      or (cardinal(read6502(ea2+3)) shl 24);
-end;
+ result:=cardinal(read6502(ea2))
+   or (cardinal(read6502(ea2+1)) shl 8)
+     or (cardinal(read6502(ea2+2)) shl 16)
+       or (cardinal(read6502(ea2+3)) shl 24);
+ end;
 
-procedure putvalue(saveval:word);
+ procedure putvalue(saveval:word);
 
-var ea2:integer;
+ var ea2:integer;
 
-begin
-ea2:=ea;
-if (addrtable[opcode] = @acc) then a := byte(saveval and $00FF) else write6502(ea2, (saveval and $00FF));
-end;
+ begin
+ ea2:=ea;
+ if (addrtable[opcode] = @acc) then a := byte(saveval and $00FF) else write6502(ea2, (saveval and $00FF));
+ end;
 
-procedure putvalue32(saveval:cardinal);
+ procedure putvalue32(saveval:cardinal);
 
-var ea2:integer;
+ var ea2:integer;
 
-begin
+ begin
 
-ea2:=ea;
+ ea2:=ea;
 
-write6502(ea2, (saveval and $000000FF));
-write6502(ea2+1, ((saveval shl 8) and $000000FF));
-write6502(ea2+2, ((saveval shl 16) and $000000FF));
-write6502(ea2+3, ((saveval shl 24) and $000000FF));
-end;
+ write6502(ea2, (saveval and $000000FF));
+ write6502(ea2+1, ((saveval shl 8) and $000000FF));
+ write6502(ea2+2, ((saveval shl 16) and $000000FF));
+ write6502(ea2+3, ((saveval shl 24) and $000000FF));
+ end;
 
-procedure reset6502;
+ procedure reset6502;
 
-begin
-//for x:=0 to 15 do for y:=0 to 15 do box(16*(x),16*(y),14,14,36);
-pc := word(read6502($FFFC)) or (word(read6502($FFFD) shl 8));
-a := 0;
-x := 0;
-y := 0;
-sp := $FD;
-//ds:=@dsa;
-//cs:=@csa;
-//:=0; ds^:=0; csi:=0; dsi:=0;
-status:=status or FLAG_CONSTANT;
-clockgoal6502:=0;
-instructions:=0;
-clockticks6502:=0;
+ begin
+ //for x:=0 to 15 do for y:=0 to 15 do box(16*(x),16*(y),14,14,36);
+ pc := word(read6502($FFFC)) or (word(read6502($FFFD) shl 8));
+ a := 0;
+ x := 0;
+ y := 0;
+ sp := $FD;
+ //ds:=@dsa;
+ //cs:=@csa;
+ //:=0; ds^:=0; csi:=0; dsi:=0;
+ status:=status or FLAG_CONSTANT;
+ clockgoal6502:=0;
+ instructions:=0;
+ clockticks6502:=0;
 
-end;
+ end;
 
-procedure nmi6502;
+ procedure nmi6502;
 
-begin
-push16(pc);
-push8(status);
-status :=status or FLAG_INTERRUPT;
-pc := word(read6502($FFFA)) or (word(read6502($FFFB)) << 8);
-//cs:=@csi;
-//ds:=@dsi;
-end;
+ begin
+ push16(pc);
+ push8(status);
+ status :=status or FLAG_INTERRUPT;
+ pc := word(read6502($FFFA)) or (word(read6502($FFFB)) << 8);
+ //cs:=@csi;
+ //ds:=@dsi;
+ end;
 
-procedure irq6502;
+ procedure irq6502;
 
-begin
-push16(pc);
-push8(status);
-status :=status or FLAG_INTERRUPT;
-pc := word(read6502($FFFE)) or (word(read6502($FFFF)) << 8);
-//cs:=@csi;
-//ds:=@dsi;
-end;
+ begin
+ push16(pc);
+ push8(status);
+ status :=status or FLAG_INTERRUPT;
+ pc := word(read6502($FFFE)) or (word(read6502($FFFF)) << 8);
+ //cs:=@csi;
+ //ds:=@dsi;
+ end;
 
-procedure exec6502(tickcount:integer);
+ procedure exec6502(tickcount:integer);
 
-begin
-clockgoal6502 += tickcount;
-while (clockticks6502 < clockgoal6502) do
-  begin
-  opcode := read6502(pc);
-  pc+=1;
-//  status := status or FLAG_CONSTANT;
-  penaltyop := 0;
-  penaltyaddr := 0;
-  addrtable[opcode];
-  optable[opcode];
-  clockticks6502 += ticktable[opcode];
-  if (penaltyop<>0) and (penaltyaddr<>0) then  clockticks6502+=1;
-  instructions+=1;
-  end;
-end;
+ begin
+ clockgoal6502 += tickcount;
+ while (clockticks6502 < clockgoal6502) do
+   begin
+   opcode := read6502(pc);
+   pc+=1;
+ //  status := status or FLAG_CONSTANT;
+   penaltyop := 0;
+   penaltyaddr := 0;
+   addrtable[opcode];
+   optable[opcode];
+   clockticks6502 += ticktable[opcode];
+   if (penaltyop<>0) and (penaltyaddr<>0) then  clockticks6502+=1;
+   instructions+=1;
+   end;
+ end;
 
-procedure fast6502(tickcount:integer);
+ procedure fast6502(tickcount:integer);
 
-begin
-clockgoal6502 += tickcount;
-while (clockticks6502 < clockgoal6502) do
-  begin
-  opcode := read6502(pc);
-  pc+=1;
-  addrtable[opcode];
-  optable[opcode];
-  clockticks6502 += 1;
-  instructions+=1;
-  end;
-end;
+ begin
+ clockgoal6502 += tickcount;
+ while (clockticks6502 < clockgoal6502) do
+   begin
+   opcode := read6502(pc);
+   pc+=1;
+   addrtable[opcode];
+   optable[opcode];
+   clockticks6502 += 1;
+   instructions+=1;
+   end;
+ end;
 
-procedure step6502;
+ procedure step6502;
 
-begin
-opcode := read6502(pc);
-pc+=1;
-status :=status or FLAG_CONSTANT;
-penaltyop := 0;
-penaltyaddr := 0;
-addrtable[opcode];
-optable[opcode];
-clockticks6502 += ticktable[opcode];
-if (penaltyop<>0) and (penaltyaddr<>0) then clockticks6502+=1;
-clockgoal6502 := clockticks6502;
-instructions+=1;
-end;
+ begin
+ opcode := read6502(pc);
+ pc+=1;
+ status :=status or FLAG_CONSTANT;
+ penaltyop := 0;
+ penaltyaddr := 0;
+ addrtable[opcode];
+ optable[opcode];
+ clockticks6502 += ticktable[opcode];
+ if (penaltyop<>0) and (penaltyaddr<>0) then clockticks6502+=1;
+ clockgoal6502 := clockticks6502;
+ instructions+=1;
+ end;
 
 
-procedure jsr6502(aa:word; addr:integer);
+ procedure jsr6502(aa:word; addr:integer);
 
-var depth:integer;
+ var depth:integer;
 
-begin
-inc(jsrcnt) ;
-//box(100,100,500,20,33);
-//outtextxy(100,100,'entered jsr at '+inttohex(addr,4),44);
-pc:=addr;
-sp := $FD;
-depth:=0;
-if aa<256 then begin a:=aa; x:=0; y:=0; status:=0; end;
-instructions:=0;
-repeat
-  opcode := read6502(pc);
-//  box(16*(opcode mod 16),16*(opcode div 16),14,14,15);
-  if opcode=$20 then inc(depth);
-  if opcode=$60 then dec(depth);
-    begin
-    pc+=1;
-    addrtable[opcode];
-    optable[opcode];
-    instructions+=1;
-    end;
-  until (depth<0) or (instructions>3000);
-//  box(100,200,500,20,33);
-//outtextxy(100,200,'exited jsr after '+inttostr(instructions)+' jsr count '+inttostr(jsrcnt),44);
+ begin
+ inc(jsrcnt) ;
+ //box(100,100,500,20,33);
+ //outtextxy(100,100,'entered jsr at '+inttohex(addr,4),44);
+ pc:=addr;
+ sp := $FD;
+ depth:=0;
+ if aa<256 then begin a:=aa; x:=0; y:=0; status:=0; end;
+ instructions:=0;
+ repeat
+   opcode := read6502(pc);
+ //  box(16*(opcode mod 16),16*(opcode div 16),14,14,15);
+   if opcode=$20 then inc(depth);
+   if opcode=$60 then dec(depth);
+     begin
+     pc+=1;
+     addrtable[opcode];
+     optable[opcode];
+     instructions+=1;
+     end;
+   until (depth<0) or (instructions>3000);
+ //  box(100,200,500,20,33);
+ //outtextxy(100,200,'exited jsr after '+inttostr(instructions)+' jsr count '+inttostr(jsrcnt),44);
 
-end;
+ end;
 
 //addressing mode functions, calculates effective addresses
 
 procedure imp; //implied
 
 begin
+ea:=-1
 end;
 
 procedure acc;  //accumulator
 
 begin
+ea:=-1
 end;
 
 procedure imm;  //immediate
@@ -557,6 +561,7 @@ begin
 reladdr := word(read6502(pc));
 inc(pc);
 if (reladdr and $80)<>0 then reladdr:=reladdr or $FF00;
+ea:=reladdr;
 end;
 
 procedure abso; //absolute
@@ -1012,14 +1017,6 @@ end;
 procedure nop;
 
 begin
-case opcode of
-  $1C:  penaltyop := 1;
-  $3C:  penaltyop := 1;
-  $5C:  penaltyop := 1;
-  $7C:  penaltyop := 1;
-  $DC:  penaltyop := 1;
-  $FC:  penaltyop := 1;
-  end;
 end;
 
 procedure ora;
@@ -1318,49 +1315,118 @@ end;
 procedure dcp;
 
 begin
-dea;
+value:=getvalue;
+value:=(value-1) and 255;
+putvalue(value);
 cmp;
 end;
 
 procedure isb;
 
 begin
-ina;
-sbc;
-if (penaltyop<>0) and (penaltyaddr<>0) then dec (clockticks6502);
+value:=(getvalue+1) and 255;
+putvalue(value);
+value := value xor $00FF;
+aresult := word(a) + value + (status and FLAG_CARRY);
+if (aresult and $FF00) <>0 then setcarry else clearcarry;
+if (aresult and $00FF)<>0 then clearzero else setzero;
+if ((aresult xor a) and (aresult xor value) and $0080)<>0 then setoverflow else clearoverflow;
+if (aresult and $0080)<>0 then setsign else clearsign;
+
+if (status and FLAG_DECIMAL)<>0 then
+  begin
+  inc(clockticks6502);
+  clearcarry;
+  if ((a and $0F) > $09) then a += $06;
+  if ((a and $F0) > $90) then
+    begin
+    a += $60;
+    setcarry;
+    end;
+  end;
+
+a:=byte(aresult and $00FF);
 end;
 
 procedure slo;
 
 begin
-asl;
-ora;
-if (penaltyop<>0) and (penaltyaddr<>0) then dec (clockticks6502);
+value := getvalue;
+aresult := value shl 1;
+if (aresult and $FF00) <>0 then setcarry else clearcarry;
+if (aresult and $00FF)<>0 then clearzero else setzero;
+if (aresult and $0080)<>0 then setsign else clearsign;
+putvalue(aresult);
+value := aresult;
+aresult := a or value;
+if (aresult and $0080)<>0 then setsign else clearsign;
+if (aresult and $00FF)<>0 then clearzero else setzero;
+a:=byte(aresult and $00FF);
 end;
 
 
 procedure rla;
 
 begin
-rol;
-ana;
+value := getvalue;;
+aresult := (value shl 1) or (status and FLAG_CARRY);
+if (aresult and $FF00) <>0 then setcarry else clearcarry;
+if (aresult and $00FF)<>0 then clearzero else setzero;
+if (aresult and $0080)<>0 then setsign else clearsign;
+putvalue(aresult);
+aresult := a and aresult;
+if (aresult and $00FF)<>0 then clearzero else setzero;
+if (aresult and $0080)<>0 then setsign else clearsign;
+a:=byte(aresult and $00FF);
 if (penaltyop<>0) and (penaltyaddr<>0) then dec (clockticks6502);
 end;
 
 procedure sre;
 
 begin
-lsr;
-eor;
-if (penaltyop<>0) and (penaltyaddr<>0) then dec (clockticks6502);
+value := getvalue and $FF;
+aresult := value shr 1;
+if (value and 1)=1 then setcarry else clearcarry;
+if (aresult and $0080)<>0 then setsign else clearsign;
+if (aresult and $00FF)<>0 then clearzero else setzero;
+putvalue(aresult);
+aresult := a xor aresult;
+if (aresult and $0080)<>0 then setsign else clearsign;
+if (aresult and $00FF)<>0 then clearzero else setzero;
+a:=byte(aresult and $00FF);
 end;
 
 procedure rra;
 
 begin
-ror;
-adc;
-if (penaltyop<>0) and (penaltyaddr<>0) then dec (clockticks6502);
+value := getvalue;;
+aresult := (value shr 1) or ((status and FLAG_CARRY) shl 7);
+if (value and 1)=1 then setcarry else clearcarry;
+if (aresult and $00FF)<>0 then clearzero else setzero;
+if (aresult and $0080)<>0 then setsign else clearsign;
+putvalue(aresult);
+
+value := aresult;
+aresult := word(value)+a+(status and FLAG_CARRY);
+if (aresult and $FF00) <>0 then setcarry else clearcarry;
+if (aresult and $00FF)<>0 then clearzero else setzero;
+if ((aresult xor a) and (aresult xor value) and $0080)<>0 then
+  setoverflow
+else
+  clearoverflow;
+if (aresult and $0080)<>0 then setsign else clearsign;
+if (status and FLAG_DECIMAL)<>0 then
+  begin
+  inc(clockticks6502);
+  clearcarry;
+  if ((a and $0F) > $09) then a += $06;
+  if ((a and $F0) > $90) then
+    begin
+    a += $60;
+    setcarry;
+    end;
+  end;
+a:=byte(aresult and $00FF);
 end;
 
 procedure anc;
@@ -1368,7 +1434,6 @@ procedure anc;
 begin
 ana;
 if (a and $80)>0 then setcarry else clearcarry;
-if (penaltyop<>0) and (penaltyaddr<>0) then dec (clockticks6502);
 end;
 
 procedure alr;
@@ -1397,37 +1462,49 @@ end;
 procedure xaa;
 
 begin;
-
+a:=x;
+value:=getvalue;
+aresult := a and value;
+if (aresult and $00FF)<>0 then clearzero else setzero;
+if (aresult and $0080)<>0 then setsign else clearsign;
+a:=byte(aresult and $00FF);
 end;
 
 procedure ahx;
 
 begin;
-
+aresult:=a and x and 7;
+putvalue(aresult);
 end;
 
 procedure tas;
 
 begin;
-
+sp:=a and x and (ea shr 8) +1;
+putvalue(sp);
 end;
 
 procedure shy;
 
 begin;
-
+value:=(((ea) shr 8) and y) +1;
+putvalue(value);
 end;
 
 procedure shx;
 
 begin;
-
+value:=(((ea) shr 8) and x) +1;
+putvalue(value);
 end;
 
 procedure las;
 
 begin;
-
+value:=getvalue and sp;
+sp:=value;
+x:=value;
+a:=value;
 end;
 
 procedure axs;
@@ -1448,6 +1525,18 @@ a:=(a and value and $00FF);
 x:=a;
 if (a and $0080)<>0 then setsign else clearsign;
 if (a and $00FF)<>0 then clearzero else setzero;
+end;
+
+procedure dop;
+
+begin
+// double nop
+end;
+
+procedure top;
+
+begin
+// double nop
 end;
 
 // end of opcodes
