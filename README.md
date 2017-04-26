@@ -1,6 +1,6 @@
-This is the player for Ultibo/RPi3 v. 0.22 alpha
+This is the player for Ultibo/RPi3 v. 0.23 alpha
 
-It plays .sid, .dmp, .wav, .mp3, .mp2 ans .s48 files.
+It plays .sid, .dmp, .wav, .mp3, .mp2, s48, mod, s3m, xm and .it files.
 
 The wav can be 44100/16bit or 96000/32bit float; also wav wrapped mp3 streams (subformat 85) are played
 

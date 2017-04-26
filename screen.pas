@@ -13,7 +13,7 @@ interface
 
 uses sysutils,classes,retromalina,platform,retro,cwindows,threads;
 
-const ver='The retromachine player v. 0.22u --- 2017.02.18';
+const ver='The retromachine player v. 0.23u --- 2017.04.26';
 
 type bmppixel=array[0..2] of byte;
 
@@ -301,7 +301,8 @@ if filetype=0 then outtextxyz(18,912,'SIDCog DMP file, '+inttostr(songfreq)+' Hz
 else if filetype=1 then outtextxyz(18,912,'PSID file, '+inttostr(1000000 div siddelay)+' Hz',250,2,2)
 else if filetype=3 then outtextxyz(18,912,'Wave file, '+inttostr(head.srate)+' Hz',250,2,2)
 else if filetype=4 then outtextxyz(18,912,'MP3 file, '+inttostr(head.srate)+' Hz, ' + inttostr(head.brate)+' kbps',250,2,2)
-else if filetype=5 then outtextxyz(18,912,'MP2 file'{, '+inttostr(head.srate)+' Hz'},250,2,2);
+else if filetype=5 then outtextxyz(18,912,'MP2 file'{, '+inttostr(head.srate)+' Hz'},250,2,2)
+else if filetype=6 then outtextxyz(18,912,'Module file'{, '+inttostr(head.srate)+' Hz'},250,2,2);
 outtextxyz(18,960,hhs+':'+mms+':'+sss,190,4,2);
 
 // compute average times
@@ -327,7 +328,8 @@ if sidcount<>0 then
   if filetype<3 then outtextxyz(656,1070,'SID '+inttostr(avall)+' us',233,2,2)
   else if filetype=3 then begin if sidtime>10 then outtextxyz(656,1070,'wav '+inttostr(avall)+' us',233,2,2); end
   else if filetype=4 then outtextxyz(656,1070,'mp3 '+inttostr(mp3time)+' us',233,2,2)
-  else if filetype=5 then outtextxyz(656,1070,'mp2 '+inttostr(mp3time)+' us',233,2,2);
+  else if filetype=5 then outtextxyz(656,1070,'mp2 '+inttostr(mp3time)+' us',233,2,2)
+  else if filetype=6 then outtextxyz(656,1070,'mod '+inttostr(mp3time)+' us',233,2,2);
   end;
 outtextxyz(864,1070,'6502 '+floattostrf((av6502/16),fffixed,4,1)+' us',124,2,2);
 outtextxyz(1088,1070,inttostr(a1base),200,2,2);

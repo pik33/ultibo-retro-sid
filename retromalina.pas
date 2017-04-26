@@ -93,7 +93,7 @@ unit retromalina;
 interface
 
 uses sysutils,classes,unit6502,Platform,Framebuffer,retrokeyboard,retromouse,
-     threads,GlobalConst,ultibo,retro, simpleaudio, mp3, HeapManager;
+     threads,GlobalConst,ultibo,retro, simpleaudio, mp3, xmp, HeapManager;
 
 const base=          $2F000000;     // retromachine system area base
       nocache=       $C0000000;     // cache off address addition
@@ -2960,6 +2960,17 @@ if (filetype=3) or (filetype=4) or (filetype=5) then
                          else if ((head.pcm=1) or (filetype>=4)) and (len=768) then for i:=0 to 383 do oscilloscope(audio2[i])
                          else for i:=0 to 95 do oscilloscope(round(16384*(audio3[4*i]+audio3[4*i+1]+audio3[4*i+2]+audio3[4*i+3])));
       end;
+    end;
+  end
+else if filetype=6 then
+  begin
+  timer1+=siddelay;
+  for i:=0 to 383 do oscilloscope(audio2[2*i]+audio2[2*i+1]);
+
+  if xmp_play_buffer(xmp_context,stream,len,2)<>0 then
+    begin
+     pauseaudio(1);
+     nextsong:=1;
     end;
   end
 else

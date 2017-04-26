@@ -31,10 +31,10 @@ uses
 //  syscalls,
   blitter,
  // retro,
-  simpleaudio,scripttest;
+  simpleaudio,scripttest,xmp;
 
 
-label p101,p999;
+label p101, p102 ,p999;
 
 
 var s,currentdir,currentdir2:string;
@@ -402,6 +402,42 @@ if findfirst(currentdir,faAnyFile,sr)=0 then
   repeat
   filenames[ilf,0]:=sr.name;
   filenames[ilf,1]:='s48';
+  ilf+=1;
+  until (findnext(sr)<>0) or (ilf=1000);
+sysutils.findclose(sr);
+
+currentdir:=currentdir2+'*.mod';
+if findfirst(currentdir,faAnyFile,sr)=0 then
+  repeat
+  filenames[ilf,0]:=sr.name;
+  filenames[ilf,1]:='mod';
+  ilf+=1;
+  until (findnext(sr)<>0) or (ilf=1000);
+sysutils.findclose(sr);
+
+currentdir:=currentdir2+'*.xm';
+if findfirst(currentdir,faAnyFile,sr)=0 then
+  repeat
+  filenames[ilf,0]:=sr.name;
+  filenames[ilf,1]:='xm';
+  ilf+=1;
+  until (findnext(sr)<>0) or (ilf=1000);
+sysutils.findclose(sr);
+
+currentdir:=currentdir2+'*.s3m';
+if findfirst(currentdir,faAnyFile,sr)=0 then
+  repeat
+  filenames[ilf,0]:=sr.name;
+  filenames[ilf,1]:='s3m';
+  ilf+=1;
+  until (findnext(sr)<>0) or (ilf=1000);
+sysutils.findclose(sr);
+
+currentdir:=currentdir2+'*.it';
+if findfirst(currentdir,faAnyFile,sr)=0 then
+  repeat
+  filenames[ilf,0]:=sr.name;
+  filenames[ilf,1]:='it';
   ilf+=1;
   until (findnext(sr)<>0) or (ilf=1000);
 sysutils.findclose(sr);
@@ -827,6 +863,60 @@ repeat
           pauseaudio(0);
           end
 
+         else if (filenames[sel+selstart,1]='mod')
+                       or (filenames[sel+selstart,1]='s3m')
+                       or (filenames[sel+selstart,1]='xm')
+                       or (filenames[sel+selstart,1]='it')
+                       then
+          begin
+          fileclose(sfh);
+          i:=xmp_test_module(Pchar(fn),nil);
+          if i<>0 then goto p102;
+          if xmp_context<>nil then
+            begin
+            xmp_end_player(xmp_context);
+            xmp_release_module(xmp_context);
+            xmp_free_context(xmp_context);
+            end;
+
+     //     box(0,0,500,100,0);
+          xmp_context:=xmp_create_context;
+ //        outtextxyz(0,0,inttostr(integer(xmp_context)),40,2,2);
+          if a1base=432 then error:=SA_changeparams(47127,16,2,384)
+                        else error:=SA_changeparams(48000,16,2,384);
+          siddelay:=8000;
+          filetype:=6;
+
+
+          i:=xmp_load_module(xmp_context,Pchar(fn));
+ //                   outtextxyz(0,32,inttostr(i),40,2,2);
+
+          if i<>0 then
+            begin
+           xmp_free_context(xmp_context);
+                 goto p102;
+            end;
+          i:= xmp_start_player(xmp_context,48000,0);
+ //               outtextxyz(0,64,inttostr(i),40,2,2);
+                xmp_set_player(xmp_context,xmp_player_interp,xmp_interp_spline);
+                xmp_set_player(xmp_context,xmp_player_dsp,xmp_dsp_lowpass);
+ //               xmp_set_player(xmp_context,xmp_player_volume,90);
+          if i<>0 then
+            begin
+                       xmp_release_module(xmp_context);
+            xmp_free_context(xmp_context);
+            goto p102;
+            end;
+          sleep(50);
+          for i:=0 to 15 do times6502[i]:=0;
+          if sprite6x>2047 then begin sprite0x:=100; sprite1x:=200; sprite2x:=300;sprite3x:=400; sprite4x:=500; sprite5x:=600; sprite6x:=700; end;
+          box(18,132,800,600,178);
+          outtextxyz(18,132,'type: MOD',188,2,2);
+          pauseaudio(0);
+          p102:
+          end
+
+
          else if filenames[sel+selstart,1]='s48' then
            begin
            fileseek(sfh,$2800,fsfrombeginning);
@@ -903,10 +993,12 @@ repeat
 
           songs:=0;
           end;
+
         songname:=s;
         songtime:=0;
         timer1:=-1;
         if filetype<>2 then begin pause1a:=false; pauseaudio(0); end;
+
         end;
     end;
 
