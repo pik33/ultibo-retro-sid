@@ -228,6 +228,7 @@ var       gpfsel4:cardinal     absolute _gpfsel4;      // GPIO Function Select 4
 
 procedure InitAudioEx(range,t_length:integer);  forward;
 function noiseshaper8(bufaddr,outbuf,oversample,len:integer):integer; forward;
+function noiseshaper9(bufaddr,outbuf,oversample,len:integer):integer; forward;
 
 // ------------------------------------------------
 // A helper procedure which removes RAM RO limit
@@ -449,6 +450,7 @@ CurrentAudioSpec:=obtained^;
 samplebuffer_ptr:=getmem(sample_buffer_size);
 samplebuffer_32_ptr:=getmem(sample_buffer_32_size);
 removeramlimits(integer(@noiseshaper8));  // noise shaper uses local vars or it will be slower
+removeramlimits(integer(@noiseshaper9));  // noise shaper uses local vars or it will be slower
 // now create and start the audio thread
 pauseA:=1;
 AudioThread:=TAudioThread.Create(true);
@@ -632,7 +634,7 @@ if vol>=0 then volume:=4096;
 end;
 
 
-function noiseshaper8(bufaddr,outbuf,oversample,len:integer):integer;
+function noiseshaper9(bufaddr,outbuf,oversample,len:integer):integer;
 
 label p101,p102,p999,i1l,i1r,i2l,i2r;
 
@@ -653,6 +655,69 @@ begin
  p102:           mov r1,r14            // inner loop counter
                  ldr r6,[r5],#4        // new input value left
                  ldr r12,[r5],#4       // new input value right
+
+ p101:           add r3,r6             // inner loop: do oversampling
+                 add r4,r12
+                 add r7,r3
+                 add r8,r4
+                 mov r9,r7,asr #19
+                 mov r10,r9,lsl #19
+                 sub r3,r10
+                 sub r7,r10
+                 add r9,#1            // kill the negative bug :) :)
+                 str r9,[r2],#4
+                 mov r9,r8,asr #19
+                 mov r10,r9,lsl #19
+                 sub r4,r10
+                 sub r8,r10
+                 add r9,#1
+                 str r9,[r2],#4
+                 subs r1,#1
+                 bne p101
+                 subs r0,#1
+                 bne p102
+
+                 str r3,i1l
+                 str r4,i1r
+                 str r7,i2l
+                 str r8,i2r
+                 str r2,result
+
+                 b p999
+
+i1l:            .long 0
+i1r:            .long 0
+i2l:            .long 0
+i2r:            .long 0
+
+p999:           pop {r0-r10,r12,r14}
+                end;
+
+CleanDataCacheRange(outbuf,$10000);
+end;
+
+
+function noiseshaper8(bufaddr,outbuf,oversample,len:integer):integer;
+
+label p101,p102,p999,i1l,i1r,i2l,i2r;
+
+// -- rev 20170126
+
+begin
+                 asm
+                 push {r0-r10,r12,r14}
+                 ldr r3,i1l            // init integerators
+                 ldr r4,i1r
+                 ldr r7,i2l
+                 ldr r8,i2r
+                 ldr r5,bufaddr        // init buffers addresses
+                 ldr r2,outbuf
+                 ldr r14,oversample    // yes, lr used here, I am short of regs :(
+                 ldr r0,len            // outer loop counter
+
+ p102:           mov r1,r14            // inner loop counter
+                 ldr r12,[r5],#4        // new input value left
+                 ldr r6,[r5],#4       // new input value right
 
  p101:           add r3,r6             // inner loop: do oversampling
                  add r4,r12

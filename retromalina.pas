@@ -878,6 +878,7 @@ var id:integer;
 
 begin
 ThreadSetCPU(ThreadGetCurrent,CPU_ID_3);
+//ThreadSetPriority(ThreadGetCurrent,5);
 sleep(1);
 
 running:=1;
@@ -959,7 +960,7 @@ for i:=0 to (1920*2400)-1 do lpoke(PtrUint(p2)+4*i,ataripallette[146]);
 for i:=base to base+$FFFFF do poke(i,0); // clean all system area
 displaystart:=$30000000;                 // vitual framebuffer address
 framecnt:=0;                             // frame counter
-
+for i:=0 to 1792*1120 do lpoke($30800000+4*i,$30000000+i);
 // init pallette, font and mouse cursor
 
 systemfont:=st4font;
@@ -1034,6 +1035,174 @@ end;
 // -----  Screen convert procedures
 
 procedure scrconvert(screen:pointer);
+
+// --- rev 21070509
+
+var a,b,c:integer;
+    e:integer;
+
+label p1,p0,p002,p10,p11,p12,p999;
+
+begin
+a:=displaystart;
+c:=$30800000;  // map start
+e:=bordercolor;
+b:=base+_pallette;
+
+                asm
+
+                stmfd r13!,{r0-r12,r14}   //Push registers
+                ldr r1,a
+                ldr r2,screen
+                ldr r3,b
+                mov r5,r2
+
+                //upper border
+
+                add r5,#307200
+                ldr r4,e
+                mov r6,r4
+                mov r7,r4
+                mov r8,r4
+                mov r9,r4
+                mov r10,r4
+                mov r12,r4
+                mov r14,r4
+
+
+p10:            stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                cmp r2,r5
+                blt p10
+
+                mov r0,#1120
+
+p11:            add r5,#256
+
+                //left border
+
+p0:             stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+
+
+                                    //active screen
+                add r5,#7168
+
+p1:
+                ldm r1!,{r4,r9}
+
+                mov r6,r4,lsr #8
+                mov r7,r4,lsr #16
+                mov r8,r4,lsr #24
+                mov r10,r9,lsr #8
+                mov r12,r9,lsr #16
+                mov r14,r9,lsr #24
+
+                and r4,#0xFF
+                and r6,#0xFF
+                and r7,#0xFF
+                and r9,#0xFF
+                and r10,#0xFF
+                and r12,#0xFF
+
+                ldr r4,[r3,r4,lsl #2]
+                ldr r6,[r3,r6,lsl #2]
+                ldr r7,[r3,r7,lsl #2]
+                ldr r8,[r3,r8,lsl #2]
+                ldr r9,[r3,r9,lsl #2]
+                ldr r10,[r3,r10,lsl #2]
+                ldr r12,[r3,r12,lsl #2]
+                ldr r14,[r3,r14,lsl #2]
+
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+
+                ldm r1!,{r4,r9}
+
+                mov r6,r4,lsr #8
+                mov r7,r4,lsr #16
+                mov r8,r4,lsr #24
+                mov r10,r9,lsr #8
+                mov r12,r9,lsr #16
+                mov r14,r9,lsr #24
+
+                and r4,#0xFF
+                and r6,#0xFF
+                and r7,#0xFF
+                and r9,#0xFF
+                and r10,#0xFF
+                and r12,#0xFF
+
+                ldr r4,[r3,r4,lsl #2]
+                ldr r6,[r3,r6,lsl #2]
+                ldr r7,[r3,r7,lsl #2]
+                ldr r8,[r3,r8,lsl #2]
+                ldr r9,[r3,r9,lsl #2]
+                ldr r10,[r3,r10,lsl #2]
+                ldr r12,[r3,r12,lsl #2]
+                ldr r14,[r3,r14,lsl #2]
+
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+
+                cmp r2,r5
+                blt p1
+
+                                  //right border
+                add r5,#256
+                ldr r4,e
+                mov r6,r4
+                mov r7,r4
+                mov r8,r4
+                mov r9,r4
+                mov r10,r4
+                mov r12,r4
+                mov r14,r4
+
+
+
+p002:           stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+
+                subs r0,#1
+                bne p11
+                                  //lower border
+                add r5,#307200
+
+p12:            stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+                stm r2!,{r4,r6,r7,r8,r9,r10,r12,r14}
+
+                cmp r2,r5
+                blt p12
+p999:           ldmfd r13!,{r0-r12,r14}
+                end;
+
+
+end;
+
+procedure scrconvert_old(screen:pointer);
 
 // --- rev 21070111
 
@@ -2965,13 +3134,17 @@ if (filetype=3) or (filetype=4) or (filetype=5) then
 else if filetype=6 then
   begin
   timer1+=siddelay;
+  songtime+=siddelay;
   for i:=0 to 383 do oscilloscope(audio2[2*i]+audio2[2*i+1]);
-
   if xmp_play_buffer(xmp_context,stream,len,2)<>0 then
     begin
      pauseaudio(1);
      nextsong:=1;
-    end;
+    end
+   else
+   begin
+     for i:=0 to 767 do audio2[i]:=word(audio2[i])-32768;
+   end;
   end
 else
   begin

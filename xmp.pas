@@ -93,7 +93,7 @@ const XMP_VERSION =             '4.4.1';
     XMP_MAX_ENV_POINTS=	        32;     //* Max number of envelope points */
     XMP_MAX_MOD_LENGTH=	        256;    //* Max number of patterns in module */
     XMP_MAX_CHANNELS=	        64;     //* Max number of channels in module */
-    XMP_MAX_SRATE=		48000;	//* max sampling rate (Hz) */
+    XMP_MAX_SRATE=		49152;	//* max sampling rate (Hz) */
     XMP_MIN_SRATE=		4000;	//* min sampling rate (Hz) */
     XMP_MIN_BPM=		20;     //* min BPM */
 

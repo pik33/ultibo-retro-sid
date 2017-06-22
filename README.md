@@ -1,3 +1,10 @@
+Update: the Ultibo retromachine player is now a part of GUI, so this version is no more developed.
+
+The GUI repository is available here:
+https://github.com/pik33/ultibo_retro_gui
+
+-------------------------------------------------------------------------
+
 This is the player for Ultibo/RPi3 v. 0.23 alpha
 
 It plays .sid, .dmp, .wav, .mp3, .mp2, s48, mod, s3m, xm and .it files.

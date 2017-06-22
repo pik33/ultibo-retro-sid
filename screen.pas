@@ -176,13 +176,13 @@ avsid:=0;
 rainbow;
 i:=displaystart;
 outtextxyz(24,1019,'A retromachine SID and WAV player by pik33 --- inspired by Johannes Ahlebrand''s Parallax Propeller SIDCog ---',89,2,2);
-blit(i,10,1011,i+$800000,10,911,1771,48,1792,1792);
+blit(i,10,1011,i+$100000,10,911,1771,48,1792,1792);
 rainbow;
 outtextxyz(24,1019,' F1,F2,F3 - channels 1..3 on/off; 1-100 Hz, 2-200 Hz, 3-150 Hz, 4-400 Hz, 5-50 Hz; P - pause; up/down/enter - ',89,2,2);
-blit(i,10,1011,i+$800000,10,959,1771,48,1792,1792);
+blit(i,10,1011,i+$100000,10,959,1771,48,1792,1792);
 rainbow;
 outtextxyz(24,1019,'select; F-432 Hz; G-440 Hz; Q-volume up; A-volume down; + - next subsong; - - previous subsong; ESC-reboot -- ',89,2,2);
-blit(i,10,1011,i+$800000,10,1007,1771,48,1792,1792);
+blit(i,10,1011,i+$100000,10,1007,1771,48,1792,1792);
 
 // Set animated sprites definitions.
 // The "balls" is an rotating blue ball definition
@@ -329,7 +329,7 @@ if sidcount<>0 then
   else if filetype=3 then begin if sidtime>10 then outtextxyz(656,1070,'wav '+inttostr(avall)+' us',233,2,2); end
   else if filetype=4 then outtextxyz(656,1070,'mp3 '+inttostr(mp3time)+' us',233,2,2)
   else if filetype=5 then outtextxyz(656,1070,'mp2 '+inttostr(mp3time)+' us',233,2,2)
-  else if filetype=6 then outtextxyz(656,1070,'mod '+inttostr(mp3time)+' us',233,2,2);
+  else if filetype=6 then outtextxyz(656,1070,'mod '+inttostr(avall)+' us',233,2,2);
   end;
 outtextxyz(864,1070,'6502 '+floattostrf((av6502/16),fffixed,4,1)+' us',124,2,2);
 outtextxyz(1088,1070,inttostr(a1base),200,2,2);
@@ -360,14 +360,14 @@ if (framecnt mod 32)=0 then systempallette[0,89]:=systempallette[1,(framecnt div
 cc:=(2*framecnt) mod 5316;
 a:=displaystart;
 
-if cc<1772 then blit(a+$800000,10+(cc),911,a,12,1011,1771-(cc),48,1792,1792);
-if cc<1772 then blit(a+$800000,10,959,a,11+1771-(cc),1011,(cc),48,1792,1792);
+if cc<1772 then blit(a+$100000,10+(cc),911,a,12,1011,1771-(cc),48,1792,1792);
+if cc<1772 then blit(a+$100000,10,959,a,11+1771-(cc),1011,(cc),48,1792,1792);
 
-if (cc>=1772) and (cc<3544) then blit (a+$800000,10,1007,a,11+3543-(cc),1011,(cc-1772),48,1792,1792);
-if (cc>=1772) and (cc<3544) then blit (a+$800000,10+(cc-1772),959,a,12,1011,1771-(cc-1772),48,1792,1792);
+if (cc>=1772) and (cc<3544) then blit (a+$100000,10,1007,a,11+3543-(cc),1011,(cc-1772),48,1792,1792);
+if (cc>=1772) and (cc<3544) then blit (a+$100000,10+(cc-1772),959,a,12,1011,1771-(cc-1772),48,1792,1792);
 
-if (cc>=3544) then blit (a+$800000,10,911,a,11+5316-(cc),1011,(cc-3544),48,1792,1792);
-if (cc>=3544) then blit (a+$800000,10+(cc-3544),1007,a,12,1011,1771-(cc-3544),48,1792,1792);
+if (cc>=3544) then blit (a+$100000,10,911,a,11+5316-(cc),1011,(cc-3544),48,1792,1792);
+if (cc>=3544) then blit (a+$100000,10+(cc-3544),1007,a,12,1011,1771-(cc-3544),48,1792,1792);
 
 // draw the oscilloscope
 box2(10,610,894,797,178);

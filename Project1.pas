@@ -31,7 +31,7 @@ uses
 //  syscalls,
   blitter,
  // retro,
-  simpleaudio,scripttest,xmp;
+  simpleaudio,scripttest,xmp, mwindows;
 
 
 label p101, p102 ,p999;
@@ -484,6 +484,7 @@ end;
 //------------------- The main program
 
 begin
+
 initmachine;
 initscreen;
 
@@ -593,7 +594,20 @@ repeat
 
   else if key=ord('s') then   // blitter test
     begin
-    script1;
+    lpoke ($2E000000,1);
+    lpoke ($2E000004,0);
+
+//    asm
+//    mov r1,#0x2E000000;
+//    vld2.8 {d0,d1},[r1]
+//    vadd.i64 d1,d2
+//    vstr d1,[r1]
+//    end;
+//    box(100,100,100,100,0);
+//    outtextxy(100,100,inttostr(lpeek($2E000000)),40);
+
+
+    //script1;
     end
 
   else if key=ord('q') then   // volume up
@@ -726,6 +740,7 @@ repeat
       if abs(SA_GetCurrentFreq-44100)<200 then SA_ChangeParams(43298,0,0,0);
       if abs(SA_GetCurrentFreq-48000)<200 then SA_ChangeParams(47127,0,0,0);
       if abs(SA_GetCurrentFreq-96000)<400 then SA_ChangeParams(94254,0,0,0);
+      if abs(SA_GetCurrentFreq-49152)<200 then SA_ChangeParams(48258,0,0,0);
       end
 
     else if key=ord('g') then   // set 440 Hz
@@ -734,6 +749,7 @@ repeat
       if abs(SA_GetCurrentFreq-43298)<200 then SA_ChangeParams(44100,0,0,0);
       if abs(SA_GetCurrentFreq-47127)<200 then SA_ChangeParams(48000,0,0,0);
       if abs(SA_GetCurrentFreq-94254)<400 then SA_ChangeParams(96000,0,0,0);
+      if abs(SA_GetCurrentFreq-48258)<200 then SA_ChangeParams(49152,0,0,0);
       end
 
     else if key=key_enter then
@@ -882,24 +898,24 @@ repeat
      //     box(0,0,500,100,0);
           xmp_context:=xmp_create_context;
  //        outtextxyz(0,0,inttostr(integer(xmp_context)),40,2,2);
-          if a1base=432 then error:=SA_changeparams(47127,16,2,384)
-                        else error:=SA_changeparams(48000,16,2,384);
-          siddelay:=8000;
+          if a1base=432 then error:=SA_changeparams(48258,16,2,384)
+                        else error:=SA_changeparams(49152,16,2,384);
+          siddelay:=7812;
           filetype:=6;
 
 
           i:=xmp_load_module(xmp_context,Pchar(fn));
  //                   outtextxyz(0,32,inttostr(i),40,2,2);
-
+                  xmp_set_player(xmp_context,xmp_player_interp,xmp_interp_spline);
+     //           xmp_set_player(xmp_context,xmp_player_dsp,xmp_dsp_lowpass);
           if i<>0 then
             begin
            xmp_free_context(xmp_context);
                  goto p102;
             end;
-          i:= xmp_start_player(xmp_context,48000,0);
+          i:= xmp_start_player(xmp_context,49152,34);
  //               outtextxyz(0,64,inttostr(i),40,2,2);
-                xmp_set_player(xmp_context,xmp_player_interp,xmp_interp_spline);
-                xmp_set_player(xmp_context,xmp_player_dsp,xmp_dsp_lowpass);
+
  //               xmp_set_player(xmp_context,xmp_player_volume,90);
           if i<>0 then
             begin
